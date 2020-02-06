@@ -1,8 +1,12 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <sys/stat.h>
+#include <string.h>
 
 #define SIZE 50
+
 
 struct queue {
     char* DirectoryNames[SIZE];
@@ -10,27 +14,13 @@ struct queue {
     int rear;
 };
 
-struct node {
-    char* directoryName;
-    struct node* next;
-};
-
-
-struct node* createNode(char* dirName)
-{
-    struct node* newNode = malloc(sizeof(struct node));
-    newNode->directoryName = dirName;
-    newNode->next = NULL;
-    return newNode;
-}
 
 struct queue* createQueue();
-void enqueue(struct queue* q, char*);
+void enqueue(struct queue* q, char *);
 char* dequeue(struct queue* q);
 void display(struct queue* q);
 int isEmpty(struct queue* q);
 void printQueue(struct queue* q);
-
 
 /*Function to create queue structure*/
 struct queue* createQueue() {
@@ -39,6 +29,7 @@ struct queue* createQueue() {
     q->rear = -1;
     return q;
 }
+
 
 int isEmpty(struct queue* q) {
     if(q->rear == -1)
@@ -56,6 +47,7 @@ void enqueue(struct queue* q, char* dirName){
             q->front = 0;
         q->rear++;
         q->DirectoryNames[q->rear] = dirName;
+        
     }
 }
 
@@ -63,58 +55,76 @@ void enqueue(struct queue* q, char* dirName){
 char* dequeue(struct queue* q){
     char* item;
     if(isEmpty(q)){
-        printf("Queue is empty");
         item = " ";
     }
     else{
         item = q->DirectoryNames[q->front];
         q->front++;
         if(q->front > q->rear){
-            printf("Resetting queue");
             q->front = q->rear = -1;
         }
     }
+    
     return item;
 }
 
 
 void BFS(char* StartDirName){
-
-    char* currentDirectory = " ";
+    
+    char* str = " ";
+    char path[1024];
+    char* next = " ";
     struct queue* q = createQueue();
+    struct stat sb;
 
     enqueue(q, StartDirName);
 
+    /*Loop until queue is empty,
+ *      * directories should be only thing in queue*/
     while(!isEmpty(q)){
-        currentDirectory = dequeue(q);
 
-        /*test this portion by printing*/
-        printf("%s",currentDirectory);
+        next = dequeue(q);
 
         DIR* d;
 
         /*Pointer for directory entry*/
-        struct dirent *dirEntry;
+        struct dirent *Entry;
 
         /*opendir returns a pointer of DIR type*/
-        d = opendir(currentDirectory);
+        d = opendir(next);
 
         if(d == NULL){
             printf("Could not open current directory");
             return;
         }
 
-        while((dirEntry = readdir(d)) != NULL){
-            enqueue(q, dirEntry->d_name);
+        /*Read all files or directories within current directory*/
+        while((Entry = readdir(d)) != NULL){
 
-            /*test*/
-            printf("%s", dirEntry->d_name);
+            if ((strcmp(Entry->d_name, ".") == 0) || (strcmp(Entry->d_name, "..") == 0)) {
+                continue;
+            }
+
+            snprintf(path, sizeof(path) - 1, "%s/%s", next, Entry->d_name);
+
+	    lstat(path, &sb);
+
+            switch (sb.st_mode & S_IFMT) {
+
+                case S_IFDIR :
+                    printf("%s\n", path);
+                    str = strdup(path);
+                    enqueue(q, str);
+                    break;
+
+                case S_IFREG :
+                    printf("%s\n", path);
+                    break;
+
+            }
+
         }
 
         closedir(d);
     }
-
-
-
-
 }
