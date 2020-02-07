@@ -2,7 +2,7 @@
 #ifndef UNTITLED3_TREETRAVERSAL_H
 #define UNTITLED3_TREETRAVERSAL_H
 
-void BFS(char *dirName);
+void BFS(char *dirName, char[], int);
 
 #endif //UNTITLED3_TREETRAVERSAL_H
 

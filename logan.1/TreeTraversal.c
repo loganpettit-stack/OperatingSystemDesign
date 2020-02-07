@@ -68,14 +68,16 @@ char* dequeue(struct queue* q){
     return item;
 }
 
+void BFS(char* StartDirName, char options[], int argCounter){
 
-void BFS(char* StartDirName){
-    
-    char* str = " ";
+    char* str = "";
     char path[1024];
     char* next = " ";
     struct queue* q = createQueue();
     struct stat sb;
+    char* optionString = " ";
+
+
 
     enqueue(q, StartDirName);
 
@@ -107,24 +109,32 @@ void BFS(char* StartDirName){
 
             snprintf(path, sizeof(path) - 1, "%s/%s", next, Entry->d_name);
 
-	    lstat(path, &sb);
+            lstat(path, &sb);
 
+
+            /*POSIX way of checking file information*/
             switch (sb.st_mode & S_IFMT) {
 
                 case S_IFDIR :
+
+                    getOptions(path, options, argCounter);
                     printf("%s\n", path);
+                    
                     str = strdup(path);
                     enqueue(q, str);
                     break;
 
                 case S_IFREG :
+                    
+                    getOptions(path, options, argCounter);
                     printf("%s\n", path);
-                    break;
 
+
+                    break;
             }
 
         }
-
         closedir(d);
     }
+    free(q);
 }
