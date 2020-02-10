@@ -79,7 +79,8 @@ int main(int argc, char *argv[]) {
 
                 /*print information on file as if tpiugs is entered*/
             case 'l' :
-
+                options[argCounter] = 'l';
+                argCounter += 1;
                 break;
 
         }
@@ -92,7 +93,7 @@ int main(int argc, char *argv[]) {
 
     char cleanedArray[argCounter + 1];
     int i = 0;
-    for(i; i < argCounter; i++){
+    for(i = 0; i < argCounter; i++){
         cleanedArray[i] = options[i];
     }
 
@@ -103,11 +104,10 @@ int main(int argc, char *argv[]) {
 }
 
 void display_help_message(char *executable){
-    fprintf(stderr, "\nHelp Option Selected [-h]: The following is the proper format for executing "
-                    "the file:\n\n%s", executable);
-    fprintf(stderr, " [-h] [-I n] [-L -d -g -i -p -s -t -u | -l] [dirname]\n\n");
-    fprintf(stderr, "[-h]   : Print a help message and exit.\n"
-                    "[-I n] : Change indentation to 'n' spaces for each level.\n"
+    printf("\nHelp Option Selected [-h], this program will preform a breadth first search of specified\n"
+                    "directory if no directory is given on the command line the the current directory is used.\n ");
+    printf("bt [-h] [-I n] [-L -d -g -i -p -s -t -u | -l] [dirname]\n\n");
+    printf("[-h]   : Print a help message and exit.\n"
                     "[-L]   : Follow symbolic links, if any.  Default will be to not follow symbolic links\n"
                     "[-d]   : Show the time of last modification.\n"
                     "[-g]   : Print the GID associated with the file.\n"
