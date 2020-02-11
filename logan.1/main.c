@@ -3,87 +3,122 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <errno.h>
 #include "TreeTraversal.h"
 
 #define SIZE 10
 
-void display_help_message(char *);
+void displayUsage();
 
 int main(int argc, char *argv[]) {
 
     int argCounter = 0;
     char options[SIZE];
     char c;
+    char* executable = strdup(argv[0]);
+    char* error = strcat(executable, ": Error: ");
+    char* optionNumError;
+    char* optionError;
+    char* duplicateError;
 
-    if(argc < 2){
-        display_help_message(argv[0]);
+    if(argc > 1) {
+
+        /*Use getopt to parse command arguements, h: means
+ *          * h require an extra argument*/
+        while ((c = getopt(argc, argv, "h:Ldgipstul")) != -1)
+            switch (c) {
+
+                /*Help option*/
+                case 'h' :
+                    printf("\nHelp Option Selected [-h], this program will preform a breadth first search of specified\n"
+                           " directory if no directory is given on the command line the the current directory is used.\n ");
+                    displayUsage();
+                    exit(EXIT_SUCCESS);
+
+                    /*Follow symbolic links if any*/
+                case 'L' :
+                    options[argCounter] = 'L';
+                    argCounter += 1;
+                    break;
+
+                    /*Print information on file type*/
+                case 't' :
+                    options[argCounter] = 't';
+                    argCounter += 1;
+                    break;
+
+                    /*Print permission bits*/
+                case 'p' :
+                    options[argCounter] = 'p';
+                    argCounter += 1;
+                    break;
+
+                    /*print number of links to files in i node table*/
+                case 'i' :
+                    options[argCounter] = 'i';
+                    argCounter += 1;
+                    break;
+
+                    /*print uid associated with file*/
+                case 'u' :
+                    options[argCounter] = 'u';
+                    argCounter += 1;
+                    break;
+
+                    /*print gid associated with file*/
+                case 'g' :
+                    options[argCounter] = 'g';
+                    argCounter += 1;
+                    break;
+
+                    /*print size of file*/
+                case 's' :
+                    options[argCounter] = 's';
+                    argCounter += 1;
+                    break;
+
+                    /*show time of last modification*/
+                case 'd' :
+                    options[argCounter] = 'd';
+                    argCounter += 1;
+                    break;
+
+                    /*print information on file as if tpiugs is entered*/
+                case 'l' :
+                    options[argCounter] = 'l';
+                    argCounter += 1;
+                    break;
+
+                default :
+                    optionError = strcat(error, "Incorrect option choice available format and options: \n");
+                    fprintf(stderr, "%s\n", optionError);
+                    displayUsage();
+                    exit(EXIT_FAILURE);
+            }
     }
 
-    /*Use getopt to parse command arguements, hI: means
- *      * h and I require an extra argument*/
-    while((c = getopt(argc, argv, "hI:Ldgipstul")) != -1)
-        switch (c) {
+    if(argCounter > 8){
+        optionNumError = strcat(error, "Maximum number of options exceeded available options and formqts are: \n");
+        fprintf(stderr, "%s\n", optionNumError);
+        displayUsage();
+        exit(EXIT_FAILURE);
+    }
 
-            /*Help option*/
-            case 'h' :
-                display_help_message(argv[0]);
-                break;
-
-                /*Follow symbolic links if any*/
-            case 'L' :
-                options[argCounter] = 'L';
-                argCounter += 1;
-                break;
-
-                /*Print information on file type*/
-            case 't' :
-                options[argCounter] = 't';
-                argCounter += 1;
-                break;
-
-                /*Print permission bits*/
-            case 'p' :
-                options[argCounter] = 'p';
-                argCounter += 1;
-                break;
-
-                /*print number of links to files in i node table*/
-            case 'i' :
-                options[argCounter] = 'i';
-                argCounter += 1;
-                break;
-
-                /*print uid associated with file*/
-            case 'u' :
-                options[argCounter] = 'u';
-                argCounter += 1;
-                break;
-
-                /*print gid associated with file*/
-            case 'g' :
-                options[argCounter] = 'g';
-                argCounter += 1;
-                break;
-
-                /*print size of file*/
-            case 's' :
-                options[argCounter] = 's';
-                argCounter += 1;
-                break;
-
-                /*show time of last modification*/
-            case 'd' :
-                options[argCounter] = 'd';
-                argCounter += 1;
-                break;
-
-                /*print information on file as if tpiugs is entered*/
-            case 'l' :
-                options[argCounter] = 'l';
-                argCounter += 1;
-                break;
-
+    /*check for duplicate options*/
+    char duplicate;
+    int k;
+    for(k = 0; k < argCounter; k++){
+        duplicate = options[k];
+        int m;
+        for( m = k + 1; m < argCounter; m++){
+            if(options[m] == duplicate){
+                duplicateError = strcat(error, "Duplicate options entered options are:\n");
+                fprintf(stderr, "%s\n", duplicateError);
+                displayUsage();
+                exit(EXIT_FAILURE);
+            }
         }
+    }
 
     char* dirName = argv[optind];
 
@@ -91,23 +126,14 @@ int main(int argc, char *argv[]) {
         dirName = ".";
     }
 
-    char cleanedArray[argCounter + 1];
-    int i = 0;
-    for(i = 0; i < argCounter; i++){
-        cleanedArray[i] = options[i];
-    }
-
-    BFS(dirName, cleanedArray, argCounter);
-
+    BFS(dirName, options, argCounter, error);
 
     return 0;
 }
 
-void display_help_message(char *executable){
-    printf("\nHelp Option Selected [-h], this program will preform a breadth first search of specified\n"
-                    "directory if no directory is given on the command line the the current directory is used.\n ");
-    printf("bt [-h] [-I n] [-L -d -g -i -p -s -t -u | -l] [dirname]\n\n");
-    printf("[-h]   : Print a help message and exit.\n"
+void displayUsage(){
+    fprintf(stderr, "bt [-h] [-I n] [-L -d -g -i -p -s -t -u | -l] [dirname]\n\n");
+    fprintf(stderr, "[-h]   : Print a help message and exit.\n"
                     "[-L]   : Follow symbolic links, if any.  Default will be to not follow symbolic links\n"
                     "[-d]   : Show the time of last modification.\n"
                     "[-g]   : Print the GID associated with the file.\n"
@@ -117,6 +143,4 @@ void display_help_message(char *executable){
                     "[-t]   : Print information on file type.\n"
                     "[-u]   : Print the UID associated with the file.\n"
                     "[-l]   : This option will be used to print information on the file as if the options tpiugs are all specified.\n\n");
-
-    exit(EXIT_SUCCESS);
 }

@@ -4,9 +4,10 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <stdbool.h>
+#include "FileOptionHandler.h"
 
-#define SIZE 50
-
+#define SIZE 1000
 
 struct queue {
     char* DirectoryNames[SIZE];
@@ -15,13 +16,6 @@ struct queue {
 };
 
 
-struct queue* createQueue();
-void enqueue(struct queue* q, char *);
-char* dequeue(struct queue* q);
-void display(struct queue* q);
-int isEmpty(struct queue* q);
-void printQueue(struct queue* q);
-
 /*Function to create queue structure*/
 struct queue* createQueue() {
     struct queue* q = malloc(sizeof(struct queue));
@@ -29,6 +23,13 @@ struct queue* createQueue() {
     q->rear = -1;
     return q;
 }
+
+
+bool checkLinkFlag(char [], int);
+struct queue* createQueue();
+void enqueue(struct queue* q, char *);
+char* dequeue(struct queue* q);
+int isEmpty(struct queue* q);
 
 
 int isEmpty(struct queue* q) {
@@ -47,7 +48,7 @@ void enqueue(struct queue* q, char* dirName){
             q->front = 0;
         q->rear++;
         q->DirectoryNames[q->rear] = dirName;
-        
+
     }
 }
 
@@ -64,21 +65,27 @@ char* dequeue(struct queue* q){
             q->front = q->rear = -1;
         }
     }
-    
+
     return item;
 }
 
-void BFS(char* StartDirName, char options[], int argCounter){
+
+void BFS(char* StartDirName, char options[], int argCounter, char* error){
 
     char* str = "";
     char path[1024];
     char* next = " ";
     struct queue* q = createQueue();
     struct stat sb;
-    char* optionString = " ";
+    bool linkFlag = false;
+    char* dirError;
+    char* statError;
+    int status;
 
+    /*Check for symbolic link on file*/
+    linkFlag = checkLinkFlag(options, argCounter);
 
-
+    /*queue the starting directory name*/
     enqueue(q, StartDirName);
 
     /*Loop until queue is empty,
@@ -96,8 +103,9 @@ void BFS(char* StartDirName, char options[], int argCounter){
         d = opendir(next);
 
         if(d == NULL){
-            printf("Could not open current directory");
-            return;
+            dirError = strcat(error, "Could not open current directory");
+            perror(dirError);
+            exit(EXIT_FAILURE);
         }
 
         /*Read all files or directories within current directory*/
@@ -109,27 +117,47 @@ void BFS(char* StartDirName, char options[], int argCounter){
 
             snprintf(path, sizeof(path) - 1, "%s/%s", next, Entry->d_name);
 
-            lstat(path, &sb);
+            /*IF -L option given follow symbolic links
+ *              * using stat, lstat returns information on
+ *              * the link to the file stat returns information
+ *              * on the actual file being linked to therefore it
+ *              * follows the link*/
+            /*need to add error handling here */
+            if (linkFlag)
+               status = stat(path, &sb);
+            else
+               status = lstat(path, &sb);
 
+            if(status != 0){
+                statError = strcat(error, "stat/lstat execution error: ");
+                perror(statError);
+                exit(EXIT_FAILURE);
+            }
 
             /*POSIX way of checking file information*/
             switch (sb.st_mode & S_IFMT) {
 
                 case S_IFDIR :
-
                     getOptions(path, options, argCounter);
                     printf("%s\n", path);
-                    
+
                     str = strdup(path);
                     enqueue(q, str);
                     break;
 
                 case S_IFREG :
-                    
                     getOptions(path, options, argCounter);
                     printf("%s\n", path);
+                    break;
 
+                case S_IFLNK :
+                    getOptions(path, options, argCounter);
+                    printf("%s\n", path);
+                    break;
 
+                default:
+                    getOptions(path, options, argCounter);
+                    printf("%s\n", path);
                     break;
             }
 
@@ -137,4 +165,17 @@ void BFS(char* StartDirName, char options[], int argCounter){
         closedir(d);
     }
     free(q);
+}
+
+bool checkLinkFlag(char options[], int counter){
+    int i;
+    bool flag = false;
+
+    for(i = 0; i < counter; i++){
+        if(options[i] == 'L'){
+            flag = true;
+        }
+    }
+
+    return flag;
 }
