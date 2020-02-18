@@ -4,10 +4,23 @@
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
+#define SHMEMKEY 0x1596
+
+/*Shared memory structure*/
+struct sharedMemoryContainer {
+    int seconds;
+    long nanoseconds;
+    long double message;
+};
 
 void displayUsage();
 
 int main(int argc, char* argv[]) {
+
+    struct sharedMemoryContainer* shMemptr;
     int c;
     char* executable = strdup(argv[0]);
     char* error = strcat(executable, ": Error: ");
@@ -108,5 +121,20 @@ void displayUsage(){
                     "-b B Start of the sequence of numbers to be tested for primality\n"
                     "-i I Increment between numbers that we test\n"
                     "-o filename Output file.\n");
+
+}
+
+struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer *shmPtr, int* sharedMemoryID, char* error){
+    char errorArr[100];
+
+    *sharedMemoryID = shmget(SHMEMKEY, sizeof(struct sharedMemoryContainer), 0666 | IPC_CREAT);
+
+    if (sharedMemoryID == (void *) -1) {
+        snprintf(errorArr, 100, "\n\n%s PID: %ld Failed to create shared memory ", error,
+                 (long) getpid());
+        perror(errorArr);
+        fprintf(stderr, "\tVale of errno: %d\n\n", errno);
+        exit(EXIT_FAILURE);
+    }
 
 }
