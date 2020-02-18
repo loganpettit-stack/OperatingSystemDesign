@@ -13,21 +13,25 @@
 struct sharedMemoryContainer {
     int seconds;
     long nanoseconds;
-    long double message;
 };
 
 void displayUsage();
+struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer*, int*, char*);
+void detachSharedMemory(struct sharedMemoryContainer*, int, char*);
+
 
 int main(int argc, char* argv[]) {
 
     struct sharedMemoryContainer* shMemptr;
     int c;
     char* executable = strdup(argv[0]);
-    char* error = strcat(executable, ": Error: ");
+    char* errorString = strcat(executable, ": Error: ");
     char* Nerror;
     char* Serror;
     char* Berror;
     char* Ierror;
+    int sharedMemoryId;
+    struct sharedMemoryContainer* sharedMemoryPtr;
 
 
     if(argc > 1) {
@@ -49,7 +53,7 @@ int main(int argc, char* argv[]) {
  *                  * create*/
                 case 'n':
                     if(!isdigit(*optarg)){
-                        Nerror = strcat(error, " [-n] option requires a digit arguement\n");
+                        Nerror = strcat(errorString, " [-n] option requires a digit arguement\n");
                         fprintf(stderr, "%s", Nerror);
                         displayUsage();
                         exit(EXIT_FAILURE);
@@ -65,7 +69,7 @@ int main(int argc, char* argv[]) {
  *                  * system at the same time*/
                 case 's' :
                     if(!isdigit(*optarg)){
-                        Serror = strcat(error, " [-s] option requires a digit arguement\n");
+                        Serror = strcat(errorString, " [-s] option requires a digit arguement\n");
                         fprintf(stderr, "%s", Serror);
                         displayUsage();
                         exit(EXIT_FAILURE);
@@ -79,7 +83,7 @@ int main(int argc, char* argv[]) {
                 /*start of the sequence of numbers to bes tested for primality*/
                 case 'b':
                     if(!isdigit(*optarg)){
-                        Berror = strcat(error, " [-b] option requires a digit arguement\n");
+                        Berror = strcat(errorString, " [-b] option requires a digit arguement\n");
                         fprintf(stderr, "%s", Berror);
                         displayUsage();
                         exit(EXIT_FAILURE);
@@ -93,7 +97,7 @@ int main(int argc, char* argv[]) {
                 /*increment between numbers that we test*/
                 case 'i':
                     if(!isdigit(*optarg)){
-                        Ierror = strcat(error, " [-i] option requires a digit arguement\n");
+                        Ierror = strcat(errorString, " [-i] option requires a digit arguement\n");
                         fprintf(stderr, "%s", Ierror);
                         displayUsage();
                         exit(EXIT_FAILURE);
@@ -112,6 +116,21 @@ int main(int argc, char* argv[]) {
             }
     }
 
+    /*Obtain pointer to shared memory*/
+    sharedMemoryPtr = connectToSharedMemory(sharedMemoryPtr, &sharedMemoryId, errorString);
+
+
+    /*Fill shared memory structure*/
+    sharedMemoryPtr->seconds = 10;
+    sharedMemoryPtr->nanoseconds = 10;
+    
+    printf("%d:%d", sharedMemoryPtr->seconds, sharedMemoryPtr->nanoseconds);
+
+
+    /*Detach pointer to shared memory*/
+    detachSharedMemory(sharedMemoryPtr, sharedMemoryId, errorString);
+
+
 }
 
 void displayUsage(){
@@ -124,11 +143,13 @@ void displayUsage(){
 
 }
 
-struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer *shmPtr, int* sharedMemoryID, char* error){
-    char errorArr[100];
+struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer* sharedMemoryPtr, int* sharedMemoryID, char* error){
+    char errorArr[200];
 
+    /*Get shared memory Id using shmget*/
     *sharedMemoryID = shmget(SHMEMKEY, sizeof(struct sharedMemoryContainer), 0666 | IPC_CREAT);
 
+    /*Error check shmget*/
     if (sharedMemoryID == (void *) -1) {
         snprintf(errorArr, 100, "\n\n%s PID: %ld Failed to create shared memory ", error,
                  (long) getpid());
@@ -137,4 +158,33 @@ struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer
         exit(EXIT_FAILURE);
     }
 
+    /*Attach to shared memory using shmat*/
+    sharedMemoryPtr = shmat(*sharedMemoryID, NULL, 0);
+
+    /*Error check shmat*/
+    if(sharedMemoryPtr == (void*) -1){
+        snprintf(errorArr, 200, "\n\n%s PID: %ld Failed to create shared memory ", error,
+                 (long) getpid());
+        perror(errorArr);
+        fprintf(stderr, "\tVale of errno: %d\n\n", errno);
+        exit(EXIT_FAILURE);
+    }
+
+    return sharedMemoryPtr;
+}
+
+
+void detachSharedMemory (struct sharedMemoryContainer* sharedMemoryPtr, int sharedMemoryId, char* error){
+    char errorArr[200];
+
+    if(shmdt(sharedMemoryPtr) == -1) {
+        snprintf(errorArr, 200, "\n\n%s PID: %ld Failed to create shared memory ", error,
+                   (long) getpid());
+        perror(errorArr);
+        fprintf(stderr, "\tVale of errno: %d\n\n", errno);
+        exit(EXIT_FAILURE);
+    }
+
+    /* Clearing shared memory related to clockId */
+    shmctl(sharedMemoryId, IPC_RMID, NULL);
 }
