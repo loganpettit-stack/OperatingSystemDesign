@@ -13,17 +13,22 @@
 struct sharedMemoryContainer {
     int seconds;
     long nanoseconds;
+    int* childArray;
 };
 
 void displayUsage();
 struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer*, int*, char*);
 void detachSharedMemory(struct sharedMemoryContainer*, int, char*);
-
+pid_t launchProcess(char *, int, int);
 
 int main(int argc, char* argv[]) {
 
     struct sharedMemoryContainer* shMemptr;
     int c;
+    int prime = 0;
+    int childLogicalID = 0;
+    int maxChildren = 4;
+    int concurrentChildren = 0;
     char* executable = strdup(argv[0]);
     char* errorString = strcat(executable, ": Error: ");
     char* Nerror;
@@ -32,6 +37,9 @@ int main(int argc, char* argv[]) {
     char* Ierror;
     int sharedMemoryId;
     struct sharedMemoryContainer* sharedMemoryPtr;
+
+    /*Able to represent process ID*/
+    pid_t pid = 0;
 
 
     if(argc > 1) {
@@ -60,7 +68,8 @@ int main(int argc, char* argv[]) {
 
                     }
                     else {
-                        printf("optarg is:  %s \n", optarg);
+                        printf("Max number of child processes to be created is:  %s \n", optarg);
+                        maxChildren = atoi(optarg);
                     }
 
                     break;
@@ -75,7 +84,8 @@ int main(int argc, char* argv[]) {
                         exit(EXIT_FAILURE);
                     }
                     else {
-                        printf("optarg is:  %s \n", optarg);
+                        printf("Max number of concurrent child processes is:  %s \n", optarg);
+                        concurrentChildren = atoi(optarg);
                     }
 
                     break;
@@ -90,6 +100,7 @@ int main(int argc, char* argv[]) {
                     }
                     else {
                         printf("optarg is:  %s \n", optarg);
+                        prime = atoi(optarg);
                     }
 
                     break;
@@ -120,11 +131,27 @@ int main(int argc, char* argv[]) {
     sharedMemoryPtr = connectToSharedMemory(sharedMemoryPtr, &sharedMemoryId, errorString);
 
 
-    /*Fill shared memory structure*/
+    /*Initialize shared memory structure*/
     sharedMemoryPtr->seconds = 10;
     sharedMemoryPtr->nanoseconds = 10;
-    
-    printf("%d:%d", sharedMemoryPtr->seconds, sharedMemoryPtr->nanoseconds);
+    sharedMemoryPtr->childArray = malloc(sizeof(int) * maxChildren);
+
+    /*Initialize shared memory child array to all zeros*/
+    int i;
+    for(i = 0; i < maxChildren; i++){
+        sharedMemoryPtr->childArray[i] = 0;
+    }
+
+    /*testing shared memory segment*/
+    printf("%d:%ld \n", sharedMemoryPtr->seconds, sharedMemoryPtr->nanoseconds);
+    int j;
+    for(j = 0; j < maxChildren; j++){
+        printf("%d", sharedMemoryPtr->childArray[j]);
+    }
+
+    /*Launch a child process*/
+    pid = launchProcess(errorString, childLogicalID, prime);
+    childLogicalID += 1;
 
 
     /*Detach pointer to shared memory*/
@@ -143,6 +170,7 @@ void displayUsage(){
 
 }
 
+/*Function to connect to shared memory and error check*/
 struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer* sharedMemoryPtr, int* sharedMemoryID, char* error){
     char errorArr[200];
 
@@ -151,10 +179,8 @@ struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer
 
     /*Error check shmget*/
     if (sharedMemoryID == (void *) -1) {
-        snprintf(errorArr, 100, "\n\n%s PID: %ld Failed to create shared memory ", error,
-                 (long) getpid());
+        snprintf(errorArr, 100, "\n\n%s PID: %ld Failed to create shared memory ", error, (long) getpid());
         perror(errorArr);
-        fprintf(stderr, "\tVale of errno: %d\n\n", errno);
         exit(EXIT_FAILURE);
     }
 
@@ -163,28 +189,53 @@ struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer
 
     /*Error check shmat*/
     if(sharedMemoryPtr == (void*) -1){
-        snprintf(errorArr, 200, "\n\n%s PID: %ld Failed to create shared memory ", error,
-                 (long) getpid());
+        snprintf(errorArr, 200, "\n\n%s PID: %ld Failed to create shared memory ", error, (long) getpid());
         perror(errorArr);
-        fprintf(stderr, "\tVale of errno: %d\n\n", errno);
         exit(EXIT_FAILURE);
     }
 
     return sharedMemoryPtr;
 }
 
-
+/*Function to detach from shared memory and error check*/
 void detachSharedMemory (struct sharedMemoryContainer* sharedMemoryPtr, int sharedMemoryId, char* error){
     char errorArr[200];
 
     if(shmdt(sharedMemoryPtr) == -1) {
-        snprintf(errorArr, 200, "\n\n%s PID: %ld Failed to create shared memory ", error,
-                   (long) getpid());
+        snprintf(errorArr, 200, "\n\n%s PID: %ld Failed to create shared memory ", error, (long) getpid());
         perror(errorArr);
-        fprintf(stderr, "\tVale of errno: %d\n\n", errno);
         exit(EXIT_FAILURE);
     }
 
     /* Clearing shared memory related to clockId */
     shmctl(sharedMemoryId, IPC_RMID, NULL);
 }
+
+/*Function to launch child processes and return the corresponding pid's*/
+pid_t launchProcess(char* error, int childLogicalID, int prime){
+    char errorArr[200];
+    pid_t pid;
+
+    /*Fork process and capture pid*/
+    pid = fork();
+
+    if(pid == -1){
+        snprintf(errorArr, 200, "\n\n%s Fork execution failure", error);
+        perror(errorArr);
+        exit(EXIT_FAILURE);
+    }
+
+    if(pid == 0){
+        /*executes files, Name of file to be execute, list of args following,
+ *          * must be terminated with null*/
+        execl("./prime", "./prime", childLogicalID, prime, NULL);
+
+        snprintf(errorArr, 200, "\n\n%s execution of user subprogram failure ", error);
+        perror(errorArr);
+        exit(EXIT_FAILURE);
+    } else
+        return pid;
+
+}
+
+
