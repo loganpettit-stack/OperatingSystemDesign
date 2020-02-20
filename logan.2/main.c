@@ -6,8 +6,9 @@
 #include <errno.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <math.h>
 
-#define SHMEMKEY 0x1596
+#define SHAREDMEMKEY 0x1596
 
 /*Shared memory structure*/
 struct sharedMemoryContainer {
@@ -25,10 +26,11 @@ int main(int argc, char* argv[]) {
 
     struct sharedMemoryContainer* shMemptr;
     int c;
-    int prime = 0;
-    int childLogicalID = 0;
+    int prime = 100;
+    int childLogicalID = 5;
     int maxChildren = 4;
     int concurrentChildren = 0;
+    int statusCode = 0;
     char* executable = strdup(argv[0]);
     char* errorString = strcat(executable, ": Error: ");
     char* Nerror;
@@ -132,8 +134,8 @@ int main(int argc, char* argv[]) {
 
 
     /*Initialize shared memory structure*/
-    sharedMemoryPtr->seconds = 10;
-    sharedMemoryPtr->nanoseconds = 10;
+    sharedMemoryPtr->seconds = 1;
+    sharedMemoryPtr->nanoseconds = 0;
     sharedMemoryPtr->childArray = malloc(sizeof(int) * maxChildren);
 
     /*Initialize shared memory child array to all zeros*/
@@ -143,21 +145,27 @@ int main(int argc, char* argv[]) {
     }
 
     /*testing shared memory segment*/
-    printf("%d:%ld \n", sharedMemoryPtr->seconds, sharedMemoryPtr->nanoseconds);
+    printf("Main initial time: %d:%ld \n", sharedMemoryPtr->seconds, sharedMemoryPtr->nanoseconds);
     int j;
     for(j = 0; j < maxChildren; j++){
-        printf("%d", sharedMemoryPtr->childArray[j]);
+        printf("Shared memory array values: %d\n", sharedMemoryPtr->childArray[j]);
     }
 
     /*Launch a child process*/
-    pid = launchProcess(errorString, childLogicalID, prime);
     childLogicalID += 1;
+    pid = launchProcess(errorString, childLogicalID, prime);
+
+    pid = wait(&statusCode);
+    printf("child exited after wait\n");
+    
+    
+    printf("Main time after child exit: %d:%ld \n", sharedMemoryPtr->seconds, sharedMemoryPtr->nanoseconds);
 
 
     /*Detach pointer to shared memory*/
     detachSharedMemory(sharedMemoryPtr, sharedMemoryId, errorString);
 
-
+    return  0;
 }
 
 void displayUsage(){
@@ -175,7 +183,7 @@ struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer
     char errorArr[200];
 
     /*Get shared memory Id using shmget*/
-    *sharedMemoryID = shmget(SHMEMKEY, sizeof(struct sharedMemoryContainer), 0666 | IPC_CREAT);
+    *sharedMemoryID = shmget(SHAREDMEMKEY, sizeof(struct sharedMemoryContainer), 0644 | IPC_CREAT);
 
     /*Error check shmget*/
     if (sharedMemoryID == (void *) -1) {
@@ -216,6 +224,13 @@ pid_t launchProcess(char* error, int childLogicalID, int prime){
     char errorArr[200];
     pid_t pid;
 
+    char childLogicalString[20];
+    char primeString[20];
+
+    snprintf(childLogicalString, 20, "%d", childLogicalID);
+    snprintf(primeString, 20, "%d", prime);
+
+
     /*Fork process and capture pid*/
     pid = fork();
 
@@ -228,7 +243,7 @@ pid_t launchProcess(char* error, int childLogicalID, int prime){
     if(pid == 0){
         /*executes files, Name of file to be execute, list of args following,
  *          * must be terminated with null*/
-        execl("./prime", "./prime", childLogicalID, prime, NULL);
+        execl("./prime", "prime", childLogicalString, primeString, NULL);
 
         snprintf(errorArr, 200, "\n\n%s execution of user subprogram failure ", error);
         perror(errorArr);

@@ -10,10 +10,10 @@ OBJECTP = prime.o
 all: oss prime
 
 $(TARGETO): $(OBJECTO)
-	$(CC) -o $(TARGETO) $(OBJECTO)
+	$(CC) -o $(TARGETO) $(OBJECTO) -lm
 
 $(TARGETP): $(OBJECTP)
-	$(CC) -o $(TARGETP) $(OBJECTP)
+	$(CC) -o $(TARGETP) $(OBJECTP) -lm
 
 .PHONY: clean
 clean:
