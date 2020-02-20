@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
  *                  printf("%d", sharedMemoryPtr->childArray[j]);
  *                      }*/
 
-    while(sharedMemoryPtr->seconds < 2){
+    while(sharedMemoryPtr->seconds > 0){
         if(sharedMemoryPtr->nanoseconds > 1000000000){
             sharedMemoryPtr->seconds += 1;
         } else{

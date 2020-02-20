@@ -7,6 +7,9 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <math.h>
+#include <setjmp.h>
+#include <sys/time.h>
+#include <signal.h>
 
 #define SHAREDMEMKEY 0x1596
 
@@ -17,17 +20,32 @@ struct sharedMemoryContainer {
     int* childArray;
 };
 
+/*Create linked list to store Child pids*/
+struct Node {
+    int data;
+    struct Node* next;
+};
+
+jmp_buf ctrlCjmp;
+jmp_buf timerjmp;
+
 void displayUsage();
 struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer*, int*, char*);
 void detachSharedMemory(struct sharedMemoryContainer*, int, char*);
 pid_t launchProcess(char *, int, int);
+unsigned int startTimer(int);
+void push(struct Node**, int );
+void deleteNode(struct Node**, int);
+void ctrlCHandler();
+void timerHandler();
 
 int main(int argc, char* argv[]) {
 
     struct sharedMemoryContainer* shMemptr;
     int c;
+    int seconds = 2;
     int prime = 100;
-    int childLogicalID = 5;
+    int childLogicalID = 0;
     int maxChildren = 4;
     int concurrentChildren = 0;
     int statusCode = 0;
@@ -39,10 +57,19 @@ int main(int argc, char* argv[]) {
     char* Ierror;
     int sharedMemoryId;
     struct sharedMemoryContainer* sharedMemoryPtr;
+    struct Node* childPIDs = NULL;
+
 
     /*Able to represent process ID*/
     pid_t pid = 0;
 
+    /*Catch ctrl+c signal and handle with
+ *      * ctrlChandler*/
+    signal(SIGINT, ctrlCHandler);
+
+    /*Catch alarm generated from timer
+ *      * and handle with timer Handler*/
+    signal (SIGALRM, timerHandler);
 
     if(argc > 1) {
 
@@ -129,6 +156,9 @@ int main(int argc, char* argv[]) {
             }
     }
 
+
+    startTimer(seconds);
+
     /*Obtain pointer to shared memory*/
     sharedMemoryPtr = connectToSharedMemory(sharedMemoryPtr, &sharedMemoryId, errorString);
 
@@ -146,19 +176,47 @@ int main(int argc, char* argv[]) {
 
     /*testing shared memory segment*/
     printf("Main initial time: %d:%ld \n", sharedMemoryPtr->seconds, sharedMemoryPtr->nanoseconds);
-    int j;
-    for(j = 0; j < maxChildren; j++){
-        printf("Shared memory array values: %d\n", sharedMemoryPtr->childArray[j]);
-    }
 
     /*Launch a child process*/
     childLogicalID += 1;
     pid = launchProcess(errorString, childLogicalID, prime);
+    push(&childPIDs, pid);
+
+    /*Jump back to main enviroment where children are launched
+ *      * but before the wait*/
+    if(setjmp(ctrlCjmp) == 1){
+
+        while(childPIDs != NULL){
+            pid = childPIDs->data;
+            kill(pid, SIGKILL);
+            deleteNode(&childPIDs, pid);
+        }
+
+        shmdt(sharedMemoryPtr);
+        shmctl(sharedMemoryId, IPC_RMID, NULL);
+
+        exit(EXIT_SUCCESS);
+    }
+    if(setjmp(timerjmp) == 1){
+
+        while(childPIDs != NULL){
+            pid = childPIDs->data;
+            kill(pid, SIGKILL);
+            deleteNode(&childPIDs, pid);
+        }
+
+        shmdt(sharedMemoryPtr);
+        shmctl(sharedMemoryId, IPC_RMID, NULL);
+
+        exit(EXIT_SUCCESS);
+    }
+
 
     pid = wait(&statusCode);
     printf("child exited after wait\n");
-    
-    
+    deleteNode(&childPIDs, pid);
+
+
     printf("Main time after child exit: %d:%ld \n", sharedMemoryPtr->seconds, sharedMemoryPtr->nanoseconds);
 
 
@@ -253,4 +311,84 @@ pid_t launchProcess(char* error, int childLogicalID, int prime){
 
 }
 
+/**Implementation from geeksforgeeks.com**/
+/* Given a reference (pointer to pointer) to the head of a list
+ *    and an int,  inserts a new node on the front of the list. */
+void push(struct Node** head_ref, int new_data)
+{
+    /* 1. allocate node */
+    struct Node* new_node = (struct Node*) malloc(sizeof(struct Node));
 
+    /* 2. put in the data  */
+    new_node->data  = new_data;
+
+    /* 3. Make next of new node as head */
+    new_node->next = (*head_ref);
+
+    /* 4. move the head to point to the new node */
+    (*head_ref)    = new_node;
+}
+
+/**Implementation from geeksforgeeks.com**/
+/* Given a reference (pointer to pointer) to the head of a list
+ *    and a key, deletes the first occurrence of key in linked list */
+void deleteNode(struct Node **head_ref, int key)
+{
+    /* Store head node*/
+    struct Node* temp = *head_ref, *prev;
+
+    /* If head node itself holds the key to be deleted*/
+    if (temp != NULL && temp->data == key)
+    {
+        *head_ref = temp->next;   /* Changed head */
+        free(temp);               /* free old head */
+        return;
+    }
+
+    /* Search for the key to be deleted, keep track of the*/
+    /* previous node as we need to change 'prev->next' */
+    while (temp != NULL && temp->data != key)
+    {
+        prev = temp;
+        temp = temp->next;
+    }
+
+    /* If key was not present in linked list*/
+    if (temp == NULL) return;
+
+    /* Unlink the node from linked list */
+    prev->next = temp->next;
+
+    free(temp);  /* Free memory */
+}
+
+/*Alarm function defined by GNU*/
+unsigned int startTimer(int seconds) {
+    struct itimerval old, new;
+    new.it_interval.tv_usec = 0;
+    new.it_interval.tv_sec = 0;
+    new.it_value.tv_usec = 0;
+    new.it_value.tv_sec = (long int) seconds;
+    if (setitimer (ITIMER_REAL, &new, &old) < 0)
+        return 0;
+    else
+        return old.it_value.tv_sec;
+}
+
+/*Function handles ctrl c signal and jumps to top
+ *  * of program stack enviroment*/
+void ctrlCHandler(){
+    char errorArr[200];
+    snprintf(errorArr, 200, "\n\nCTRL+C signal caught, killing all processes and releasing shared memory.");
+    perror(errorArr);
+    longjmp(ctrlCjmp, 1);
+}
+
+/*Function handles timer alarm signal and jumps
+ *  * to top of program stack enviroment*/
+void timerHandler(){
+    char errorArr[200];
+    snprintf(errorArr, 200, "\n\ntimer interrupt triggered, killing all processes and releasing shared memory.");
+    perror(errorArr);
+    longjmp(timerjmp, 1);
+}
