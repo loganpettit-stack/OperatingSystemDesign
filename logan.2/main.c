@@ -13,12 +13,12 @@
 
 #define SHAREDMEMKEY 0x1596
 
-/*Shared memory structure*/
-struct sharedMemoryContainer {
-    int seconds;
-    long nanoseconds;
-    int* childArray;
-};
+/*Shared memory structure
+ * struct sharedMemoryContainer {
+ *     int seconds;
+ *         long nanoseconds;
+ *             int* childArray;
+ *             };*/
 
 /*Create linked list to store Child pids*/
 struct Node {
@@ -29,9 +29,11 @@ struct Node {
 jmp_buf ctrlCjmp;
 jmp_buf timerjmp;
 
+/*void detachSharedMemory(struct sharedMemoryContainer*, int, char*);*/
+/*struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer*, int*, char*);*/
+void detachSharedMemory(long*, int, char*);
+long*  connectToSharedMemory(int*, char*, int);
 void displayUsage();
-struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer*, int*, char*);
-void detachSharedMemory(struct sharedMemoryContainer*, int, char*);
 pid_t launchProcess(char *, int, int);
 unsigned int startTimer(int);
 void push(struct Node**, int );
@@ -41,24 +43,29 @@ void timerHandler();
 
 int main(int argc, char* argv[]) {
 
-    struct sharedMemoryContainer* shMemptr;
+    /* struct sharedMemoryContainer* sharedMemoryPtr;*/
+
     int c;
+    int incrementer = 1;
+    int childrenCounter = 0;
     int seconds = 2;
-    int prime = 100;
-    int childLogicalID = 0;
+    int prime = 2;
+    int childLogicalID = 1;
     int maxChildren = 4;
-    int concurrentChildren = 0;
+    int concurrentChildren = 2;
     int statusCode = 0;
+    int runningChildren = 0;
     char* executable = strdup(argv[0]);
     char* errorString = strcat(executable, ": Error: ");
     char* Nerror;
     char* Serror;
     char* Berror;
     char* Ierror;
+    char* filename = "output.log";
+    FILE* fptr;
     int sharedMemoryId;
-    struct sharedMemoryContainer* sharedMemoryPtr;
+    long* sharedMemoryPtr;
     struct Node* childPIDs = NULL;
-
 
     /*Able to represent process ID*/
     pid_t pid = 0;
@@ -70,6 +77,36 @@ int main(int argc, char* argv[]) {
     /*Catch alarm generated from timer
  *      * and handle with timer Handler*/
     signal (SIGALRM, timerHandler);
+
+
+    /*Jump back to main enviroment where children are launched
+ *      * but before the wait*/
+    if (setjmp(ctrlCjmp) == 1) {
+
+        while (childPIDs != NULL) {
+            pid = childPIDs->data;
+            kill(pid, SIGKILL);
+            deleteNode(&childPIDs, pid);
+        }
+
+        shmdt(sharedMemoryPtr);
+        shmctl(sharedMemoryId, IPC_RMID, NULL);
+
+        exit(EXIT_SUCCESS);
+    }
+    if (setjmp(timerjmp) == 1) {
+
+        while (childPIDs != NULL) {
+            pid = childPIDs->data;
+            kill(pid, SIGKILL);
+            deleteNode(&childPIDs, pid);
+        }
+
+        shmdt(sharedMemoryPtr);
+        shmctl(sharedMemoryId, IPC_RMID, NULL);
+
+        exit(EXIT_SUCCESS);
+    }
 
     if(argc > 1) {
 
@@ -94,10 +131,8 @@ int main(int argc, char* argv[]) {
                         fprintf(stderr, "%s", Nerror);
                         displayUsage();
                         exit(EXIT_FAILURE);
-
                     }
                     else {
-                        printf("Max number of child processes to be created is:  %s \n", optarg);
                         maxChildren = atoi(optarg);
                     }
 
@@ -107,13 +142,11 @@ int main(int argc, char* argv[]) {
  *                  * system at the same time*/
                 case 's' :
                     if(!isdigit(*optarg)){
-                        Serror = strcat(errorString, " [-s] option requires a digit arguement\n");
                         fprintf(stderr, "%s", Serror);
                         displayUsage();
                         exit(EXIT_FAILURE);
                     }
                     else {
-                        printf("Max number of concurrent child processes is:  %s \n", optarg);
                         concurrentChildren = atoi(optarg);
                     }
 
@@ -128,7 +161,6 @@ int main(int argc, char* argv[]) {
                         exit(EXIT_FAILURE);
                     }
                     else {
-                        printf("optarg is:  %s \n", optarg);
                         prime = atoi(optarg);
                     }
 
@@ -143,105 +175,156 @@ int main(int argc, char* argv[]) {
                         exit(EXIT_FAILURE);
                     }
                     else {
-                        printf("optarg is:  %s \n", optarg);
+                        incrementer = atoi(optarg);
                     }
 
                     break;
 
                 /*-o filename output file */
                 case 'o':
-                    printf("o selected\n");
-
+                    filename = optarg;
                     break;
             }
     }
 
+    printf("Max children to be created: %d\n", maxChildren);
+    printf("Max children to be concurently running: %d:\n", concurrentChildren);
+    printf("Number to start prime check sequence: %d\n", prime);
+    printf("Number to increment the prime sequence: %d\n", incrementer);
+    printf("File to be output to: %s\n", filename);
+
+
+
+    fptr = fopen(filename, "w");
+    if (fptr == NULL)
+    {
+        fprintf(stderr, "\nError opend file\n");
+        exit(1);
+    }
 
     startTimer(seconds);
 
+
+
     /*Obtain pointer to shared memory*/
-    sharedMemoryPtr = connectToSharedMemory(sharedMemoryPtr, &sharedMemoryId, errorString);
+    sharedMemoryPtr = connectToSharedMemory( &sharedMemoryId, errorString, maxChildren);
 
 
-    /*Initialize shared memory structure*/
-    sharedMemoryPtr->seconds = 1;
-    sharedMemoryPtr->nanoseconds = 0;
-    sharedMemoryPtr->childArray = malloc(sizeof(int) * maxChildren);
-
-    /*Initialize shared memory child array to all zeros*/
+    /*Initialize shared memory seconds and nanoseconds as well
+ *      * as array for child processes*/
     int i;
-    for(i = 0; i < maxChildren; i++){
-        sharedMemoryPtr->childArray[i] = 0;
+    for(i = 0; i < maxChildren + 2; i++){
+        sharedMemoryPtr[i] = 0;
     }
 
-    /*testing shared memory segment*/
-    printf("Main initial time: %d:%ld \n", sharedMemoryPtr->seconds, sharedMemoryPtr->nanoseconds);
+    sharedMemoryPtr[0] = 0;
+    sharedMemoryPtr[1] = 0;
 
-    /*Launch a child process*/
-    childLogicalID += 1;
-    pid = launchProcess(errorString, childLogicalID, prime);
-    push(&childPIDs, pid);
+    printf("\nMain initial time is: %ld:%ld\n", sharedMemoryPtr[0], sharedMemoryPtr[1]);
 
-    /*Jump back to main enviroment where children are launched
- *      * but before the wait*/
-    if(setjmp(ctrlCjmp) == 1){
+    printf("\n");
 
-        while(childPIDs != NULL){
-            pid = childPIDs->data;
-            kill(pid, SIGKILL);
-            deleteNode(&childPIDs, pid);
+    int m;
+    for(m = 0; m < concurrentChildren; m++){
+        pid = launchProcess(errorString, childLogicalID, prime);
+        printf("\nLaunching child %ld at time %ld:%ld\n", (long)pid, sharedMemoryPtr[0], sharedMemoryPtr[1]);
+        push(&childPIDs, pid);
+        childLogicalID += 1;
+        childrenCounter += 1;
+        runningChildren += 1;
+        prime += incrementer;
+    }
+
+    sharedMemoryPtr[1] = 10000;
+
+    usleep(1000);
+
+    sharedMemoryPtr[1] += 10000;
+
+    while(childrenCounter < maxChildren + 1 && runningChildren > 0){
+
+        if(sharedMemoryPtr[1] > 1000000000){
+            sharedMemoryPtr[0] += 1;
+        } else{
+            sharedMemoryPtr[1] += 100000;
         }
 
-        shmdt(sharedMemoryPtr);
-        shmctl(sharedMemoryId, IPC_RMID, NULL);
 
-        exit(EXIT_SUCCESS);
-    }
-    if(setjmp(timerjmp) == 1){
+        pid = wait(&statusCode);
 
-        while(childPIDs != NULL){
-            pid = childPIDs->data;
-            kill(pid, SIGKILL);
+        if (pid > 0) {
+            printf("\nChild with PID %ld exited with status 0x%x at main time %ld:%ld \n",
+                   (long) pid, statusCode, sharedMemoryPtr[0], sharedMemoryPtr[1]);
+
+            runningChildren -= 1;
+
             deleteNode(&childPIDs, pid);
+
+            if (childrenCounter < maxChildren) {
+                pid = launchProcess(errorString, childLogicalID, prime);
+                printf("\nLaunching child %ld at time %ld:%ld\n\n", (long)pid, sharedMemoryPtr[0], sharedMemoryPtr[1]);
+                push(&childPIDs, pid);
+                childLogicalID += 1;
+                childrenCounter += 1;
+                runningChildren += 1;
+                prime += incrementer;
+              /*  usleep(1000);*/
+
+
+                if(sharedMemoryPtr[1] > 1000000000){
+                    sharedMemoryPtr[0] += 1;
+                } else{
+                    sharedMemoryPtr[1] += 100000;
+                }
+
+                if(sharedMemoryPtr[1] > 1000000000){
+                    sharedMemoryPtr[0] += 1;
+                } else{
+                    sharedMemoryPtr[1] += 1000000;
+                }
+
+
+            }
         }
-
-        shmdt(sharedMemoryPtr);
-        shmctl(sharedMemoryId, IPC_RMID, NULL);
-
-        exit(EXIT_SUCCESS);
     }
 
 
-    pid = wait(&statusCode);
-    printf("child exited after wait\n");
-    deleteNode(&childPIDs, pid);
+    printf("\nMain time at end of program: %ld:%ld \n", sharedMemoryPtr[0], sharedMemoryPtr[1]);
 
-
-    printf("Main time after child exit: %d:%ld \n", sharedMemoryPtr->seconds, sharedMemoryPtr->nanoseconds);
+    printf("Array of primes:\n");
+    int y;
+    for(y = 2; y < maxChildren + 2; y++){
+        printf("%ld  ", sharedMemoryPtr[y]);
+    }
 
 
     /*Detach pointer to shared memory*/
     detachSharedMemory(sharedMemoryPtr, sharedMemoryId, errorString);
 
+
+    printf("\n");
+
     return  0;
 }
 
 void displayUsage(){
-    fprintf(stderr, "This program will be executed ..\n");
+    fprintf(stderr, "This program will execute with the following option using the defaults unless otherwise specified: \n");
     fprintf(stderr, "-n x Indicate the maximum total of child processes oss will ever create. (Default 4)\n"
                     "-s x Indicate the number of children allowed to exist in the system at the same time. (Default 2)\n"
-                    "-b B Start of the sequence of numbers to be tested for primality\n"
-                    "-i I Increment between numbers that we test\n"
-                    "-o filename Output file.\n");
+                    "-b B Start of the sequence of numbers to be tested for primality (Default 2)\n"
+                    "-i I Increment between numbers that we test (Default 1)\n"
+                    "-o filename Output file (Default output.log)\n");
 
 }
 
 /*Function to connect to shared memory and error check*/
-struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer* sharedMemoryPtr, int* sharedMemoryID, char* error){
+long* connectToSharedMemory( int* sharedMemoryID, char* error, int maxChildren){
     char errorArr[200];
+    long* sharedMemoryPtr;
 
-    /*Get shared memory Id using shmget*/
-    *sharedMemoryID = shmget(SHAREDMEMKEY, sizeof(struct sharedMemoryContainer), 0644 | IPC_CREAT);
+    /*Get shared memory Id using shmget
+ *     *sharedMemoryID = shmget(SHAREDMEMKEY, sizeof(struct sharedMemoryContainer), 0777 | IPC_CREAT);*/
+    *sharedMemoryID = shmget(SHAREDMEMKEY, sizeof(int) + sizeof(long) + sizeof(int) * maxChildren, 0644 | IPC_CREAT);
 
     /*Error check shmget*/
     if (sharedMemoryID == (void *) -1) {
@@ -250,8 +333,10 @@ struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer
         exit(EXIT_FAILURE);
     }
 
+
     /*Attach to shared memory using shmat*/
     sharedMemoryPtr = shmat(*sharedMemoryID, NULL, 0);
+
 
     /*Error check shmat*/
     if(sharedMemoryPtr == (void*) -1){
@@ -263,8 +348,10 @@ struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer
     return sharedMemoryPtr;
 }
 
+
+
 /*Function to detach from shared memory and error check*/
-void detachSharedMemory (struct sharedMemoryContainer* sharedMemoryPtr, int sharedMemoryId, char* error){
+void detachSharedMemory (long* sharedMemoryPtr, int sharedMemoryId, char* error){
     char errorArr[200];
 
     if(shmdt(sharedMemoryPtr) == -1) {
@@ -362,7 +449,7 @@ void deleteNode(struct Node **head_ref, int key)
     free(temp);  /* Free memory */
 }
 
-/*Alarm function defined by GNU*/
+/*Timer function that sends alarm defined by GNU*/
 unsigned int startTimer(int seconds) {
     struct itimerval old, new;
     new.it_interval.tv_usec = 0;
