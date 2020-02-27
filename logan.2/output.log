@@ -1,0 +1,49 @@
+
+Main initial time is: 0:0
+Launching child 23972 at time 0:0
+Launching child 23973 at time 0:0
+Child with PID 23972 exited with status 0x0 at main time 0:1010000 
+Launching child 23974 at time 0:1010000
+Child with PID 23973 exited with status 0x0 at main time 0:3010000 
+Launching child 23975 at time 0:3010000
+Child with PID 23974 exited with status 0x0 at main time 0:5010000 
+Launching child 23976 at time 0:5010000
+Child with PID 23975 exited with status 0x0 at main time 0:7010000 
+Launching child 23977 at time 0:7010000
+Child with PID 23976 exited with status 0x0 at main time 0:9010000 
+Launching child 23978 at time 0:9010000
+Child with PID 23977 exited with status 0x0 at main time 0:11010000 
+Launching child 23979 at time 0:11010000
+Child with PID 23978 exited with status 0x0 at main time 0:13010000 
+Launching child 23980 at time 0:13010000
+Child with PID 23979 exited with status 0x0 at main time 0:15010000 
+Launching child 23981 at time 0:15010000
+Child with PID 23980 exited with status 0x0 at main time 0:17010000 
+Launching child 23982 at time 0:17010000
+Child with PID 23981 exited with status 0x0 at main time 0:19010000 
+Launching child 23983 at time 0:19010000
+Child with PID 23982 exited with status 0x0 at main time 0:21010000 
+Launching child 23984 at time 0:21010000
+Child with PID 23983 exited with status 0x0 at main time 0:23010000 
+Launching child 23985 at time 0:23010000
+Child with PID 23984 exited with status 0x0 at main time 0:25010000 
+Launching child 23986 at time 0:25010000
+Child with PID 23985 exited with status 0x0 at main time 0:27010000 
+Launching child 23987 at time 0:27010000
+Child with PID 23986 exited with status 0x0 at main time 0:29010000 
+Launching child 23988 at time 0:29010000
+Child with PID 23987 exited with status 0x0 at main time 0:31010000 
+Launching child 23989 at time 0:31010000
+Child with PID 23988 exited with status 0x0 at main time 0:33010000 
+Launching child 23990 at time 0:33010000
+Child with PID 23989 exited with status 0x0 at main time 0:35010000 
+Launching child 23991 at time 0:35010000
+Child with PID 23990 exited with status 0x0 at main time 0:37010000 
+Child with PID 23991 exited with status 0x0 at main time 0:38010000 
+Main time at end of program: 0:38010000 
+
+Prime numbers found: 
+10000019 
+Non prime numbers found: 
+10000000 10000001 10000002 10000003 10000004 10000005 10000006 10000007 10000008 10000009 10000010 10000011 10000012 10000013 10000014 10000015 10000016 10000017 10000018 
+Undetermined numbers: 

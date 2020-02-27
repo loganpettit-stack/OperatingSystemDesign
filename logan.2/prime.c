@@ -8,19 +8,9 @@
 
 #define SHAREDMEMKEY 0x1596
 
-
-/*Shared memory structure
- * struct sharedMemoryContainer {
- *     int seconds;
- *         long nanoseconds;
- *             int* childArray;
- *             };
- *             */
-/*struct sharedMemoryContainer* connectToSharedMemory(struct sharedMemoryContainer*, int*, char*);*/
-/*void detachSharedMemory(struct sharedMemoryContainer*, int, char*);*/
 long* connectToSharedMemorystruct(int *sharedMemoryID, char *error);
 void detachSharedMemory(long*, int, char*);
-long getCombinedTime(int, long);
+long getCombinedTime(long, long);
 
 int main(int argc, char* argv[]) {
 
@@ -38,35 +28,54 @@ int main(int argc, char* argv[]) {
 
 
 
-    /*connect to shared memory
- *     sharedMemoryPtr = connectToSharedMemory(sharedMemoryPtr, &sharedMemoryId, errorString);*/
+    /*connect to shared memory*/
     sharedMemoryPtr = connectToSharedMemorystruct(&sharedMemoryId, errorString);
 
-    /*testing initial shared memory segment
- *     printf("\nChild %d entered at: %ld:%ld \n", childLogicalId, sharedMemoryPtr[0], sharedMemoryPtr[1]);*/
+    /*testing initial shared memory segment*/
     beginTime = getCombinedTime(sharedMemoryPtr[0], sharedMemoryPtr[1]);
     killTime = beginTime + 1000000;
 
+    if (n >= 2) {
+        int i;
+        for (i = 2; i <= sqrt(n); i++) {
 
-    int i;
-    for (i = 2; i <= sqrt(n); i++) {
+            checkTime = getCombinedTime(sharedMemoryPtr[0], sharedMemoryPtr[1]);
 
-        checkTime = getCombinedTime(sharedMemoryPtr[0], sharedMemoryPtr[1]);
-        if(checkTime >= killTime){
-            sharedMemoryPtr[childLogicalId + 2] = -1;
+            if (checkTime >= killTime) {
+                sharedMemoryPtr[childLogicalId + 1] = -1;
 
-            printf("Child took too long to find prime");
-            detachSharedMemory(sharedMemoryPtr, sharedMemoryId, errorString);
+                fprintf(stderr, "\nChild %d took too long to find prime\n", childLogicalId);
+
+                detachSharedMemory(sharedMemoryPtr, sharedMemoryId, errorString);
+                exit(-1);
+            }
+
+            /*If n is divisible by any number between
+ *             2 and n/2, it is not prime*/
+            if (n % i == 0) {
+                flag = 0;
+                break;
+            }
+
+            checkTime = getCombinedTime(sharedMemoryPtr[0], sharedMemoryPtr[1]);
+
+            if (checkTime >= killTime) {
+                sharedMemoryPtr[childLogicalId + 1] = -1;
+
+                fprintf(stderr, "\nChild %d took too long to find prime\n", childLogicalId);
+
+                printf("\nplacing in array: %ld", sharedMemoryPtr[childLogicalId + 1]);
+
+
+                detachSharedMemory(sharedMemoryPtr, sharedMemoryId, errorString);
+                exit(-1);
+            }
 
         }
-
-        /*If n is divisible by any number between
- *         2 and n/2, it is not prime*/
-        if (n % i == 0) {
-            flag = 0;
-            break;
-        }
+    } else {
+        flag = 0;
     }
+
 
     if (flag == 1) {
        /* printf("%d is a prime number", n);*/
@@ -77,12 +86,6 @@ int main(int argc, char* argv[]) {
         sharedMemoryPtr[childLogicalId + 1] = -n;
     }
 
-   /* printf("child looking at array: \n");
- *     int k;
- *         for (k = 0; k < childLogicalId; k++) {
- *                 printf("%d", sharedMemoryPtr[k]);
- *                     }*
- *                         printf("\nExiting child %d at: %ld:%ld\n\n", childLogicalId, sharedMemoryPtr[0], sharedMemoryPtr[1]);*/
 
     /*Detach pointer to shared memory*/
     detachSharedMemory(sharedMemoryPtr, sharedMemoryId, errorString);
@@ -94,7 +97,7 @@ long *connectToSharedMemorystruct(int *sharedMemoryID, char *error) {
     char errorArr[200];
 
 /*Get shared memory Id using shmget allocate enough room for the clock and one array space*/
-    *sharedMemoryID = shmget(SHAREDMEMKEY, sizeof(int) + sizeof(long) + sizeof(long), 0644 | IPC_CREAT);
+    *sharedMemoryID = shmget(SHAREDMEMKEY, sizeof(int) + sizeof(long) + sizeof(long), 0777 | IPC_CREAT);
 
 /*Error check shmget*/
     if (sharedMemoryID == (void *) -1) {
@@ -131,7 +134,7 @@ void detachSharedMemory (long* sharedMemoryPtr, int sharedMemoryId, char* error)
     }
 }
 
-long getCombinedTime(int seconds, long nanoseconds){
+long getCombinedTime(long seconds, long nanoseconds){
     long time = 0;
 
     if(seconds > 0){

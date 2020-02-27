@@ -66,6 +66,13 @@ int main(int argc, char* argv[]) {
     int sharedMemoryId;
     long* sharedMemoryPtr;
     struct Node* childPIDs = NULL;
+    int* allNumbers;
+    int* primeArray;
+    int* nonPrimeArray;
+    int* undeterminedArray;
+    int primeArrayIndexer = 0;
+    int nonPrimeArrayIndexer = 0;
+    int undeterminedArrayIndexer = 0;
 
     /*Able to represent process ID*/
     pid_t pid = 0;
@@ -187,13 +194,14 @@ int main(int argc, char* argv[]) {
             }
     }
 
+    printf("Prime finder program initialized with these values: \n");
     printf("Max children to be created: %d\n", maxChildren);
     printf("Max children to be concurently running: %d:\n", concurrentChildren);
     printf("Number to start prime check sequence: %d\n", prime);
     printf("Number to increment the prime sequence: %d\n", incrementer);
     printf("File to be output to: %s\n", filename);
 
-
+    allNumbers = (int*)malloc(maxChildren * sizeof(int));
 
     fptr = fopen(filename, "w");
     if (fptr == NULL)
@@ -203,8 +211,6 @@ int main(int argc, char* argv[]) {
     }
 
     startTimer(seconds);
-
-
 
     /*Obtain pointer to shared memory*/
     sharedMemoryPtr = connectToSharedMemory( &sharedMemoryId, errorString, maxChildren);
@@ -220,40 +226,37 @@ int main(int argc, char* argv[]) {
     sharedMemoryPtr[0] = 0;
     sharedMemoryPtr[1] = 0;
 
-    printf("\nMain initial time is: %ld:%ld\n", sharedMemoryPtr[0], sharedMemoryPtr[1]);
-
-    printf("\n");
+    fprintf(fptr, "\nMain initial time is: %ld:%ld\n", sharedMemoryPtr[0], sharedMemoryPtr[1]);
 
     int m;
     for(m = 0; m < concurrentChildren; m++){
         pid = launchProcess(errorString, childLogicalID, prime);
-        printf("\nLaunching child %ld at time %ld:%ld\n", (long)pid, sharedMemoryPtr[0], sharedMemoryPtr[1]);
+        fprintf(fptr, "Launching child %ld at time %ld:%ld\n", (long)pid, sharedMemoryPtr[0], sharedMemoryPtr[1]);
         push(&childPIDs, pid);
+        allNumbers[childrenCounter] = prime;
         childLogicalID += 1;
         childrenCounter += 1;
         runningChildren += 1;
         prime += incrementer;
+
     }
-
-    sharedMemoryPtr[1] = 10000;
-
-    usleep(1000);
 
     sharedMemoryPtr[1] += 10000;
 
     while(childrenCounter < maxChildren + 1 && runningChildren > 0){
 
+
+        /*clock incrementer*/
         if(sharedMemoryPtr[1] > 1000000000){
             sharedMemoryPtr[0] += 1;
         } else{
-            sharedMemoryPtr[1] += 100000;
+            sharedMemoryPtr[1] += 1000000;
         }
-
 
         pid = wait(&statusCode);
 
         if (pid > 0) {
-            printf("\nChild with PID %ld exited with status 0x%x at main time %ld:%ld \n",
+            fprintf(fptr, "Child with PID %ld exited with status 0x%x at main time %ld:%ld \n",
                    (long) pid, statusCode, sharedMemoryPtr[0], sharedMemoryPtr[1]);
 
             runningChildren -= 1;
@@ -262,20 +265,13 @@ int main(int argc, char* argv[]) {
 
             if (childrenCounter < maxChildren) {
                 pid = launchProcess(errorString, childLogicalID, prime);
-                printf("\nLaunching child %ld at time %ld:%ld\n\n", (long)pid, sharedMemoryPtr[0], sharedMemoryPtr[1]);
+                fprintf(fptr, "Launching child %ld at time %ld:%ld\n", (long)pid, sharedMemoryPtr[0], sharedMemoryPtr[1]);
                 push(&childPIDs, pid);
+                allNumbers[childrenCounter] = prime;
                 childLogicalID += 1;
                 childrenCounter += 1;
                 runningChildren += 1;
                 prime += incrementer;
-              /*  usleep(1000);*/
-
-
-                if(sharedMemoryPtr[1] > 1000000000){
-                    sharedMemoryPtr[0] += 1;
-                } else{
-                    sharedMemoryPtr[1] += 100000;
-                }
 
                 if(sharedMemoryPtr[1] > 1000000000){
                     sharedMemoryPtr[0] += 1;
@@ -289,20 +285,83 @@ int main(int argc, char* argv[]) {
     }
 
 
-    printf("\nMain time at end of program: %ld:%ld \n", sharedMemoryPtr[0], sharedMemoryPtr[1]);
+    fprintf(fptr, "Main time at end of program: %ld:%ld \n", sharedMemoryPtr[0], sharedMemoryPtr[1]);
+
+    primeArray = (int *) malloc(maxChildren * sizeof(int));
+    nonPrimeArray = (int *) malloc(maxChildren * sizeof(int));
+    undeterminedArray = (int *) malloc(maxChildren * sizeof(int));
 
     printf("Array of primes:\n");
-    int y;
-    for(y = 2; y < maxChildren + 2; y++){
-        printf("%ld  ", sharedMemoryPtr[y]);
+
+
+    /*We declare 0 and 1 as always prime so we search
+ *      * the original prime numbers checked to see if they
+ *           * are 1 or 0 if so we automatically put them in the nonprime
+ *                * array and change the value to zero, this now assumes that they
+ *                     * will never be declared -1 by the child process*/
+    int u;
+    for(u = 0; u < maxChildren; u++){
+
+        if(allNumbers[u] == 0){
+            nonPrimeArray[nonPrimeArrayIndexer] = 0;
+            nonPrimeArrayIndexer += 1;
+            sharedMemoryPtr[u + 2] = 0;
+        }
+        else if(allNumbers[u] == 1){
+            nonPrimeArray[nonPrimeArrayIndexer] = 1;
+            nonPrimeArrayIndexer += 1;
+            sharedMemoryPtr[u + 2] = 0;
+        }
     }
+
+    int y;
+    for (y = 2; y < maxChildren + 2; y++) {
+        printf("%ld  ", sharedMemoryPtr[y]);
+
+
+
+        /*if number is prime*/
+        if (sharedMemoryPtr[y] > 0) {
+            primeArray[primeArrayIndexer] = (int) sharedMemoryPtr[y];
+            primeArrayIndexer += 1;
+        }
+            /*if number is not prime*/
+        else if (sharedMemoryPtr[y] < -1) {
+            nonPrimeArray[nonPrimeArrayIndexer] = (int) sharedMemoryPtr[y] * -1;
+            nonPrimeArrayIndexer += 1;
+        }
+        else if (sharedMemoryPtr[y] == -1){
+            undeterminedArray[undeterminedArrayIndexer] = y;
+            undeterminedArrayIndexer += 1;
+        }
+    }
+
+
+    fprintf(fptr, "\nPrime numbers found: \n");
+    int q;
+    for (q = 0; q < primeArrayIndexer; q++) {
+        fprintf(fptr, "%d ", primeArray[q]);
+    }
+
+    fprintf(fptr, "\nNon prime numbers found: \n");
+    int w;
+    for (w = 0; w < nonPrimeArrayIndexer; w++) {
+        fprintf(fptr, "%d ", nonPrimeArray[w]);
+    }
+
+    fprintf(fptr, "\nUndetermined numbers: \n");
+    int e;
+    for (e = 0; e < undeterminedArrayIndexer; e++) {
+        fprintf(fptr, "%d ", allNumbers[undeterminedArray[e] - 2]);
+    }
+
+    fprintf(fptr,"\n");
+    printf("\n");
 
 
     /*Detach pointer to shared memory*/
     detachSharedMemory(sharedMemoryPtr, sharedMemoryId, errorString);
-
-
-    printf("\n");
+    fclose(fptr);
 
     return  0;
 }
@@ -324,7 +383,7 @@ long* connectToSharedMemory( int* sharedMemoryID, char* error, int maxChildren){
 
     /*Get shared memory Id using shmget
  *     *sharedMemoryID = shmget(SHAREDMEMKEY, sizeof(struct sharedMemoryContainer), 0777 | IPC_CREAT);*/
-    *sharedMemoryID = shmget(SHAREDMEMKEY, sizeof(int) + sizeof(long) + sizeof(int) * maxChildren, 0644 | IPC_CREAT);
+    *sharedMemoryID = shmget(SHAREDMEMKEY, sizeof(int) + sizeof(long) + sizeof(int) * maxChildren, 0777 | IPC_CREAT);
 
     /*Error check shmget*/
     if (sharedMemoryID == (void *) -1) {
