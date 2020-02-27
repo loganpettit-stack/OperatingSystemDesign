@@ -1,0 +1,61 @@
+commit 328ced8fa3343fbf5751bd66ed8df59f72a8b860
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Thu Feb 27 01:52:38 2020 -0600
+
+    Finalized error handling and polished code
+
+commit 4d985ad420f90621469b23298965d7eed39a3375
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Thu Feb 27 00:21:28 2020 -0600
+
+    added file output and dealt with 0 and 1 prime number issues
+
+commit 3858ca9ee0b79dd1543828acc34e226ede45d914
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Wed Feb 26 21:01:48 2020 -0600
+
+    Fixed shared memory array to be 1D array instead of structure
+
+commit 1bdf321f5c41a75a689fe6c7f998493aae76cd5e
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Thu Feb 20 15:52:10 2020 -0600
+
+    added handling for ctrc signal and timer signal to kill the child processes and main program
+
+commit e7f111fb3212be309b0f6ceeaa26f3d75c644f15
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Thu Feb 20 11:48:44 2020 -0600
+
+    added ability to fork and exec child, have child read from shared memory and have parent read from chang
+
+commit 1bf04218003fa197f96f7b2b71a28c07c59f5232
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Wed Feb 19 13:15:08 2020 -0600
+
+    added ability to launch child process with command line args
+
+commit 05ccdd7e47480086ca659bf0ab76b94b1b136bc5
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Tue Feb 18 16:12:59 2020 -0600
+
+    added shared memory segment with attachment, detachment, and error handling
+
+commit 3aa591d0ade3ec309ecd6d9aec025562d910f74e
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Mon Feb 17 19:02:36 2020 -0600
+
+    started adding shared memory implementation
+
+commit 1db6344e2b8acb9f4a6437efc6c2a01dbc7be05e
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Mon Feb 17 19:00:22 2020 -0600
+
+    Added command line options and error handling for them
+
+commit ac98d5eddd2a18129e6756520da4d79766314a33
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Mon Feb 17 12:54:22 2020 -0600
+
+    initialized second project directory
+
+
