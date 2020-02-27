@@ -45,6 +45,7 @@ int main(int argc, char* argv[]) {
 
     /* struct sharedMemoryContainer* sharedMemoryPtr;*/
 
+    char options[10];
     int c;
     int incrementer = 1;
     int childrenCounter = 0;
@@ -61,6 +62,9 @@ int main(int argc, char* argv[]) {
     char* Serror;
     char* Berror;
     char* Ierror;
+    char* optionNumError;
+    char* duplicateError;
+    char* optionError;
     char* filename = "output.log";
     FILE* fptr;
     int sharedMemoryId;
@@ -73,6 +77,9 @@ int main(int argc, char* argv[]) {
     int primeArrayIndexer = 0;
     int nonPrimeArrayIndexer = 0;
     int undeterminedArrayIndexer = 0;
+    int argCounter = 0;
+
+
 
     /*Able to represent process ID*/
     pid_t pid = 0;
@@ -141,6 +148,8 @@ int main(int argc, char* argv[]) {
                     }
                     else {
                         maxChildren = atoi(optarg);
+                        options[argCounter] = 'n';
+                        argCounter += 1;
                     }
 
                     break;
@@ -155,6 +164,8 @@ int main(int argc, char* argv[]) {
                     }
                     else {
                         concurrentChildren = atoi(optarg);
+                        options[argCounter] = 's';
+                        argCounter += 1;
                     }
 
                     break;
@@ -169,6 +180,8 @@ int main(int argc, char* argv[]) {
                     }
                     else {
                         prime = atoi(optarg);
+                        options[argCounter] = 'b';
+                        argCounter += 1;
                     }
 
                     break;
@@ -183,6 +196,8 @@ int main(int argc, char* argv[]) {
                     }
                     else {
                         incrementer = atoi(optarg);
+                        options[argCounter] = 'i';
+                        argCounter += 1;
                     }
 
                     break;
@@ -190,9 +205,41 @@ int main(int argc, char* argv[]) {
                 /*-o filename output file */
                 case 'o':
                     filename = optarg;
+                    options[argCounter] = 'o';
+                    argCounter += 1;
                     break;
+
+                default :
+                    optionError = strcat(errorString, "Incorrect option choice available format and options: \n");
+                    fprintf(stderr, "%s\n", optionError);
+                    displayUsage();
+                    exit(EXIT_FAILURE);
             }
     }
+
+    if(argCounter > 5){
+        optionNumError = strcat(errorString, "Maximum number of options exceeded available options and formqts are: \n");
+        fprintf(stderr, "%s\n", optionNumError);
+        displayUsage();
+        exit(EXIT_FAILURE);
+    }
+
+    /*check for duplicate options*/
+    char duplicate;
+    int k;
+    for(k = 0; k < argCounter; k++){
+        duplicate = options[k];
+        int m;
+        for( m = k + 1; m < argCounter; m++){
+            if(options[m] == duplicate){
+                duplicateError = strcat(errorString, "Duplicate options entered options are:\n");
+                fprintf(stderr, "%s\n", duplicateError);
+                displayUsage();
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
+
 
     printf("Prime finder program initialized with these values: \n");
     printf("Max children to be created: %d\n", maxChildren);
@@ -291,7 +338,7 @@ int main(int argc, char* argv[]) {
     nonPrimeArray = (int *) malloc(maxChildren * sizeof(int));
     undeterminedArray = (int *) malloc(maxChildren * sizeof(int));
 
-    printf("Array of primes:\n");
+    /*printf("Array of primes:\n");*/
 
 
     /*We declare 0 and 1 as always prime so we search
@@ -316,9 +363,7 @@ int main(int argc, char* argv[]) {
 
     int y;
     for (y = 2; y < maxChildren + 2; y++) {
-        printf("%ld  ", sharedMemoryPtr[y]);
-
-
+       /* printf("%ld  ", sharedMemoryPtr[y]);*/
 
         /*if number is prime*/
         if (sharedMemoryPtr[y] > 0) {

@@ -27,7 +27,6 @@ int main(int argc, char* argv[]) {
     long checkTime = 0;
 
 
-
     /*connect to shared memory*/
     sharedMemoryPtr = connectToSharedMemorystruct(&sharedMemoryId, errorString);
 
@@ -63,9 +62,6 @@ int main(int argc, char* argv[]) {
                 sharedMemoryPtr[childLogicalId + 1] = -1;
 
                 fprintf(stderr, "\nChild %d took too long to find prime\n", childLogicalId);
-
-                printf("\nplacing in array: %ld", sharedMemoryPtr[childLogicalId + 1]);
-
 
                 detachSharedMemory(sharedMemoryPtr, sharedMemoryId, errorString);
                 exit(-1);

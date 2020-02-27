@@ -1,0 +1,8 @@
+HOW TO COMPILE: you can compile the project by typing make on the command line, this will create executable bt
+HOW TO EXECUTE: execute the file by typing ./bt [options] [directory] by default just executing ./bt will do a breadth first search of the current directory you are in
+
+GIT LOG: the log of all commits are stored in gitlog
+
+OTHER: I have included a test directory with nested directories and files that contains a symbolic link to another test directory with nested directories and files. the test directory is named testDir which has a file that symlinks to testLinkdDir. 
+
+PROBLEMS: I ran into a few problems when coming back to C for the first time in a while. I was overwriting memory locations with my queue, which I fixed up after a day. I covered my program with as much error handling as I could find and should not exit without a detailed error message that I have implemented.  

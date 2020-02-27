@@ -7,6 +7,8 @@ TARGETP = prime
 OBJECTO = main.o
 OBJECTP = prime.o
 
+.SUFFIXES = .c .o
+
 all: oss prime
 
 $(TARGETO): $(OBJECTO)
@@ -15,6 +17,9 @@ $(TARGETO): $(OBJECTO)
 $(TARGETP): $(OBJECTP)
 	$(CC) -o $(TARGETP) $(OBJECTP) -lm
 
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
 .PHONY: clean
 clean:
-	rm -f *.o $(TARGETO) $(TARGETP)
+	rm -f *.o *.log $(TARGETO) $(TARGETP)

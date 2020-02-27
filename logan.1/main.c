@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
     char* optionNumError;
     char* optionError;
     char* duplicateError;
+    char* optionlError;
 
     if(argc > 1) {
 
@@ -104,14 +105,23 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    /*check for duplicate options*/
-    char duplicate;
+    /*check for duplicate options and options
+ * combined with l */
+    char argChecker;
     int k;
     for(k = 0; k < argCounter; k++){
-        duplicate = options[k];
+        argChecker = options[k];
+
+        if(argChecker == 'l' && argCounter > 1){
+            optionlError = strcat(error, "Option l cannot be combined with any other options, format is: \n");
+            fprintf(stderr, "%s\n", optionlError);
+            displayUsage();
+            exit(EXIT_FAILURE);
+        }
+
         int m;
-        for( m = k + 1; m < argCounter; m++){
-            if(options[m] == duplicate){
+        for(m = k + 1; m < argCounter; m++){
+            if(options[m] == argChecker){
                 duplicateError = strcat(error, "Duplicate options entered options are:\n");
                 fprintf(stderr, "%s\n", duplicateError);
                 displayUsage();
@@ -119,7 +129,6 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-
     char* dirName = argv[optind];
 
     if(dirName == NULL){
@@ -132,7 +141,7 @@ int main(int argc, char *argv[]) {
 }
 
 void displayUsage(){
-    fprintf(stderr, "bt [-h] [-I n] [-L -d -g -i -p -s -t -u | -l] [dirname]\n\n");
+    fprintf(stderr, "bt [-h] [-L -d -g -i -p -s -t -u | -l] [dirname]\n\n");
     fprintf(stderr, "[-h]   : Print a help message and exit.\n"
                     "[-L]   : Follow symbolic links, if any.  Default will be to not follow symbolic links\n"
                     "[-d]   : Show the time of last modification.\n"

@@ -1,0 +1,80 @@
+commit d5a9f6764c82f4ef1b50f8b2a94698ec9f3f8251
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Mon Feb 10 21:46:27 2020 -0600
+
+    covered error handling and added ability to follow symlinks
+
+commit 018c15ec7b40f2650e986cfa961cab136e410957
+Merge: dac4377 315d956
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Sun Feb 9 22:31:27 2020 -0600
+
+    Merge branch 'master' of https://github.com/loganpettit-stack/OperatingSystemDesign
+    re aligning remote and local
+
+commit dac4377a92395b08c415771684297773766587f5
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Sun Feb 9 22:30:09 2020 -0600
+
+    added feature for date modified and size of file
+
+commit 315d956db35eea31048de732dec7b097f4b9163a
+Author: Logan Pettit <56748229+loganpettit-stack@users.noreply.github.com>
+Date:   Fri Feb 7 16:00:05 2020 -0600
+
+    Delete main.o
+
+commit 3c375d758f37708b14b97863681be5b50eb7de6f
+Author: Logan Pettit <56748229+loganpettit-stack@users.noreply.github.com>
+Date:   Fri Feb 7 15:59:56 2020 -0600
+
+    Delete .TreeTraversal.c.swp
+
+commit d23607b42f205a83382aa7b8c579ec76899f910f
+Author: Logan Pettit <56748229+loganpettit-stack@users.noreply.github.com>
+Date:   Fri Feb 7 15:59:49 2020 -0600
+
+    Delete FileOptionHandler.o
+
+commit 50d56e868511f4e8d2343be9636df1e4167b28eb
+Author: Logan Pettit <56748229+loganpettit-stack@users.noreply.github.com>
+Date:   Fri Feb 7 15:59:40 2020 -0600
+
+    Delete TreeTraversal.o
+
+commit 93385edc7419b602dd78cca12462794eb78354fe
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Fri Feb 7 15:58:39 2020 -0600
+
+    added permissions, filetype, uid, gid, i node links options
+
+commit 65ea92d3f9681adae5fece52b2552816dcc88e7d
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Fri Feb 7 13:54:50 2020 -0600
+
+    added Permission option
+
+commit 5a01522517a6ce890f968edf00c0fcce19b68da9
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Thu Feb 6 14:56:14 2020 -0600
+
+    fixed queue added posix way of checking for directories
+
+commit d9084ab1e4e5b1a9a5b8d8bbea3ac1afdb286a3f
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Mon Feb 3 17:30:48 2020 -0600
+
+    Updated TreeTraversal.c
+
+commit e6c47efc6f384979afe3793035e17356cde8d70c
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Thu Jan 30 15:49:56 2020 -0600
+
+    added project 1 directory
+
+commit 6d3b99521574a523ab48a90cb832db0ea683534e
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Thu Jan 30 15:45:02 2020 -0600
+
+    initial commit
+
