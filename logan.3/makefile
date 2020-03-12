@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -g
 
-TARGETO = oss
-TARGETP = prime
+TARGETO = master
+TARGETP = bin_adder
 
 OBJECTO = master.o
 OBJECTP = bin_adder.o
@@ -12,15 +12,15 @@ OBJECTP = bin_adder.o
 all: master bin_adder
 
 $(TARGETO): $(OBJECTO)
-        $(CC) -o $(TARGETO) $(OBJECTO) -lm
+	$(CC) -o $(TARGETO) $(OBJECTO) -lm
 
 $(TARGETP): $(OBJECTP)
-        $(CC) -o $(TARGETP) $(OBJECTP) -lm
+	$(CC) -o $(TARGETP) $(OBJECTP) -lm
 
 .c.o:
-        $(CC) $(CFLAGS) -c $<
+	 $(CC) $(CFLAGS) -c $< -lm
 
 .PHONY: clean
 clean:
-        rm -f *.o *.log $(TARGETO) $(TARGETP)
+	rm -f *.o *.log $(TARGETO) $(TARGETP)
 
