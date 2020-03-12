@@ -1,4 +1,4 @@
-#include <stdlib.h>
+ #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <ctype.h>
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
     }
 
     int x;
-    for (x = 1; x < 9; x++) {
+    for (x = 1; x < 129; x++) {
         fprintf(output, "%d\n", x);
     }
 
@@ -193,24 +193,24 @@ int main(int argc, char *argv[]) {
 
 
     /* printf("children to launch before %d\n", childrenToLaunch);
- *  
- *       while (childrenToLaunch > 0) {
- *        
- *                 while (index < fileData) {
- *                  
- *                   
- *                                pid = launchProcess(errorString, childLogicalID, index, numbersToAdd);
- *                                             push(&childPIDs, pid);
- *                                                          index += numberDistance;
- *                                                                       childLogicalID += 1;
- *                                                                        
- *                                                                                     pid = wait(&statusCode);
- *                                                                                      
- *                                                                                                   if (pid > 0) {
- *                                                                                                                    fprintf(stderr, "Child with PID %ld exited with status 0x%x\n",
- *                                                                                                                                             (long) pid, statusCode);
- *                                                                                                                                                          }
- *                                                                                                                                                                   }*/
+ *
+ *      while (childrenToLaunch > 0) {
+ *
+ *               while (index < fileData) {
+ *
+ *
+ *                            pid = launchProcess(errorString, childLogicalID, index, numbersToAdd);
+ *                                         push(&childPIDs, pid);
+ *                                                      index += numberDistance;
+ *                                                                   childLogicalID += 1;
+ *
+ *                                                                                pid = wait(&statusCode);
+ *
+ *                                                                                             if (pid > 0) {
+ *                                                                                                              fprintf(stderr, "Child with PID %ld exited with status 0x%x\n",
+ *                                                                                                                                       (long) pid, statusCode);
+ *                                                                                                                                                    }
+ *                                                                                                                                                             }*/
 
     /*handle shifting of elements*/
     /*sharedMemoryPtr[1] = sharedMemoryPtr[numberDistance];
@@ -230,9 +230,9 @@ int main(int argc, char *argv[]) {
         for (t = 0; t < 8; t++) {
             printf("MASTER: shared memory pointer: %ld\n", sharedMemoryPtr[t]);
         }
-    }*/
+    }
 
-    printf("\nSummed of data in file: %ld\n\n", sharedMemoryPtr[0]);
+    printf("\nSummed of data in file: %ld\n\n", sharedMemoryPtr[0]);*/
 
 
     /*Log summation launch*/
@@ -243,14 +243,15 @@ int main(int argc, char *argv[]) {
     logChildrenToLaunch = ceil((double) fileData / log2((double) fileData));
     index = 0;
     double logNumberDistance;
-    logNumberDistance = logChildrenToLaunch;
+    logNumberDistance = log2(fileData);
     int logNumbersToAdd = (int) logNumberDistance;
+    int loopCounter = 0;
+
+    printf("\n log number distance %f\n", logNumberDistance);
+    printf("\nlog children to launch %f\n", logChildrenToLaunch);
 
 
-    printf("log children to launch %f", logChildrenToLaunch);
-
-
-    while (childrenToLaunch > 0) {
+    while (logChildrenToLaunch > 0) {
 
         while (index < fileData) {
 
@@ -269,24 +270,42 @@ int main(int argc, char *argv[]) {
         }
 
         /*handle shifting of elements*/
-        sharedMemoryPtr[1] = sharedMemoryPtr[numberDistance];
+        sharedMemoryPtr[1] = sharedMemoryPtr[(int)logNumberDistance];
 
         int k;
-        for (k = 2; k < childrenToLaunch; k++) {
-
-            sharedMemoryPtr[k] = sharedMemoryPtr[k * 2];
+        for (k = 2; k < logChildrenToLaunch; k++) {
+            sharedMemoryPtr[k] = sharedMemoryPtr[k * (int)logNumberDistance];
         }
 
+
+        /*Set up next layer to be added*/
         index = 0;
-        childrenToLaunch /= 2;
-        fileData /= 2;
-        printf("LAYER FINISHED children to launch %d\n\n\n", childrenToLaunch);
+        logChildrenToLaunch = ceil(logChildrenToLaunch / 2);
 
-        int t;
-        for (t = 0; t < 8; t++) {
-            printf("MASTER: shared memory pointer: %ld\n", sharedMemoryPtr[t]);
+        /*handle infinite loop caused by ceil of 1/2 never being 0*/
+        if(logChildrenToLaunch == 1){
+            if(loopCounter == 1){
+                logChildrenToLaunch = 0;
+            }
+
+            loopCounter +=1;
         }
+
+
+        fileData /= logNumbersToAdd;
+        logNumberDistance = 2;
+        logNumbersToAdd = 2;
+
+       /* printf("LAYER FINISHED children to launch %f\n\n\n", logChildrenToLaunch);
+ *
+ *         int t;
+ *                 for (t = 0; t < 64; t++) {
+ *                             printf("MASTER: shared memory pointer: %ld\n", sharedMemoryPtr[t]);
+ *                                     }*/
     }
+
+
+    printf("\nLog summed of data in file: %ld\n\n", sharedMemoryPtr[0]);
 
 
     detachSharedMemory(sharedMemoryPtr, sharedMemoryId, errorString);

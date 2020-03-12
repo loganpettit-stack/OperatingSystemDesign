@@ -44,13 +44,14 @@ int main(int argc, char* argv[]) {
 
 
     sharedMemoryPtr[originalIndex] = accumulator;
-    printf("Placing: %d into: %d\n", accumulator, originalIndex);
-
-    int t;
-    for(t = 0; t < 8; t++){
-        printf("shared memory pointer: %ld\n", sharedMemoryPtr[t]);
-    }
-
+  
+  /*  printf("Placing: %d into: %d\n", accumulator, originalIndex);
+ *
+ *      int t;
+ *          for(t = 0; t < 64; t++){
+ *                  printf("shared memory pointer: %ld\n", sharedMemoryPtr[t]);
+ *                      }
+ *                      */
 
     detachSharedMemory(sharedMemoryPtr, sharedMemoryId, errorString);
 
