@@ -15,7 +15,7 @@ $(TARGETO): $(OBJECTO)
 	$(CC) -o $(TARGETO) $(OBJECTO) -lm
 
 $(TARGETP): $(OBJECTP)
-	$(CC) -o $(TARGETP) $(OBJECTP) -lm
+	$(CC) -o $(TARGETP) $(OBJECTP) -lm -lpthread
 
 .c.o:
 	 $(CC) $(CFLAGS) -c $< -lm
