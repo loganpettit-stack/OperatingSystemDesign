@@ -10,6 +10,8 @@
 #include <setjmp.h>
 #include <sys/time.h>
 #include <signal.h>
+#include <time.h>
+
 
 #define SHAREDMEMKEY 0x1596
 #define SEMAPHOREKEY 0x0852
@@ -64,8 +66,13 @@ int main(int argc, char *argv[]) {
     int runningChildren = 0;
     long *sharedMemoryPtr;
     struct Node *childPIDs = NULL;
-
-
+    time_t t;
+    time(&t);
+    time_t beforeTime;
+    time_t afterTime;
+    long time_past;
+    int upper = 256;
+    int lower = 0;
 
     /*Able to represent process ID*/
     pid_t pid = 0;
@@ -79,7 +86,7 @@ int main(int argc, char *argv[]) {
     signal(SIGALRM, timerHandler);
 
 
-    /*Jump back to main enviroment where children are launched
+    /*Jump back to main enviroment where Concurrentchildren are launched
  *      * but before the wait*/
     if (setjmp(ctrlCjmp) == 1) {
 
@@ -118,8 +125,10 @@ int main(int argc, char *argv[]) {
     }
 
     int x;
-    for (x = 1; x < 17; x++) {
-        fprintf(output, "%d\n", x);
+    int randomNumber;
+    for (x = 1; x <=64 ; x++) {
+        randomNumber = (rand() % (upper - lower + 1)) + lower;
+        fprintf(output, "%d\n", randomNumber);
     }
 
 
@@ -143,7 +152,7 @@ int main(int argc, char *argv[]) {
 
     fclose(input);
 
-    printf("line counter: %d\n", lineCounter);
+    printf("Amount of lines in file: %d\n", lineCounter);
 
 
     /*Start the  main timer*/
@@ -165,86 +174,97 @@ int main(int argc, char *argv[]) {
     long fileDigit = 0;
     int i;
     for (i = 0; i < lineCounter; i++) {
-        /* different way to get digit from file
- *           fscanf(input, "%d", &d);
- *                     printf("whole line %d\n", d);*/
-
         fgets(line, sizeof(line), input);
         fileDigit = strtol(line, &endPointer, 10);
-        /*printf("whole line: %ld\n", fileDigit);*/
 
         sharedMemoryPtr[i] = fileDigit;
     }
 
     fclose(input);
 
-    /*test shared memory array
- *     int t;
- *         for(t = 0; t < fileData; t++){
- *                 printf("shared memory pointer: %ld\n", sharedMemoryPtr[t]);
- *                     }*/
-
-
     /*n/2 summation launch*/
     int childrenToLaunch = fileData / 2;
+    int originalChildrenToLaunch = childrenToLaunch;
     int index = 0;
     int numberDistance = 2;
+    int flag = 1;
+    int Concurrentchildren;
+    int childrenInLayer = childrenToLaunch;
 
+    if (childrenToLaunch < 10) {
+        Concurrentchildren = childrenToLaunch;
+    } else {
+        Concurrentchildren = 10;
+    }
 
-    /* printf("children to launch before %d\n", childrenToLaunch);*/
 
 
     outputLog = fopen(output_log, "w");
-    fprintf(outputLog, "\nSummation of numbers splitting them into n/2 groups: \n\n");
-    char *pidString = "PID";
-    char *indexString = "Index";
-    char *addedString = "Size";
-    int flag = 1;
-
     if (outputLog == NULL) {
         fprintf(stderr, "adder_log could not be openend");
         return 1;
     }
+    fprintf(outputLog, "\nSummation of numbers splitting them into n/2 groups: \n");
+    char *pidString = "PID";
+    char *indexString = "Index";
+    char *addedString = "Size";
+
 
     fprintf(outputLog, "%-10s %-5s %-5s\n", pidString, indexString, addedString);
 
     fclose(outputLog);
 
+    time(&beforeTime);
 
+    printf("\n\nRUNNING N/2 SUMMATION:\n");
+    printf("Initial Children to launch summing groups of 2: %d\n", childrenToLaunch);
+    printf("Calculation start time: %s\n\n\n", ctime(&beforeTime));
+
+    /*Launch n/2 processes*/
     while (childrenToLaunch > 0) {
 
-        runningChildren = childrenToLaunch;
 
-        while (runningChildren > 0) {
+         /*Waiting for all children in layer to launch and finish*/
+        while (childrenInLayer > 0) {
 
+            runningChildren = Concurrentchildren;
 
-            /*Flag indicates a layer is ready to launch*/
-            if(flag == 1) {
-                int l;
-                for (l = 0; l < childrenToLaunch; l++) {
-                    pid = launchProcess(errorString, childLogicalID, index, numbersToAdd);
-                    push(&childPIDs, pid);
-                    index += numberDistance;
-                    childLogicalID += 1;
+            /*Launch processes concurrently and loop wait until finished*/
+            while (runningChildren > 0) {
+
+                /*If flag is raised more children are ready
+ *                  * to be launched*/
+                if (flag == 1) {
+                    int l;
+                    for (l = 0; l < Concurrentchildren; l++) {
+                        pid = launchProcess(errorString, childLogicalID, index, numbersToAdd);
+                        push(&childPIDs, pid);
+                        index += numberDistance;
+                        childLogicalID += 1;
+                        childrenToLaunch -=1;
+                    }
+                    flag = 0;
                 }
 
-                flag = 0;
+                pid = wait(&statusCode);
+                if (pid > 0) {
+                    fprintf(stderr, "Child with PID %ld exited with status 0x%x\n",
+                            (long) pid, statusCode);
+
+                    runningChildren -= 1;
+                    deleteNode(&childPIDs, pid);
+                }
             }
 
-            pid = wait(&statusCode);
+            flag = 1;
+            childrenInLayer = childrenToLaunch;
 
-            if (pid > 0) {
-                fprintf(stderr, "Child with PID %ld exited with status 0x%x\n",
-                        (long) pid, statusCode);
-
-                runningChildren -= 1;
-                deleteNode(&childPIDs, pid);
-            }
-
-            /*if there are no more running children launch
- *              * the next layer*/
-            if(runningChildren == 0){
-                flag = 1;
+            /*if we have launched 10 processes and
+ *             * waited for those to finish launch the next set*/
+            if (childrenToLaunch < 10 ) {
+                Concurrentchildren = childrenToLaunch;
+            } else {
+                Concurrentchildren = 10;
             }
         }
 
@@ -253,156 +273,196 @@ int main(int argc, char *argv[]) {
         sharedMemoryPtr[1] = sharedMemoryPtr[numberDistance];
 
         int k;
-        for (k = 2; k < childrenToLaunch; k++) {
+        for (k = 2; k < originalChildrenToLaunch; k++) {
             sharedMemoryPtr[k] = sharedMemoryPtr[k * 2];
         }
 
         index = 0;
-        childrenToLaunch /= 2;
+        originalChildrenToLaunch /= 2;
+        childrenToLaunch = originalChildrenToLaunch;
+        childrenInLayer = childrenToLaunch;
         fileData /= 2;
 
-        /*
- *           int t;
- *                     for (t = 0; t < 8; t++) {
- *                                   printf("MASTER: shared memory pointer: %ld\n", sharedMemoryPtr[t]);
- *                                             }*/
+        if (childrenToLaunch < 10) {
+            Concurrentchildren = childrenToLaunch;
+        } else {
+            Concurrentchildren = 10;
+        }
+    }
+
+    time(&afterTime);
+    time_past = afterTime - beforeTime;
+
+    outputLog = fopen(output_log, "a");
+    if (outputLog == NULL) {
+        fprintf(stderr, "adder_log could not be openend");
+        return 1;
     }
 
     printf("\nn/2 Summed of data in file: %ld\n\n", sharedMemoryPtr[0]);
+    fprintf(outputLog, "\nFile data summed to: %ld\n", sharedMemoryPtr[0]);
+    fprintf(outputLog, "Time taken to execute: %ld seconds\n", time_past);
+
+    fclose(outputLog);
 
 
-/*re load data into shared memory
- *     input = fopen(inputFile, "r");
- *         if (input == NULL) {
- *                 fprintf(stderr,
- *                                 "Input file could not be opened");
- *                                         return 1;
- *                                             }
- *
- *
- *                                                 int j;
- *                                                     for (
- *                                                                 j = 0;
- *                                                                             j < lineCounter;
- *                                                                                         j++) {
- *                                                                                                 fgets(line,
- *                                                                                                               sizeof(line), input);
- *                                                                                                                       fileDigit = strtol(line, &endPointer, 10);
- *
- *                                                                                                                               sharedMemoryPtr[j] =
- *                                                                                                                                               fileDigit;
- *                                                                                                                                                   }
- *
- *                                                                                                                                                       fclose(input);*/
+    /*re load data into shared memory*/
+    input = fopen(inputFile, "r");
+    if (input == NULL) {
+        fprintf(stderr,
+                "Input file could not be opened");
+        return 1;
+    }
+
+    int j;
+    for (j = 0; j < lineCounter; j++) {
+        fgets(line, sizeof(line), input);
+        fileDigit = strtol(line, &endPointer, 10);
+        sharedMemoryPtr[j] = fileDigit;
+    }
+
+    fclose(input);
+
+    outputLog = fopen(output_log, "a");
+    fprintf(outputLog,
+            "\nSummation of numbers splitting them into n/log(n) groups: \n\n");
+
+    if (outputLog == NULL) {
+        fprintf(stderr,
+                "adder_log could not be openend");
+        return 1;
+    }
+
+    fprintf(outputLog,
+            "%-10s %-5s %-5s\n", pidString, indexString, addedString);
+
+    fclose(outputLog);
 
 
-/*test shared memory array
- *     int t;
- *         for (
- *                     t = 0;
- *                                 t < fileData;
- *                                             t++) {
- *                                                     printf("shared memory pointer: %ld\n", sharedMemoryPtr[t]);
- *                                                         }
- *
- *
- *                                                             outputLog = fopen(output_log, "a");
- *                                                                 fprintf(outputLog,
- *                                                                             "\nSummation of numbers splitting them into n/log(n) groups: \n\n");
- *
- *                                                                                 if (outputLog == NULL) {
- *                                                                                         fprintf(stderr,
- *                                                                                                         "adder_log could not be openend");
- *                                                                                                                 return 1;
- *                                                                                                                     }
- *
- *                                                                                                                         fprintf(outputLog,
- *                                                                                                                                     "%-10s %-5s %-5s\n", pidString, indexString, addedString);
- *
- *                                                                                                                                         fclose(outputLog);*/
+    /*Log summation launch */
+    double logChildrenToLaunch = 0;
+    fileData = originalFileData;
+    logChildrenToLaunch = ceil((double) fileData / log2((double) fileData));
+    originalChildrenToLaunch = (int)logChildrenToLaunch;
+    index = 0;
+    double logNumberDistance;
+    logNumberDistance = log2(fileData);
+    int logNumbersToAdd = (int) logNumberDistance;
+    int loopCounter = 0;
+    childrenInLayer = logChildrenToLaunch;
+
+    /*Set children to launch*/
+    if (logChildrenToLaunch < 10) {
+        Concurrentchildren = (int)logChildrenToLaunch;
+    } else {
+        Concurrentchildren = 10;
+    }
+
+    printf("\n\n\n\nRUNNING N/LOG(N) SUMMATION: \n");
+    printf("Number group sizes:  %f\n", logNumberDistance);
+    printf("Initial children to launch:  %f\n", logChildrenToLaunch);
+    flag = 1;
+
+    time(&beforeTime);
+
+    printf("Calculation start time: %ld\n\n\n", beforeTime);
+
+    /*loop to launch layers of processes*/
+    while (logChildrenToLaunch > 0) {
+
+        while(childrenInLayer > 0) {
+            runningChildren = Concurrentchildren;
+
+            /*loop to catch all launched Concurrentchildren*/
+            while (runningChildren > 0) {
 
 
-/*Log summation launch
- *     printf("\n\n\nRUNNING LOG SUMMATION: \n");
- *
- *         double logChildrenToLaunch = 0;
- *             fileData = originalFileData;
- *                 logChildrenToLaunch = ceil((double) fileData / log2((double) fileData));
- *                     index = 0;
- *                         double logNumberDistance;
- *                             logNumberDistance = log2(fileData);
- *                                 int logNumbersToAdd = (int) logNumberDistance;
- *                                     int loopCounter = 0;
- *
- *                                         printf("\n log number distance %f\n", logNumberDistance);
- *                                             printf("\nlog children to launch %f\n", logChildrenToLaunch);
- *
- *
- *                                                 while (logChildrenToLaunch > 0) {
- *
- *                                                         while (index < fileData) {
- *
- *                                                                     pid = launchProcess(errorString, childLogicalID, index, logNumbersToAdd);
- *                                                                                 push(&childPIDs, pid);
- *                                                                                             index += (int)
- *                                                                                                                 logNumberDistance;
- *                                                                                                                             childLogicalID += 1;
- *
- *                                                                                                                                         pid = wait(&statusCode);
- *
- *
- *                                                                                                                                                     if (pid > 0) {
- *                                                                                                                                                                     fprintf(stderr,
- *                                                                                                                                                                                             "Child with PID %ld exited with status 0x%x\n",
- *                                                                                                                                                                                                                     (long) pid, statusCode);
- *                                                                                                                                                                                                                                 }
- *                                                                                                                                                                                                                                         }
- *                                                                                                                                                                                                                                                 */
-/*handle shifting of elements
- *         sharedMemoryPtr[1] = sharedMemoryPtr[(int) logNumberDistance];
- *
- *                 int k;
- *                         for (
- *                                         k = 2;
- *                                                         k < logChildrenToLaunch;
- *                                                                         k++) {
- *                                                                                     sharedMemoryPtr[k] = sharedMemoryPtr[k * (int) logNumberDistance];
- *                                                                                             }
- *
- *                                                                                                 */
-/*Set up next layer to be added
- *         index = 0;
- *                 logChildrenToLaunch = ceil(logChildrenToLaunch / 2);
- *                     */
-/*handle infinite loop caused by ceil of 1/2 never being 0
- *         if (logChildrenToLaunch == 1) {
- *                     if (loopCounter == 1) {
- *                                     logChildrenToLaunch = 0;
- *                                                 }
- *
- *                                                             loopCounter += 1;
- *                                                                     }
- *
- *
- *                                                                             fileData /=
- *                                                                                             logNumbersToAdd;
- *                                                                                                     logNumberDistance = 2;
- *                                                                                                             logNumbersToAdd = 2;
- *                                                                                                                 */
-/* printf("LAYER FINISHED children to launch %f\n\n\n", logChildrenToLaunch);
- *
- *  int t;
- *   for (t = 0; t < 64; t++) {
- *        printf("MASTER: shared memory pointer: %ld\n", sharedMemoryPtr[t]);
- *         }
- *             }
- *
- *
- *                 printf("\nLog summed of data in file: %ld\n\n", sharedMemoryPtr[0]);*/
+                if (flag == 1) {
+                    int o;
+                    for (o = 0; o < Concurrentchildren; o++) {
+                        pid = launchProcess(errorString, childLogicalID, index, logNumbersToAdd);
+                        push(&childPIDs, pid);
+                        index += (int) logNumberDistance;
+                        childLogicalID += 1;
+                        logChildrenToLaunch -= 1;
+                    }
+                    flag = 0;
+                }
+
+                pid = wait(&statusCode);
+                if (pid > 0) {
+                    fprintf(stderr, "Child with PID %ld exited with status 0x%x\n",
+                            (long) pid, statusCode);
+
+                    runningChildren -= 1;
+                    deleteNode(&childPIDs, pid);
+                }
+            }
+
+            /*Allow processes to be launched again*/
+            flag = 1;
+            childrenInLayer = (int)logChildrenToLaunch;
+
+            /*if we have launched 10 processes and
+ *              * waited for those to finish launch the next set*/
+            if (logChildrenToLaunch < 10 ) {
+                Concurrentchildren = (int)logChildrenToLaunch;
+            } else {
+                Concurrentchildren = 10;
+            }
+        }
+
+        /*handle shifting of elements*/
+        sharedMemoryPtr[1] = sharedMemoryPtr[(int) logNumberDistance];
+
+        int k;
+        for (k = 2; k < originalChildrenToLaunch; k++) {
+            sharedMemoryPtr[k] = sharedMemoryPtr[k * (int) logNumberDistance];
+        }
+
+        /*Zero out the rest of the shared memory to allow proper adding*/
+        int u;
+        for(u = originalChildrenToLaunch; u < fileData; u++){
+            sharedMemoryPtr[u] = 0;
+        }
+
+        /*Set up next layer to be added*/
+        index = 0;
+        originalChildrenToLaunch = ceil((double)originalChildrenToLaunch/2);
+        logChildrenToLaunch = originalChildrenToLaunch;
 
 
-    detachSharedMemory(sharedMemoryPtr, sharedMemoryId, errorString
-    );
+
+        /*handle infinite loop caused by ceil of 1/2 never being 0 */
+        if (logChildrenToLaunch == 1) {
+            if (loopCounter == 1) {
+                logChildrenToLaunch = 0;
+            }
+
+            loopCounter += 1;
+        }
+
+
+        childrenInLayer = (int)logChildrenToLaunch;
+
+        logNumberDistance = 2;
+        logNumbersToAdd = 2;
+    }
+
+    time(&afterTime);
+    time_past = afterTime - beforeTime;
+
+    outputLog = fopen(output_log, "a");
+    if (outputLog == NULL) {
+        fprintf(stderr, "adder_log could not be openend");
+        return 1;
+    }
+
+    printf("\nLog summed of data in file: %ld\n\n", sharedMemoryPtr[0]);
+    fprintf(outputLog, "\nSummed data from file using n/log(n) groups: %ld\n", sharedMemoryPtr[0]);
+    fprintf(outputLog, "Time taken to execute: %ld seconds\n", time_past);
+
+    detachSharedMemory(sharedMemoryPtr, sharedMemoryId, errorString);
 
 
 }

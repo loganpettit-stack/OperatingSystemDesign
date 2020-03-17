@@ -20,7 +20,6 @@ typedef struct {
 
 SEMAPHORE *semaphore;
 int semaphoreID;
-int seconds = 0;
 
 void detachSharedMemory(long *, int, char *);
 
@@ -45,9 +44,10 @@ int main(int argc, char *argv[]) {
     time(&t);
     int upper = 3;
     int lower = 0;
+    srand(getpid());
 
 
-    printf("\n\nprocess: %d started clock time: %s\n", childLogicalId, ctime(&t));
+    printf("process: %d started clock time: %s\n", childLogicalId, ctime(&t));
 
     /*initialize shared memory and semaphore  mutex to 1*/
     sharedMemoryPtr = connectToSharedMemory(&sharedMemoryId, errorString, numbersToRead);
@@ -63,16 +63,16 @@ int main(int argc, char *argv[]) {
 
     sharedMemoryPtr[originalIndex] = accumulator;
 
-    printf("%d Placing: %d into: %d\n", childLogicalId, accumulator, originalIndex);
+    /*printf("%d Placing: %d into: %d\n", childLogicalId, accumulator, originalIndex);*/
 
 
     /*sleep for random time*/
     int randomSleepTime = (rand() % (upper - lower + 1)) + lower;
-    printf("random sleep time: %d\n", randomSleepTime);
+    /*printf("random sleep time: %d\n", randomSleepTime);*/
     int o;
     for (o = 0; o < randomSleepTime; o++) {
-        usleep(1000000);
-    }
+         usleep(1000000);
+     }
 
     /*critical section,
  *      * wait a second before writing to file
