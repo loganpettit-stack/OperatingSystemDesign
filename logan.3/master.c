@@ -73,6 +73,7 @@ int main(int argc, char *argv[]) {
     long time_past;
     int upper = 256;
     int lower = 0;
+    srand(time(NULL));
 
     /*Able to represent process ID*/
     pid_t pid = 0;
@@ -248,8 +249,8 @@ int main(int argc, char *argv[]) {
 
                 pid = wait(&statusCode);
                 if (pid > 0) {
-                    fprintf(stderr, "Child with PID %ld exited with status 0x%x\n",
-                            (long) pid, statusCode);
+                   /* fprintf(stderr, "Child with PID %ld exited with status 0x%x\n",
+ *                             (long) pid, statusCode);*/
 
                     runningChildren -= 1;
                     deleteNode(&childPIDs, pid);
@@ -365,7 +366,7 @@ int main(int argc, char *argv[]) {
 
     time(&beforeTime);
 
-    printf("Calculation start time: %ld\n\n\n", beforeTime);
+    printf("Calculation start time: %s\n\n\n", ctime(&beforeTime));
 
     /*loop to launch layers of processes*/
     while (logChildrenToLaunch > 0) {
@@ -391,8 +392,8 @@ int main(int argc, char *argv[]) {
 
                 pid = wait(&statusCode);
                 if (pid > 0) {
-                    fprintf(stderr, "Child with PID %ld exited with status 0x%x\n",
-                            (long) pid, statusCode);
+                    /*fprintf(stderr, "Child with PID %ld exited with status 0x%x\n",
+ *                             (long) pid, statusCode);*/
 
                     runningChildren -= 1;
                     deleteNode(&childPIDs, pid);

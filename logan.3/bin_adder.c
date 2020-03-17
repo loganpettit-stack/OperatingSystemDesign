@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
     srand(getpid());
 
 
-    printf("process: %d started clock time: %s\n", childLogicalId, ctime(&t));
+    printf("Process: %d started clock time: %s\n", childLogicalId, ctime(&t));
 
     /*initialize shared memory and semaphore  mutex to 1*/
     sharedMemoryPtr = connectToSharedMemory(&sharedMemoryId, errorString, numbersToRead);
@@ -67,28 +67,29 @@ int main(int argc, char *argv[]) {
 
 
     /*sleep for random time*/
-    int randomSleepTime = (rand() % (upper - lower + 1)) + lower;
-    /*printf("random sleep time: %d\n", randomSleepTime);*/
-    int o;
-    for (o = 0; o < randomSleepTime; o++) {
-         usleep(1000000);
-     }
+     int randomSleepTime = (rand() % (upper - lower + 1)) + lower;
+     /* printf("random sleep time: %d\n", randomSleepTime);*/
+     int o;
+     for (o = 0; o < 1; o++) {
+          usleep(50000);
+      }
 
     /*critical section,
  *      * wait a second before writing to file
  *           * wait a second before leaving sections*/
     sem_wait(&(semaphore->mutex));
-
+    usleep(500000);
     time(&t);
-    fprintf(stderr, "child %d Entering critical section at: %s\n", childLogicalId, ctime(&t));
+    fprintf(stderr, "Process: %d Entering critical section at: %s\n", childLogicalId, ctime(&t));
 
-    usleep(1000000);
+
     fptr = fopen(outfile, "a");
-    fprintf(fptr, "%-10d %-5d %-5d\n", getpid(), originalIndex, accumulator);
-    usleep(1000000);
+    time(&t);
+    fprintf(fptr, "%-10d %-5d %-5d %-20s\n", getpid(), originalIndex, accumulator, ctime(&t));
+    usleep(500000);
 
     time(&t);
-    fprintf(stderr, "child %d Exiting critical section at: %s\n", childLogicalId, ctime(&t));
+    fprintf(stderr, "Process: %d Exiting critical section at: %s\n", childLogicalId, ctime(&t));
 
     sem_post(&(semaphore->mutex));
 

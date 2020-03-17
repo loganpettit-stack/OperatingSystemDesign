@@ -1,0 +1,27 @@
+AUTHOR: Logan Pettit
+
+HOW TO RUN: This project can be ran by typing make which compiles the .c files into the executables master and bin_adder. You will then execute the project using ./master which will call upon bin_adder executable as needed.
+
+DESCRIPTION: This project determine the sum of 64 numbers printed into a file by 2 different methods: 
+
+1. Partition the n integers into n/2 pairs. Use n/2 processes to add together each pair of integers resulting into n/2
+integers. Repeat the method on the n/2 integers and continue until the final result is obtained. (This is a binary tree
+algorithm.)
+
+2. Divide the n integers into n/ log n groups of log n numbers each. Use n/ log n processes, each adding the numbers in one group sequentially. Then add the n/ log n results using method 1.
+
+The program then displays when the process is launched, when it enters it's critical section and when it exits the critical section. The results of what happens in the critical section is displayed in a file named adder_log. The bin_adder process will add the numbers and place them back into shared memory to be used for later processes. it will then wait for a random amount of time, betweem 0 and 3 seconds, enter the critical section wait for another small amount of time then print to the adder_log, then wait for longer and exit the critical section. Apon exiting it wil print when it exits the critcal section. 
+
+ISSUES: I will first state that the project runs perfectly to my understanding of what we were trying to accomplish. I ran into multiple issues along the way some of which stemmed from a missunderstanding of the directions in this project. A few changes were made along the way after some clarification and testing. 
+
+1. The child process does not wait in a loop attempting to gain control of the semaphore. This is unnescessary because the processes is held when it executes sem_wait(). 
+
+2. The process will print its entry and exiting time in the critical section to the stderr since the adder_log filed needed to adhere to a specific prompt. 
+
+3. The time of waiting after entering the critical section and before leaving the critical section was changed to less than 1 second due the fact that it was preventing the program to fully execute in 100 seconds using anything over 64 lines of data in the file (64 lines of data was the minimum requirement). The bin_adder processes will also no longer wait for a random amount of seconds but, instead wait for a predefined amount of time and also sleep after entering and exiting. This creates an enviroment where the processes performance can be consistantly measured rather than having each child process take a random amount of time. 
+
+
+Beyond the discrepancies in the directions I had spent substantial time creating the algorithms to do the summations and shift the data in shared memory. After doing so I realized I did not have the capabilities to limit the amount of concurrent processes being launched so they do not exceed 20. I was able to rework the algorithms after a substantial amount of time to limit the master process to allow it to launch only 10 processes concurrently at a time. This was a number I decided and was not explicitly mentioned in the directions. The program will launch a max of 10 at a time, wait and launch the rest depending on what is left. The project presented a difficult challenge and and was one of the most complex things I have worked on to date. 
+
+
+PERFORMANCE: The first method of summing the numbers takes much longer than the second, this is due to the fact that it must launch many more processes at first which substantially increases the amount of processes it has to launch at the next level. The second method is almost 3x faster when running with 64 numbers in the file. After running the program you can see the time taken by each method in the adder_log. 
