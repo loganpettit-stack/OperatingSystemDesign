@@ -1,4 +1,3 @@
-
 #ifndef SCHEDULER_STRUCTURES_H
 #define SCHEDULER_STRUCTURES_H
 
@@ -9,8 +8,8 @@ typedef struct {
 } Queue;
 
 typedef struct {
-    unsigned int seconds;
-    unsigned int nanoseconds;
+    long seconds;
+    long nanoseconds;
 } MemoryClock;
 
 typedef struct {
@@ -24,6 +23,15 @@ typedef struct {
     int ppid;
     int uId;
     int gId;
+
+    /*Scheduling data*/
+    int readyState;
+    int suspendedState;
+    int blockedState;
+    int quantum;
+    int PCBtableLocation;
+    int priority;
+
 
     /*Scheduling
  *     int priority;

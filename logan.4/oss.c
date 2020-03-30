@@ -13,8 +13,11 @@
 #include <time.h>
 #include <limits.h>
 #include "structures.h"
+#include <sys/msg.h>
 
-#define SHAREDMEMKEY 0x1596
+#define PCBKEY 0x1596
+#define MESSAGEKEY 0x1470
+#define CLOCKKEY 0x3574
 
 
 jmp_buf ctrlCjmp;
@@ -25,16 +28,18 @@ int pcbID;
 int msqID;
 int clocKID;
 
+int runningProcesses = 0;
+int totalProcesses = 0;
 
 /*pointers to shared memory
  *  * structures*/
-MessageQ *msq;
+MessageQ msq;
 MemoryClock *memoryClock;
 ProcessCtrlBlk *pcbTable;
 
-void detachSharedMemory(long *, int, char *);
+void connectToMessageQueue(char *);
 
-long *connectToSharedMemory(int *, char *, int);
+MemoryClock *connectToClock(char *);
 
 pid_t launchProcess(char *, int);
 
@@ -50,33 +55,47 @@ int findTableLocation(const int[], int);
 
 Queue *createQueue(unsigned int);
 
-void enqueue(Queue *queue, int item);
+void enqueue(Queue *, int);
+
+int dequeue(Queue *);
 
 void initializePCB(int);
 
+void scheduleProcess(Queue *, Queue *, Queue *, Queue *, int[], char *);
+
+long getTimeInNanoseconds(long, long);
+
+void addTime(long nanoseconds);
+
+int isEmpty(Queue *);
+
+void dispatchProcess(Queue *, int, int);
+
 int main(int argc, char *argv[]) {
 
-    const unsigned  int maxTimeBetweenNewProcsSecs = 1;
-    const unsigned  int maxTimeBetweenNewProcsNS = 0;
+    const unsigned int maxTimeBetweenNewProcsSecs = 0;
+    const unsigned int maxTimeBetweenNewProcsNS = 100000;
 
     char *executable = strdup(argv[0]);
     char *errorString = strcat(executable, ": Error: ");
     char errorArr[200];
-    FILE *input;
-    FILE *output;
     FILE *outputLog;
-    int lineCounter = 0;
-    int seconds = 3;
-    int statusCode = 0;
-    int childLogicalID = 0;
-    int sharedMemoryId;
+    char *fileName = "output.dat";
+    long initializeScheduler = 5000000000;
+    int seconds = 6;
+    int randomNano;
+    long nextLaunchTime;
     int bitVector[18] = {0};
     int openTableLocation;
-    int runningChildren = 0;
+    int flag = 1;
     int pctLocation = 0;
-    long *sharedMemoryPtr;
     int totalPCBs = 18;
+    int basequantum = 10;
+    long currentTime = 0;
     Queue *queue1 = createQueue(18);
+    Queue *queue2 = createQueue(18);
+    Queue *queue3 = createQueue(18);
+    Queue *blockedQueue = createQueue(18);
 
 
     /*Able to represent process ID*/
@@ -95,74 +114,242 @@ int main(int argc, char *argv[]) {
  *      * but before the wait*/
     if (setjmp(ctrlCjmp) == 1) {
 
+        /*Detach clock from shared memory*/
+        if (shmdt(memoryClock) == -1) {
+            snprintf(errorArr, 200, "\n\n%s Failed to detach the virtual clock from shared memory", errorString);
+            perror(errorArr);
+            exit(EXIT_FAILURE);
+        }
+
+
         /*Detach process control block shared memory*/
-        if(shmdt(pcbTable) == -1){
+        if (shmdt(pcbTable) == -1) {
             snprintf(errorArr, 200, "\n\n%s Failed to detach from proccess control blocks shared memory", errorString);
             perror(errorArr);
             exit(EXIT_FAILURE);
         }
 
-        /*Clear pcb shared memory*/
+        /*Clear shared memory*/
         shmctl(pcbID, IPC_RMID, NULL);
+        shmctl(clocKID, IPC_RMID, NULL);
+        shmctl(msqID, IPC_RMID, NULL);
 
         exit(EXIT_SUCCESS);
     }
+
+
     if (setjmp(timerjmp) == 1) {
+        int process;
 
+        while (!isEmpty(queue1)) {
+            process = dequeue(queue1);
+            pid = pcbTable[process].pid;
+            kill(pid, SIGKILL);
+        }
+
+        /*Detach clock from shared memory*/
+        if (shmdt(memoryClock) == -1) {
+            snprintf(errorArr, 200, "\n\n%s Failed to detach the virtual clock from shared memory", errorString);
+            perror(errorArr);
+            exit(EXIT_FAILURE);
+        }
 
         /*Detach process control block shared memory*/
-        if(shmdt(pcbTable) == -1){
+        if (shmdt(pcbTable) == -1) {
             snprintf(errorArr, 200, "\n\n%s Failed to detach from proccess control blocks shared memory", errorString);
             perror(errorArr);
             exit(EXIT_FAILURE);
         }
 
-        /*Clear pcb shared memory*/
+        /*Clear shared memory*/
         shmctl(pcbID, IPC_RMID, NULL);
+        shmctl(clocKID, IPC_RMID, NULL);
+        shmctl(msqID, IPC_RMID, NULL);
 
         exit(EXIT_SUCCESS);
     }
+
 
     startTimer(seconds);
 
     /*Connect and create pcbtable in shared memory*/
     pcbTable = connectPcb(totalPCBs, errorString);
 
+    /*Connect clock to shared memory*/
+    connectToClock(errorString);
 
-    /*Start launching processes, find an open space in pcb table first*/
-    if((openTableLocation = findTableLocation(bitVector, totalPCBs)) != - 1) {
+    /*Connect message queue*/
+    connectToMessageQueue(errorString);
 
-        printf("open table locations: %d\n", openTableLocation);
+    memoryClock->seconds = 0;
+    memoryClock->nanoseconds = 10;
 
-        /*Launch process*/
-        pid = launchProcess(errorString, openTableLocation);
+    /*Get next random time a process should launch in nanoseconds*/
+    srand(time(0));
+    randomNano = (rand() % maxTimeBetweenNewProcsNS + 1);
+    nextLaunchTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds + randomNano);
 
-        /*Queue it into the first queue*/
-        enqueue(queue1, openTableLocation);
 
-        /*Show that a process is occupying a space in
- *          * the bitvector which will directly relate to the pcb table*/
-        bitVector[openTableLocation] = 1;
+    nextLaunchTime = 0;
+    /*Launch processes until 100 is reached*/
+    while (flag) {
 
-        wait(&statusCode);
+
+
+        currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
+
+        /*Only allow a certian number of concurrent processes*/
+        if (runningProcesses < 18 && currentTime > nextLaunchTime && totalProcesses < 100) {
+
+
+
+            /*Start launching processes, find an open space in pcb table first*/
+            if ((openTableLocation = findTableLocation(bitVector, totalPCBs)) != -1) {
+
+                /*Launch process*/
+                pid = launchProcess(errorString, openTableLocation);
+                runningProcesses += 1;
+                totalProcesses += 1;
+
+                /*Generate next process launch time*/
+                srand(time(0));
+                randomNano = (rand() % maxTimeBetweenNewProcsNS + 1);
+                nextLaunchTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds + randomNano);
+
+                printf("next launch time: %ld\n", nextLaunchTime);
+
+                /*Queue all processes into the first queue*/
+                enqueue(queue1, openTableLocation);
+
+                /*Show that a process is occupying a space in
+ *                  * the bitvector which will directly relate to the pcb table*/
+                bitVector[openTableLocation] = 1;
+
+                printf("\nOSS: generating process with PID: %d, Putting into Queue 1 at time: %ld:%ld totalproccesses: %d.\n",
+                       pid, memoryClock->seconds, memoryClock->nanoseconds, totalProcesses);
+
+            }
+
+        }
+
+        currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
+
+        if (currentTime > initializeScheduler) {
+            scheduleProcess(queue1, queue2, queue3, blockedQueue, bitVector, errorString);
+        }
+
+        printf ("total proc: %d, running proc: %d\n", totalProcesses, runningProcesses);
+
+        if(runningProcesses == 0){
+            flag = 0;
+        }
+
+        addTime(100000);
+
     }
 
 
+    printf("%d", totalProcesses);
 
 
-    /*detach pcb shared memory*/
-    if(shmdt(pcbTable) == -1){
+
+    /*detach structures from shared memory*/
+    if (shmdt(memoryClock) == -1) {
+        snprintf(errorArr, 200, "\n\n%s Failed to detach the virtual clock from shared memory", errorString);
+        perror(errorArr);
+        exit(EXIT_FAILURE);
+    }
+
+
+    if (shmdt(pcbTable) == -1) {
         snprintf(errorArr, 200, "\n\n%s Failed to detach from proccess control blocks shared memory", errorString);
         perror(errorArr);
         exit(EXIT_FAILURE);
     }
 
-    /*Clear pcb shared memory*/
+    /*Clear shared memory*/
+    shmctl(clocKID, IPC_RMID, NULL);
     shmctl(pcbID, IPC_RMID, NULL);
 
+    printf("Clearning message queue");
+    shmctl(msqID, IPC_RMID, NULL);
 
-    startTimer(seconds);
+    return 0;
+}
 
+void scheduleProcess(Queue *q1, Queue *q2, Queue *q3, Queue *bq, int bitVector[], char *errorString) {
+    int statusCode = 0;
+    long quantum = 1000000;
+    int location = 0;
+    char message[20];
+    int processToLaunch = 0;
+    int pid = 0;
+    char errorArr[200];
+    long q1Quantum = quantum;
+    long q2Quantum = quantum * 2;
+    long q3Quantum = quantum * 4;
+    /*Deque process to be scheduled and set the message queue
+ *      * with its pid. */
+    processToLaunch = dequeue(q1);
+    pid = pcbTable[processToLaunch].pid;
+
+    printf("Starting scheduler\n");
+
+    msq.mesq_type = (long) pid;
+
+
+    /*Send time quantum to process*/
+    snprintf(message, 20, "%ld", quantum);
+    strcpy(msq.mesq_text, message);
+    if (msgsnd(msqID, &msq, sizeof(msq), MSG_NOERROR) == -1) {
+        snprintf(errorArr, 200, "%s failed to send message in scheduler", errorString);
+        perror(errorArr);
+        exit(1);
+    }
+
+
+    /*When process sends back */
+    if (msgrcv(msqID, &msq, sizeof(msq), getpid(), MSG_NOERROR) == -1) {
+        snprintf(errorArr, 200, "%s failed to recieve message in scheduler", errorString);
+        perror(errorArr);
+        exit(EXIT_FAILURE);
+    }
+    printf("message from user process: %s\n", msq.mesq_text);
+
+   pid = wait(&statusCode);
+    if (pid > 0) {
+        fprintf(stderr, "Child with PID %ld exited with status 0x%x\n",
+                (long) pid, statusCode);
+        runningProcesses -= 1;
+        bitVector[processToLaunch] = 0;
+    }
+
+
+
+}
+
+/*void dispatchProcess(Queue* queue, int quatum, int location){
+ *
+ * }*/
+
+void addTime(long nanoseconds) {
+    nanoseconds += memoryClock->nanoseconds;
+    if (nanoseconds > 1000000000) {
+        memoryClock->seconds += 1;
+        nanoseconds -= 1000000000;
+        memoryClock->nanoseconds = nanoseconds;
+    } else {
+        memoryClock->nanoseconds += nanoseconds;
+    }
+}
+
+/*Return time in nanoseconds*/
+long getTimeInNanoseconds(long seconds, long nanoseconds) {
+    long secondsToNanoseconds = 0;
+    secondsToNanoseconds = seconds * 1000000000;
+    nanoseconds += secondsToNanoseconds;
+
+    return nanoseconds;
 }
 
 /*Connect to a portion of shared memory for the process control blocks, create enough
@@ -170,16 +357,17 @@ int main(int argc, char *argv[]) {
 ProcessCtrlBlk *connectPcb(int totalpcbs, char *error) {
     char errorArr[200];
 
-    pcbID = shmget(SHAREDMEMKEY, totalpcbs * sizeof(ProcessCtrlBlk), 0777 | IPC_CREAT);
+    pcbID = shmget(PCBKEY, totalpcbs * sizeof(ProcessCtrlBlk), 0777 | IPC_CREAT);
     if (pcbID == -1) {
-        snprintf(errorArr, 200, "\n\n%s PID: %ld Failed to create shared memory space", errorArr);
+        snprintf(errorArr, 200, "\n\n%s PID: %ld Failed to create shared memory space for process control block",
+                 errorArr);
         perror(errorArr);
         exit(EXIT_FAILURE);
     }
 
     pcbTable = shmat(pcbID, NULL, 0);
     if (pcbTable == (void *) -1) {
-        snprintf(errorArr, 200, "\n\n%s PID: %ld Failed to attach to shared memory ", errorArr);
+        snprintf(errorArr, 200, "\n\n%s PID: %ld Failed to attach to shared memory process control block", errorArr);
         perror(errorArr);
         exit(EXIT_FAILURE);
     }
@@ -190,11 +378,11 @@ ProcessCtrlBlk *connectPcb(int totalpcbs, char *error) {
 
 /*Function to find an open location in the bit vector which will correspond to the spot
  *  * in the pcb table*/
-int findTableLocation(const int bitVector[], int totalPCBs){
+int findTableLocation(const int bitVector[], int totalPCBs) {
     int i;
 
-    for(i = 0; i < totalPCBs; i++){
-        if(bitVector[i] == 0){
+    for (i = 0; i < totalPCBs; i++) {
+        if (bitVector[i] == 0) {
             return i;
         }
     }
@@ -203,48 +391,48 @@ int findTableLocation(const int bitVector[], int totalPCBs){
 }
 
 /*Function to connect to shared memory and error check*/
-long *connectToSharedMemory(int *sharedMemoryID, char *error, int lineCount) {
+MemoryClock *connectToClock(char *error) {
     char errorArr[200];
     long *sharedMemoryPtr;
 
     /*Get shared memory Id using shmget*/
-    *sharedMemoryID = shmget(SHAREDMEMKEY, sizeof(int) * lineCount, 0777 | IPC_CREAT);
+    clocKID = shmget(CLOCKKEY, sizeof(memoryClock), 0777 | IPC_CREAT);
 
     /*Error check shmget*/
-    if (sharedMemoryID == (void *) -1) {
-        snprintf(errorArr, 100, "\n\n%s PID: %ld Failed to create shared memory ", error, (long) getpid());
+    if (clocKID == -1) {
+        snprintf(errorArr, 200, "\n\n%s PID: %ld Failed to create shared memory space for clock", error,
+                 (long) getpid());
         perror(errorArr);
         exit(EXIT_FAILURE);
     }
 
 
     /*Attach to shared memory using shmat*/
-    sharedMemoryPtr = shmat(*sharedMemoryID, NULL, 0);
+    memoryClock = shmat(clocKID, NULL, 0);
 
 
     /*Error check shmat*/
-    if (sharedMemoryPtr == (void *) -1) {
-        snprintf(errorArr, 200, "\n\n%s PID: %ld Failed to create shared memory ", error, (long) getpid());
+    if (memoryClock == (void *) -1) {
+        snprintf(errorArr, 200, "\n\n%s PID: %d Failed to attach to shared memory clock", error, getpid());
         perror(errorArr);
         exit(EXIT_FAILURE);
     }
 
-    return sharedMemoryPtr;
+    return memoryClock;
 }
 
 
-/*Function to detach from shared memory and error check*/
-void detachSharedMemory(long *sharedMemoryPtr, int sharedMemoryId, char *error) {
+/*Function to connect the message queue to shared memory*/
+void connectToMessageQueue(char *error) {
     char errorArr[200];
 
-    if (shmdt(sharedMemoryPtr) == -1) {
-        snprintf(errorArr, 200, "\n\n%s PID: %ld Failed to create shared memory ", error, (long) getpid());
+    if ((msqID = msgget(MESSAGEKEY, 0777 | IPC_CREAT)) == -1) {
+        snprintf(errorArr, 200, "\n\n%s Pid: %d Failed to connect to message queue", error, getpid());
         perror(errorArr);
-        exit(EXIT_FAILURE);
+        exit(1);
     }
 
-    /* Clearing shared memory related to clockId */
-    shmctl(sharedMemoryId, IPC_RMID, NULL);
+    printf("message queue connected to\n");
 }
 
 /*Function to launch child processes and return the corresponding pid's*/
@@ -272,26 +460,28 @@ pid_t launchProcess(char *error, int openTableLocation) {
 
         /*executes files, Name of file to be execute, list of args following,
  *          * must be terminated with null*/
-        execl("./userProcess", "userProcess", tableLocationString,  NULL);
+        execl("./userProcess", "userProcess", tableLocationString, NULL);
 
         snprintf(errorArr, 200, "\n\n%s execution of user subprogram failure ", error);
         perror(errorArr);
         exit(EXIT_FAILURE);
-        
+
     } else
         return pid;
 
 }
 
-void initializePCB(int tableLocation){
+void initializePCB(int tableLocation) {
     pcbTable[tableLocation].pid = getpid();
     pcbTable[tableLocation].ppid = getppid();
     pcbTable[tableLocation].uId = getuid();
     pcbTable[tableLocation].gId = getgid();
 
-    printf("oss: Process pid: %d\n ppid: %d\n gid: %d\n uid: %d\n\n",
-           pcbTable[tableLocation].pid, pcbTable[tableLocation].ppid, pcbTable[tableLocation].gId, pcbTable[tableLocation].uId);
+    /* printf("oss: Process pid: %d\n ppid: %d\n gid: %d\n uid: %d\n\n",
+ *             pcbTable[tableLocation].pid, pcbTable[tableLocation].ppid, pcbTable[tableLocation].gId,
+ *                         pcbTable[tableLocation].uId);*/
 }
+
 
 /**Implementation from geeksforgeeks.com**/
 Queue *createQueue(unsigned capacity) {
