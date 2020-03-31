@@ -1,3 +1,4 @@
+
 #ifndef SCHEDULER_STRUCTURES_H
 #define SCHEDULER_STRUCTURES_H
 
@@ -31,6 +32,10 @@ typedef struct {
     int quantum;
     int PCBtableLocation;
     int priority;
+    int job;
+    int cpuTimeUsed;
+    int burstTime;
+    int jobFinished;
 
 
     /*Scheduling
