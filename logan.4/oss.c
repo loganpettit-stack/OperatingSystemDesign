@@ -197,7 +197,6 @@ int main(int argc, char *argv[]) {
     while (flag) {
 
 
-
         currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
 
         /*Only allow a certian number of concurrent processes*/
@@ -236,13 +235,14 @@ int main(int argc, char *argv[]) {
 
         currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
 
+        printf("segfault?");
         if (currentTime > initializeScheduler) {
             scheduleProcess(queue1, queue2, queue3, blockedQueue, bitVector, errorString);
         }
 
-        printf ("total proc: %d, running proc: %d\n", totalProcesses, runningProcesses);
+        printf("total proc: %d, running proc: %d\n", totalProcesses, runningProcesses);
 
-        if(runningProcesses == 0){
+        if (runningProcesses == 0) {
             flag = 0;
         }
 
@@ -297,22 +297,21 @@ void scheduleProcess(Queue *q1, Queue *q2, Queue *q3, Queue *bq, int bitVector[]
     processToLaunch = dequeue(q1);
     pid = pcbTable[processToLaunch].pid;
 
-    int y;
-    for (y = 0; y < 18; y++){
-        printf("bitvector: %d\n", bitVector[y]);
-    }
+    /*int y;
+ *     for (y = 0; y < 18; y++){
+ *             printf("bitvector: %d\n", bitVector[y]);
+ *                 }
+ *                     srand(memoryClock->nanoseconds);
+ *                         int job = (rand() % (upper - lower + 1)) + lower;
+ *                             pcbTable[processToLaunch].job = job;
+ *
+ *                                 printf("\nrandom job is: %d\n", job);*/
 
-    srand(memoryClock->nanoseconds);
-    int job = (rand() % (upper - lower + 1)) + lower;
-    pcbTable[processToLaunch].job = job;
-
-    printf("\nrandom job is: %d\n", job);
 
 
     printf("Starting scheduler for process: %d\n\n\n", pid);
 
     msq.mesq_type = (long) pid;
-
 
     /*Send time quantum to process and signal it to start doing work*/
     snprintf(message, 20, "%ld", quantum);
@@ -341,9 +340,9 @@ void scheduleProcess(Queue *q1, Queue *q2, Queue *q3, Queue *bq, int bitVector[]
  *                                 }*/
 
     /*if process job finished parent signals to kill the process*/
-    if(pcbTable[processToLaunch].jobFinished == 1){
-       /* printf("killing process %d\n", pcbTable[processToLaunch].pid);
- *         kill(pcbTable[processToLaunch].pid, SIGKILL);*/
+    if (pcbTable[processToLaunch].jobFinished == 1) {
+        /* printf("killing process %d\n", pcbTable[processToLaunch].pid);
+ *          kill(pcbTable[processToLaunch].pid, SIGKILL);*/
         pid = wait(&statusCode);
         if (pid > 0) {
             fprintf(stderr, "Child with PID %ld exited with status 0x%x\n",
@@ -352,11 +351,14 @@ void scheduleProcess(Queue *q1, Queue *q2, Queue *q3, Queue *bq, int bitVector[]
         }
         runningProcesses -= 1;
         bitVector[processToLaunch] = 0;
-    } else /*if (pcbTable[processToLaunch].jobType == 2)*/{
+    } else if (pcbTable[processToLaunch].jobType == 1) {
         printf("process not finished requeing\n");
         enqueue(q1, processToLaunch);
+    } else if (pcbTable[processToLaunch].jobType == 2) {
+        enqueue(q1, processToLaunch);
+    } else {
+        enqueue(q1, processToLaunch);
     }
-
 
 
 }
@@ -512,9 +514,9 @@ void initializePCB(int tableLocation) {
     pcbTable[tableLocation].uId = getuid();
     pcbTable[tableLocation].gId = getgid();
 
-   /* printf("oss: Process pid: %d\n ppid: %d\n gid: %d\n uid: %d\n\n",
- *             pcbTable[tableLocation].pid, pcbTable[tableLocation].ppid, pcbTable[tableLocation].gId,
- *                         pcbTable[tableLocation].uId);*/
+    /* printf("oss: Process pid: %d\n ppid: %d\n gid: %d\n uid: %d\n\n",
+ *              pcbTable[tableLocation].pid, pcbTable[tableLocation].ppid, pcbTable[tableLocation].gId,
+ *                           pcbTable[tableLocation].uId);*/
 }
 
 

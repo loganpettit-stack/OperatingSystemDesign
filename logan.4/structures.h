@@ -1,4 +1,3 @@
-
 #ifndef SCHEDULER_STRUCTURES_H
 #define SCHEDULER_STRUCTURES_H
 
@@ -36,6 +35,8 @@ typedef struct {
     int cpuTimeUsed;
     int burstTime;
     int jobFinished;
+    int jobType;
+    int timeToUnblock;
 
 
     /*Scheduling

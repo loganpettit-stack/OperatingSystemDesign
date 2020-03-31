@@ -49,7 +49,6 @@ int main(int argc, char *argv[]){
     int upper = 1;
     int lower = 0;
     srand(getpid());
-    int quantumChoice = (rand() % (upper - lower) + 1);
 
     /*Connect to pcbtable in shared memory*/
     pcbTable = connectPcb(totalPCBs, errorString);
@@ -82,11 +81,44 @@ int main(int argc, char *argv[]){
 
     while(running == 1){
 
+
         /*Get quantum from parent process*/
         quantum = atoi(msq.mesq_text);
-        pcbTable[tableLocation].quantum = quantum;
-        job = pcbTable[tableLocation].job;
 
+        /*Generate random number between 0 and 100 to add probability
+ *          * that a process will terminate*/
+        srand(getpid() * memoryClock->nanoseconds);
+
+        int terminationProbability = (rand() % 100  + 1) ;
+        printf("termination probability: %d\n", terminationProbability);
+
+        /*If the termination probability is greater than 30
+ *          * do not terminate */
+        if(terminationProbability > 30) {
+
+            int quantumChoice = (rand() % 2);
+            printf("quantum choice: %d\n", quantumChoice);
+
+            /*If quantum choice is 0 it uses part of the quantum, if
+ *              * it is 1 then use the full quantum*/
+            if (quantumChoice == 0) {
+                pcbTable[tableLocation].burstTime = (rand() % quantum);
+                pcbTable[tableLocation].quantum = quantum;
+
+                /*Choose a random job between 2 and 3*/
+                job = (rand() % (3 - 2 + 1)) + 2;
+            } else {
+                pcbTable[tableLocation].burstTime = quantum;
+                pcbTable[tableLocation].quantum = quantum;
+                job = 1;
+            }
+        }
+        else {
+            /*process is terminating*/
+            job = 0;
+        }
+
+        printf("\njob choice: %d\n", job);
 
         switch(job){
 
@@ -95,12 +127,19 @@ int main(int argc, char *argv[]){
 
                 /*Give process some amount of burst time since it takes time to decided
  *                  * about termination, give it a random time within its quantum */
+
+                pcbTable[tableLocation].quantum = quantum;
                 pcbTable[tableLocation].burstTime = (rand() % pcbTable[tableLocation].quantum);
                 pcbTable[tableLocation].jobFinished = 1;
+                pcbTable[tableLocation].jobType = 0;
 
                 msq.mesq_type = getppid();
+
                 snprintf(msq.mesq_text, sizeof(msq.mesq_text),
-                        "used a portion of time quantum and terminated" );
+                        "process PID %d used %d of time quantum %d and terminated",
+                        pcbTable[tableLocation].pid,  pcbTable[tableLocation].burstTime, pcbTable[tableLocation].quantum);
+
+
 
                 if(msgsnd(msqID, &msq, sizeof(msq), IPC_NOWAIT) == -1){
                     snprintf(errorArr, 200, "\n%s User failed to send message", errorString);
@@ -112,11 +151,37 @@ int main(int argc, char *argv[]){
                 break;
 
 
-                /*Job where the process runs for only a portion of the time quantum*/
+                /*Job where the process runs for full of the time quantum*/
             case 1:
 
                 pcbTable[tableLocation].jobFinished = 0;
-                pcbTable[tableLocation].burstTime = (rand() % pcbTable[tableLocation].quantum);
+                pcbTable[tableLocation].jobType = 1;
+
+                msq.mesq_type = getppid();
+                snprintf(msq.mesq_text, sizeof(msq.mesq_text),
+                         "process with PID %d used full time quantum of %d\n", pcbTable[tableLocation].pid, quantum);
+
+                if(msgsnd(msqID, &msq, sizeof(msq), IPC_NOWAIT) == -1){
+                    snprintf(errorArr, 200, "\n%s User failed to send message", errorString);
+                    perror(errorArr);
+                    exit(1);
+                }
+
+                /*runs for full time quantum and waits for task from oss*/
+                if(msgrcv(msqID, &msq, sizeof(msq), getpid(), MSG_NOERROR) == -1){
+                    snprintf(errorArr, 200, "\n%s User failed to receive message", errorString);
+                    perror(errorArr);
+                    exit(1);
+                }
+
+                running = 1;
+                break;
+
+                /*Job where process runs for a portion of the time quantum*/
+            case 2:
+
+                pcbTable[tableLocation].jobFinished = 0;
+                pcbTable[tableLocation].jobType = 2;
 
                 msq.mesq_type = getppid();
                 snprintf(msq.mesq_text, sizeof(msq.mesq_text),
@@ -137,20 +202,17 @@ int main(int argc, char *argv[]){
                     exit(1);
                 }
 
-                printf("message recieved from oss do task: %d\n", pcbTable[tableLocation].job);
-
                 running = 1;
                 break;
 
-
-                /*Job where process runs for a full portion of the time quantum*/
-            case 2:
+            case 3:
 
                 pcbTable[tableLocation].jobFinished = 0;
+                pcbTable[tableLocation].jobType = 3;
 
                 msq.mesq_type = getppid();
-                snprintf(msq.mesq_text, sizeof(msq.mesq_text),
-                         "used full time quantum of %d", quantum);
+                snprintf(msq.mesq_text, sizeof(msq.mesq_text), "ran %d of time provided quantum %d and was blocked",
+                        pcbTable[tableLocation].burstTime, quantum);
 
                 if(msgsnd(msqID, &msq, sizeof(msq), IPC_NOWAIT) == -1){
                     snprintf(errorArr, 200, "\n%s User failed to send message", errorString);
@@ -158,17 +220,13 @@ int main(int argc, char *argv[]){
                     exit(1);
                 }
 
-                /*runs for full time quantum and waits for task from oss*/
+                /*runs for a random portion of time quantum and becomes blocked, waits
+ *                  * for oss to move it out of blocked queue and requeue*/
                 if(msgrcv(msqID, &msq, sizeof(msq), getpid(), MSG_NOERROR) == -1){
                     snprintf(errorArr, 200, "\n%s User failed to receive message", errorString);
                     perror(errorArr);
                     exit(1);
                 }
-
-                printf("message recieved from oss do task: %d\n", pcbTable[tableLocation].job);
-
-                running = 1;
-                break;
 
         }
 
