@@ -1,3 +1,4 @@
+
 #ifndef SCHEDULER_STRUCTURES_H
 #define SCHEDULER_STRUCTURES_H
 
@@ -37,33 +38,10 @@ typedef struct {
     int jobFinished;
     int jobType;
     int timeToUnblock;
-
-
-    /*Scheduling
- *     int priority;
- *         int pctLocation;
- *             unsigned int timeCreatedSecs;
- *                 unsigned int timeCreatedNS;
- *                     unsigned int dispatchTime;
- *                         unsigned int lastWaitTimeSecs;
- *                             unsigned int lastWaitTimeNS;
- *                                 unsigned int totalWaitTimeSecs;
- *                                     unsigned int totalWaitTimeNS;
- *                                         unsigned int lastTimeAccessedSecs;
- *                                             unsigned int lastTimeAccessedNS;
- *                                                 unsigned int cpuTimeUsed;
- *                                                     unsigned int systemTimeUsedSecs;
- *                                                         unsigned int systemTimeUsedNS;
- *                                                             unsigned int lastBurstDuration;
- *                                                                 int quantum;
- *                                                                     int task;
- *                                                                         int ready;
- *                                                                             int suspend;
- *                                                                                 int blocked;
- *                                                                                     unsigned int timeToUnblockSecs;
- *                                                                                         unsigned int timeToUnblockNS;
- *                                                                                             int queueLooper;
- *                                                                                                 int completed;*/
+    int processClass;
+    long blockedTime;
+    long seconds;
+    long nanoseconds;
 } ProcessCtrlBlk;
 
 

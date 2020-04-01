@@ -36,6 +36,8 @@ MemoryClock *connectToClock(char *);
 
 void connectToMessageQueue(char *);
 
+long getTimeInNanoseconds(long, long);
+
 int main(int argc, char *argv[]){
 
     int totalPCBs = 18;
@@ -46,9 +48,12 @@ int main(int argc, char *argv[]){
     int running = 1;
     int quantum;
     int job;
-    int upper = 1;
-    int lower = 0;
-    srand(getpid());
+    long r = 0;
+    long s = 0;
+    double p = 0;
+    int percent = 0;
+    long currentTime;
+    srand(time(0));
 
     /*Connect to pcbtable in shared memory*/
     pcbTable = connectPcb(totalPCBs, errorString);
@@ -75,7 +80,7 @@ int main(int argc, char *argv[]){
         exit(EXIT_FAILURE);
     }
 
-    printf("process %d is running at time %ld:%ld\n", getpid(), memoryClock->seconds, memoryClock->nanoseconds);
+    /*printf("process %d is running at time %ld:%ld\n", getpid(), memoryClock->seconds, memoryClock->nanoseconds);*/
 
 
 
@@ -90,26 +95,44 @@ int main(int argc, char *argv[]){
         srand(getpid() * memoryClock->nanoseconds);
 
         int terminationProbability = (rand() % 100  + 1) ;
-        printf("termination probability: %d\n", terminationProbability);
+       /* printf("termination probability: %d\n", terminationProbability);*/
 
         /*If the termination probability is greater than 30
  *          * do not terminate */
         if(terminationProbability > 30) {
 
-            int quantumChoice = (rand() % 2);
-            printf("quantum choice: %d\n", quantumChoice);
+            /*Choose between job 1, 2, or 3*/
+           r = (rand() % (3 + 1));
+           s = (rand() % (1000 + 1));
+          /* printf("r:s %ld:%ld\n", r, s);*/
 
-            /*If quantum choice is 0 it uses part of the quantum, if
- *              * it is 1 then use the full quantum*/
-            if (quantumChoice == 0) {
+
+            /*Depending on what r is depends on what the process will do
+ *              * if it is 3 it will run for a portion of the time quantum
+ *                           * and get preempted, if it is less than 3 it will run for
+ *                                        * a portion of the time quantum and be preempted by a block
+ *                                                     * for r.s seconds , and if it is 1 it will run its full time
+ *                                                                  * quantum and be requeued*/
+            if (r == 3) {
+                p = (rand() % (99 - 1 + 1)) + 1;
+                percent = p;
+                p /= 100;
+                p *= quantum;
+                pcbTable[tableLocation].burstTime = (int) p;
+                pcbTable[tableLocation].quantum = quantum;
+
+                job = 2;
+            }
+            else if (r == 2) {
                 pcbTable[tableLocation].burstTime = (rand() % quantum);
+                pcbTable[tableLocation].seconds = r;
+                pcbTable[tableLocation].nanoseconds = s;
                 pcbTable[tableLocation].quantum = quantum;
-
-                /*Choose a random job between 2 and 3*/
-                job = (rand() % (3 - 2 + 1)) + 2;
-            } else {
+                job = 3;
+            }
+            else {
+                pcbTable[tableLocation].quantum = quantum;
                 pcbTable[tableLocation].burstTime = quantum;
-                pcbTable[tableLocation].quantum = quantum;
                 job = 1;
             }
         }
@@ -118,7 +141,7 @@ int main(int argc, char *argv[]){
             job = 0;
         }
 
-        printf("\njob choice: %d\n", job);
+       /* printf("\njob choice: %d\n", job);*/
 
         switch(job){
 
@@ -136,7 +159,7 @@ int main(int argc, char *argv[]){
                 msq.mesq_type = getppid();
 
                 snprintf(msq.mesq_text, sizeof(msq.mesq_text),
-                        "process PID %d used %d of time quantum %d and terminated",
+                        "Process PID %d used %d of time quantum %d and terminated",
                         pcbTable[tableLocation].pid,  pcbTable[tableLocation].burstTime, pcbTable[tableLocation].quantum);
 
 
@@ -159,7 +182,7 @@ int main(int argc, char *argv[]){
 
                 msq.mesq_type = getppid();
                 snprintf(msq.mesq_text, sizeof(msq.mesq_text),
-                         "process with PID %d used full time quantum of %d\n", pcbTable[tableLocation].pid, quantum);
+                         "Process with PID %d used full time quantum of %d\n", pcbTable[tableLocation].pid, quantum);
 
                 if(msgsnd(msqID, &msq, sizeof(msq), IPC_NOWAIT) == -1){
                     snprintf(errorArr, 200, "\n%s User failed to send message", errorString);
@@ -177,7 +200,8 @@ int main(int argc, char *argv[]){
                 running = 1;
                 break;
 
-                /*Job where process runs for a portion of the time quantum*/
+                /*Job where process runs for a portion of the time quantum or is preempted, and will
+ *                  * run again at the same priority level until they exhaust their full time quantum*/
             case 2:
 
                 pcbTable[tableLocation].jobFinished = 0;
@@ -185,7 +209,8 @@ int main(int argc, char *argv[]){
 
                 msq.mesq_type = getppid();
                 snprintf(msq.mesq_text, sizeof(msq.mesq_text),
-                         "used %d of %d time quantum" , pcbTable[tableLocation].burstTime, quantum);
+                         "Process PID %d used %d ns (%d %%) of %d time quantum" ,
+                         pcbTable[tableLocation].pid, pcbTable[tableLocation].burstTime, percent, quantum);
 
                 if(msgsnd(msqID, &msq, sizeof(msq), IPC_NOWAIT) == -1){
                     snprintf(errorArr, 200, "\n%s User failed to send message", errorString);
@@ -205,14 +230,21 @@ int main(int argc, char *argv[]){
                 running = 1;
                 break;
 
+                /*Job where process runs for a portion of quantum and becomes blocked by I/O */
             case 3:
+
+                currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
 
                 pcbTable[tableLocation].jobFinished = 0;
                 pcbTable[tableLocation].jobType = 3;
 
+
+                /*Give time to be blocked as a random amount of time less than time quantum*/
+                pcbTable[tableLocation].blockedTime = currentTime + pcbTable[tableLocation].burstTime;
+
                 msq.mesq_type = getppid();
-                snprintf(msq.mesq_text, sizeof(msq.mesq_text), "ran %d of time provided quantum %d and was blocked",
-                        pcbTable[tableLocation].burstTime, quantum);
+                snprintf(msq.mesq_text, sizeof(msq.mesq_text), "Process %d ran %d ns of time provided quantum %d and is waiting %ld ns for I/O\n",
+                        pcbTable[tableLocation].pid, pcbTable[tableLocation].burstTime, quantum, (r * 1000) + s);
 
                 if(msgsnd(msqID, &msq, sizeof(msq), IPC_NOWAIT) == -1){
                     snprintf(errorArr, 200, "\n%s User failed to send message", errorString);
@@ -229,19 +261,6 @@ int main(int argc, char *argv[]){
                 }
 
         }
-
-
-
-     /*   msq.mesq_type = getppid();
- *           snprintf(msq.mesq_text, sizeof(msq.mesq_text), "used time quantum and terminated");
- *                   printf("Quantum: %d\n", quantum);
- *
- *                           if(msgsnd(msqID, &msq, sizeof(msq), IPC_NOWAIT) == -1){
- *                                       snprintf(errorArr, 200, "\n\n%s PID: %d Failed to send message", errorString, getpid());
- *                                                   perror(errorArr);
- *                                                               exit(EXIT_FAILURE);
- *                                                                       }
- *                                                                               running = 0; */
 
         if(pcbTable[tableLocation].jobFinished == 1){
             break;
@@ -265,7 +284,7 @@ int main(int argc, char *argv[]){
     }
 
 
-    printf("user process %d terminating\n", getpid());
+   /* printf("user process %d terminating\n", getpid());*/
     exit(0);
 }
 
@@ -276,14 +295,14 @@ ProcessCtrlBlk *connectPcb(int totalpcbs, char *error) {
 
     pcbID = shmget(PCBKEY, totalpcbs * sizeof(ProcessCtrlBlk), 0777 | IPC_CREAT);
     if (pcbID == -1) {
-        snprintf(errorArr, 200, "\n\n%s child PID: %d Failed to create proccess control block space", errorArr, getpid());
+        snprintf(errorArr, 200, "\n\n%s child PID: %d Failed to create proccess control block space", error, getpid());
         perror(errorArr);
         exit(EXIT_FAILURE);
     }
 
     pcbTable = shmat(pcbID, NULL, 0);
     if (pcbTable == (void *) -1) {
-        snprintf(errorArr, 200, "\n\n%s child PID: %d Failed to attach to process control block ", errorArr, getpid());
+        snprintf(errorArr, 200, "\n\n%s child PID: %d Failed to attach to process control block ", error, getpid());
         perror(errorArr);
         exit(EXIT_FAILURE);
     }
@@ -294,7 +313,6 @@ ProcessCtrlBlk *connectPcb(int totalpcbs, char *error) {
 /*Function to connect to shared memory and error check*/
 MemoryClock *connectToClock(char *error) {
     char errorArr[200];
-    long *sharedMemoryPtr;
 
     /*Get shared memory Id using shmget*/
     clocKID = shmget(CLOCKKEY, sizeof(memoryClock), 0777 | IPC_CREAT);
@@ -306,10 +324,8 @@ MemoryClock *connectToClock(char *error) {
         exit(EXIT_FAILURE);
     }
 
-
     /*Attach to shared memory using shmat*/
     memoryClock = shmat(clocKID, NULL, 0);
-
 
     /*Error check shmat*/
     if (memoryClock == (void *) -1) {
@@ -330,5 +346,15 @@ void connectToMessageQueue(char *error) {
         exit(1);
     }
 }
+
+/*Return time in nanoseconds*/
+long getTimeInNanoseconds(long seconds, long nanoseconds) {
+    long secondsToNanoseconds = 0;
+    secondsToNanoseconds = seconds * 1000000000;
+    nanoseconds += secondsToNanoseconds;
+
+    return nanoseconds;
+}
+
 
 
