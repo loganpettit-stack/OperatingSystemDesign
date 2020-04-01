@@ -28,9 +28,16 @@ int pcbID;
 int msqID;
 int clocKID;
 
+long cycles = 0;
+double totalCPUUtilization = 0;
+int totalLaunches = 0;
+double timeWaitedToLaunch = 0;
+int totalBlockedProcesses = 0;
+double blockedWaitTime = 0;
 int runningProcesses = 0;
 int totalProcesses = 0;
 long nextLaunchTime;
+long idleTime;
 
 /*pointers to shared memory
  *  * structures*/
@@ -74,8 +81,8 @@ void dispatchProcess(int, Queue *, Queue *, Queue *, Queue *, Queue *, Queue *, 
 
 int main(int argc, char *argv[]) {
 
-    const unsigned int maxTimeBetweenNewProcsSecs = 0;
-    const unsigned int maxTimeBetweenNewProcsNS = 100000;
+    const unsigned int maxTimeBetweenNewProcsSecs = 1;
+    const unsigned int maxTimeBetweenNewProcsNS = 10000000;
 
     char *executable = strdup(argv[0]);
     char *errorString = strcat(executable, ": Error: ");
@@ -90,8 +97,8 @@ int main(int argc, char *argv[]) {
     int flag = 1;
     int pctLocation = 0;
     int totalPCBs = 18;
-    int basequantum = 10;
     long currentTime = 0;
+    long idleStart = 0;
     Queue *tempQueue = createQueue(18);
     Queue *queue0 = createQueue(18);
     Queue *queue1 = createQueue(18);
@@ -172,6 +179,7 @@ int main(int argc, char *argv[]) {
     }
 
 
+
     startTimer(seconds);
 
     /*Connect and create pcbtable in shared memory*/
@@ -184,7 +192,13 @@ int main(int argc, char *argv[]) {
     connectToMessageQueue(errorString);
 
     memoryClock->seconds = 0;
-    memoryClock->nanoseconds = 10;
+    memoryClock->nanoseconds = 100;
+
+    currentTime = (memoryClock->seconds, memoryClock->nanoseconds);
+    /*get a starting idle time */
+    if(isEmpty(queue0) && isEmpty(queue1) && isEmpty(queue2) && isEmpty(queue3) && isEmpty(blockedQueue)) {
+        idleStart = currentTime;
+    }
 
     /*Get next random time a process should launch in nanoseconds*/
     srand(time(0));
@@ -196,20 +210,18 @@ int main(int argc, char *argv[]) {
     /*Launch processes until 100 is reached*/
     while (flag) {
 
-
         currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
 
        /* printf("Current time: %ld\n", currentTime);*/
         /*Only allow a certian number of concurrent processes*/
         if (runningProcesses < 18 && currentTime > nextLaunchTime && totalProcesses < 100) {
 
-
-
             /*Start launching processes, find an open space in pcb table first*/
             if ((openTableLocation = findTableLocation(bitVector, totalPCBs)) != -1) {
 
                 /*Launch process*/
                 pid = launchProcess(errorString, openTableLocation);
+                pcbTable[openTableLocation].timeWaitedToLaunch = currentTime;
                 runningProcesses += 1;
                 totalProcesses += 1;
 
@@ -230,29 +242,38 @@ int main(int argc, char *argv[]) {
                /* printf("\nOSS: generating process with PID: %d, Putting into Queue 1 at time: %ld:%ld totalproccesses: %d.\n",
  *                        pid, memoryClock->seconds, memoryClock->nanoseconds, totalProcesses);*/
 
+                addTime(100);
             }
-
         }
 
         currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
-
-        if (currentTime > initializeScheduler) {
-            scheduleProcess(tempQueue, queue0, queue1, queue2, queue3, blockedQueue, bitVector, errorString);
+        if(isEmpty(queue0) && isEmpty(queue1) && isEmpty(queue2) && isEmpty(queue3) && isEmpty(blockedQueue)) {
+            idleTime += currentTime - idleStart;
+            idleStart = currentTime;
         }
 
-        /*printf("total proc: %d, running proc: %d\n", totalProcesses, runningProcesses);*/
+       /* printf("\n\n\n\n concurrent procs: %f util: %f  \n\n\n",concurrentProcesses, cpuUtilization);*/
 
-        if (runningProcesses == 0) {
+       /*Let initial processes launch to start system up */
+        if (currentTime > initializeScheduler) {
+            scheduleProcess(tempQueue, queue0, queue1, queue2, queue3, blockedQueue, bitVector, errorString);
+
+            cycles += 1;
+            double concurrentProcesses = runningProcesses;
+            double totalprocs = 18;
+            double cpuUtilization = concurrentProcesses / totalprocs;
+            totalCPUUtilization += cpuUtilization;
+        }
+
+        if (runningProcesses == 0 && totalProcesses == 100) {
             flag = 0;
         }
 
         addTime(100000);
-
     }
 
 
     printf("Program exited after running %d processes\n\n", totalProcesses);
-
 
 
     /*detach structures from shared memory*/
@@ -274,23 +295,47 @@ int main(int argc, char *argv[]) {
     shmctl(pcbID, IPC_RMID, NULL);
     msgctl(msqID, IPC_RMID, NULL);
 
+    int sec = 0;
+    long nsec = 0;
+    double avgwait = blockedWaitTime / totalBlockedProcesses;
+    printf("avgwait: %f blockedWait: %f totalBlocked: %d\n", avgwait, blockedWaitTime, totalBlockedProcesses);
+    if(avgwait > 1000000000){
+        sec = avgwait / 1000000000;
+        nsec = (long)avgwait - (sec * 1000000000);
+    } else {
+        sec = 0;
+        nsec = avgwait; 
+    }
+    printf("Average time a process spent blocked: %d:%ld  \n", sec, nsec);
+
+    avgwait = timeWaitedToLaunch / totalLaunches;
+    printf("avgwait: %f timewaited: %f total launch %d\n", avgwait, timeWaitedToLaunch, totalLaunches);
+    if(avgwait > 1000000000) {
+        sec = avgwait / 1000000000;
+        nsec = (long) avgwait - (sec * 1000000000);
+    }else {
+        sec = 0;
+        nsec = avgwait;
+    }
+    printf("Average time a process waited to be launched: %d:%ld\n", sec, nsec);
+
+    avgwait = idleTime;
+    if(avgwait > 1000000000){
+        sec = avgwait / 1000000000;
+        nsec = (long)avgwait - (sec * 1000000000);
+    }
+    printf("CPU was idle with no processes for: %d:%ld \n", sec, nsec);
+    printf("Average CPU utilization %f%% \n", totalCPUUtilization / cycles * 100);
+
     return 0;
 }
 
 void
 scheduleProcess(Queue *tq, Queue *q0, Queue *q1, Queue *q2, Queue *q3, Queue *bq, int bitVector[], char *errorString) {
-    int statusCode = 0;
     long currentTime;
-    int upper = 2;
-    int lower = 0;
     long quantum = 1000000;
-    int location = 0;
-    char message[20];
-    int processToLaunch = 0;
-    int pid = 0;
     int blockedprocess;
     int processToEvaluate;
-    char errorArr[200];
     long q0Quantum = quantum;
     long q1Quantum = quantum;
     long q2Quantum = quantum / 2;
@@ -310,12 +355,6 @@ scheduleProcess(Queue *tq, Queue *q0, Queue *q1, Queue *q2, Queue *q3, Queue *bq
         }
     }
 
-    /*printf("OSS: Starting scheduler for process: %d\n\n\n", pid);
- *     int u;
- *         for(u = 0; u < 18; u++){
- *                 printf("blocked q: %d\n", bq->array[u]);
- *                     }*/
-
     /*Check if blocked queue times are up and move them
  *      * to the highest priortiy queue*/
     currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
@@ -328,12 +367,18 @@ scheduleProcess(Queue *tq, Queue *q0, Queue *q1, Queue *q2, Queue *q3, Queue *bq
             if(pcbTable[blockedprocess].processClass == 0){
                 printf("OSS: Process %d has became unblocked and is being placed back into queue 0\n",
                         pcbTable[blockedprocess].pid);
+                blockedWaitTime += currentTime - pcbTable[blockedprocess].waitTime;
+                totalBlockedProcesses += 1;
                 enqueue(q0, blockedprocess);
+                addTime(100);
             }
             else {
                 printf("OSS: Process %d has became unblocked and is being placed into queue 1\n",
                        pcbTable[blockedprocess].pid);
+                blockedWaitTime += currentTime - pcbTable[blockedprocess].waitTime;
+                totalBlockedProcesses += 1;
                 enqueue(q1, blockedprocess);
+                addTime(100);
             }
 
             i -= 1;
@@ -341,15 +386,7 @@ scheduleProcess(Queue *tq, Queue *q0, Queue *q1, Queue *q2, Queue *q3, Queue *bq
         i += 1;
     }
 
-
-    /*printf("\n\n");
- *     int m;
- *         for(m = 0; m < 18; m++){
- *                 printf("blocked q: %d\n", bq->array[m]);
- *                     }*/
-
-
-    addTime(100000);
+    addTime(10000);
 
     /*Dispatch processes in queues starting with highest priority
  *      * until they are empty, Break out of loop to re launch a process if
@@ -368,7 +405,7 @@ scheduleProcess(Queue *tq, Queue *q0, Queue *q1, Queue *q2, Queue *q3, Queue *bq
         dispatchProcess(1, q1, q0, q1, q2, q3, bq, bitVector, errorString, q1Quantum);
 
         currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
-        if (runningProcesses < 10 && nextLaunchTime < currentTime) {
+        if (runningProcesses < 5 && nextLaunchTime < currentTime) {
             break;
         }
     }
@@ -377,7 +414,7 @@ scheduleProcess(Queue *tq, Queue *q0, Queue *q1, Queue *q2, Queue *q3, Queue *bq
         dispatchProcess(2, q2, q0, q1, q2, q3, bq, bitVector, errorString, q2Quantum);
 
         currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
-        if (runningProcesses < 10 && nextLaunchTime < currentTime) {
+        if (runningProcesses < 5 && nextLaunchTime < currentTime) {
             break;
         }
     }
@@ -386,7 +423,7 @@ scheduleProcess(Queue *tq, Queue *q0, Queue *q1, Queue *q2, Queue *q3, Queue *bq
         dispatchProcess(3, q3, q0, q1, q2, q3, bq, bitVector, errorString, q3Quantum);
 
         currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
-        if (runningProcesses < 10 && nextLaunchTime < currentTime) {
+        if (runningProcesses < 5 && nextLaunchTime < currentTime) {
             break;
         }
     }
@@ -400,17 +437,28 @@ void dispatchProcess(int Qnum, Queue *dispatchQ, Queue *q0, Queue *q1, Queue *q2
     char errorArr[200];
     char message[20];
     int pid;
+    long currentTime;
     int processToLaunch;
     processToLaunch = dequeue(dispatchQ);
     pid = pcbTable[processToLaunch].pid;
 
+    currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
+
     if(pcbTable[processToLaunch].processClass == 0) {
         printf("OSS: Dispatching real-time process %d from queue %d at time %ld:%ld\n",
                pid, Qnum, memoryClock->seconds, memoryClock->nanoseconds);
+        timeWaitedToLaunch += currentTime - pcbTable[processToLaunch].timeWaitedToLaunch;
+        pcbTable[processToLaunch].timeWaitedToLaunch = currentTime;
+        totalLaunches += 1;
+        addTime(100);
     }
     else {
         printf("OSS: Dispatching user process %d from queue %d at time %ld:%ld\n",
                pid, Qnum, memoryClock->seconds, memoryClock->nanoseconds);
+        timeWaitedToLaunch = currentTime - pcbTable[processToLaunch].timeWaitedToLaunch;
+        pcbTable[processToLaunch].timeWaitedToLaunch = currentTime;
+        totalLaunches += 1;
+        addTime(100);
     }
 
     msq.mesq_type = (long) pid;

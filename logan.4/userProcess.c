@@ -237,6 +237,7 @@ int main(int argc, char *argv[]){
 
                 pcbTable[tableLocation].jobFinished = 0;
                 pcbTable[tableLocation].jobType = 3;
+                pcbTable[tableLocation].waitTime = currentTime;
 
 
                 /*Give time to be blocked as a random amount of time less than time quantum*/

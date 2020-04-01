@@ -42,6 +42,9 @@ typedef struct {
     long blockedTime;
     long seconds;
     long nanoseconds;
+    long waitTime;
+    long timeWaitedToLaunch;
+
 } ProcessCtrlBlk;
 
 
