@@ -19,7 +19,7 @@
 #define MESSAGEKEY 0x1470
 #define CLOCKKEY 0x3574
 
-
+jmp_buf fileLinejmp;
 jmp_buf ctrlCjmp;
 jmp_buf timerjmp;
 
@@ -28,6 +28,9 @@ int pcbID;
 int msqID;
 int clocKID;
 
+int fileFlag = 0;
+char *fileName = "output.dat";
+int lineCount = 0;
 long cycles = 0;
 double totalCPUUtilization = 0;
 int totalLaunches = 0;
@@ -69,7 +72,7 @@ int dequeue(Queue *);
 
 void initializePCB(int);
 
-void scheduleProcess(Queue *, Queue *, Queue *, Queue *, Queue *, Queue *, int[], char *);
+void scheduleProcess(Queue *, Queue *, Queue *, Queue *, Queue *, Queue *, int[], char *, FILE *);
 
 long getTimeInNanoseconds(long, long);
 
@@ -77,7 +80,7 @@ void addTime(long nanoseconds);
 
 int isEmpty(Queue *);
 
-void dispatchProcess(int, Queue *, Queue *, Queue *, Queue *, Queue *, Queue *, int[], char *, long);
+void dispatchProcess(int, Queue *, Queue *, Queue *, Queue *, Queue *, Queue *, int[], char *, long, FILE *);
 
 int main(int argc, char *argv[]) {
 
@@ -88,17 +91,19 @@ int main(int argc, char *argv[]) {
     char *errorString = strcat(executable, ": Error: ");
     char errorArr[200];
     FILE *outputLog;
-    char *fileName = "output.dat";
-    long initializeScheduler = 5000000000;
+    long initializeScheduler = 7000000000;
     int seconds = 3;
     int randomNano;
     int bitVector[18] = {0};
     int openTableLocation;
     int flag = 1;
-    int pctLocation = 0;
+    int sec = 0;
+    long nsec = 0;
+    double avgwait = 0;
     int totalPCBs = 18;
     long currentTime = 0;
     long idleStart = 0;
+    int process = 0;
     Queue *tempQueue = createQueue(18);
     Queue *queue0 = createQueue(18);
     Queue *queue1 = createQueue(18);
@@ -106,6 +111,7 @@ int main(int argc, char *argv[]) {
     Queue *queue3 = createQueue(18);
     Queue *blockedQueue = createQueue(18);
 
+    outputLog = fopen(fileName, "w");
 
     /*Able to represent process ID*/
     pid_t pid = 0;
@@ -118,10 +124,65 @@ int main(int argc, char *argv[]) {
  *      * and handle with timer Handler */
     signal(SIGALRM, timerHandler);
 
-
     /*Jump back to main enviroment where Concurrentchildren are launched
- *      * but before the wait*/
+ *     * but before the wait*/
     if (setjmp(ctrlCjmp) == 1) {
+
+        /*Attempt to output statistics if it ran for long enough*/
+        avgwait = blockedWaitTime / totalBlockedProcesses;
+        if (avgwait > 1000000000) {
+            sec = avgwait / 1000000000;
+            nsec = (long) avgwait - (sec * 1000000000);
+        } else {
+            sec = 0;
+            nsec = (long)avgwait;
+        }
+        fprintf(outputLog, "\n\nAverage time a process spent blocked: %d:%ld  \n", sec, nsec);
+
+        avgwait = timeWaitedToLaunch / totalLaunches;
+        if (avgwait > 1000000000) {
+            sec = (long)avgwait / 1000000000;
+            nsec = (long) avgwait - (sec * 1000000000);
+        } else {
+            sec = 0;
+            nsec = (long)avgwait;
+        }
+        fprintf(outputLog, "Average time a process waited to be launched: %d:%ld\n", sec, nsec);
+
+        avgwait = idleTime;
+        if (avgwait > 1000000000) {
+            sec = avgwait / 1000000000;
+            nsec = (long) avgwait - (sec * 1000000000);
+        }
+        fprintf(outputLog, "CPU was idle with no processes for: %d:%ld \n", sec, nsec);
+        fprintf(outputLog, "Average CPU utilization %f%% \n", totalCPUUtilization / cycles * 100);
+
+        /*Empty all queues*/
+        while(!isEmpty(queue0)){
+            process = dequeue(queue0);
+            pid = pcbTable[process].pid;
+            kill(pid, SIGKILL);
+        }
+        while (!isEmpty(queue1)) {
+            process = dequeue(queue1);
+            pid = pcbTable[process].pid;
+            kill(pid, SIGKILL);
+        }
+        while(!isEmpty(queue2)){
+            process = dequeue(queue2);
+            pid = pcbTable[process].pid;
+            kill(pid, SIGKILL);
+        }
+        while(!isEmpty(queue3)){
+            process = dequeue(queue3);
+            pid = pcbTable[process].pid;
+            kill(pid, SIGKILL);
+        }
+        while(!isEmpty(blockedQueue)){
+            process = dequeue(blockedQueue);
+            pid = pcbTable[process].pid;
+            kill(pid, SIGKILL);
+        }
 
         /*Detach clock from shared memory*/
         if (shmdt(memoryClock) == -1) {
@@ -139,6 +200,91 @@ int main(int argc, char *argv[]) {
         }
 
         /*Clear shared memory*/
+        fclose(outputLog);
+        shmctl(pcbID, IPC_RMID, NULL);
+        shmctl(clocKID, IPC_RMID, NULL);
+        msgctl(msqID, IPC_RMID, NULL);
+
+        exit(EXIT_SUCCESS);
+    }
+
+    if (setjmp(fileLinejmp) == 1) {
+
+        fprintf(stderr, "OSS: log file filled up with over 10000 lines, stopping program\n");
+
+        /*Attempt to output statistics if it ran for long enough*/
+        avgwait = blockedWaitTime / totalBlockedProcesses;
+        if (avgwait > 1000000000) {
+            sec = avgwait / 1000000000;
+            nsec = (long) avgwait - (sec * 1000000000);
+        } else {
+            sec = 0;
+            nsec = (long)avgwait;
+        }
+        fprintf(outputLog, "\n\nAverage time a process spent blocked: %d:%ld  \n", sec, nsec);
+
+        avgwait = timeWaitedToLaunch / totalLaunches;
+        if (avgwait > 1000000000) {
+            sec = (long)avgwait / 1000000000;
+            nsec = (long) avgwait - (sec * 1000000000);
+        } else {
+            sec = 0;
+            nsec = (long)avgwait;
+        }
+        fprintf(outputLog, "Average time a process waited to be launched: %d:%ld\n", sec, nsec);
+
+        avgwait = idleTime;
+        if (avgwait > 1000000000) {
+            sec = avgwait / 1000000000;
+            nsec = (long) avgwait - (sec * 1000000000);
+        }
+        fprintf(outputLog, "CPU was idle with no processes for: %d:%ld \n", sec, nsec);
+        fprintf(outputLog, "Average CPU utilization %f%% \n", totalCPUUtilization / cycles * 100);
+
+        /*Empty all queues*/
+        while(!isEmpty(queue0)){
+            process = dequeue(queue0);
+            pid = pcbTable[process].pid;
+            kill(pid, SIGKILL);
+        }
+        while (!isEmpty(queue1)) {
+            process = dequeue(queue1);
+            pid = pcbTable[process].pid;
+            kill(pid, SIGKILL);
+        }
+        while(!isEmpty(queue2)){
+            process = dequeue(queue2);
+            pid = pcbTable[process].pid;
+            kill(pid, SIGKILL);
+        }
+        while(!isEmpty(queue3)){
+            process = dequeue(queue3);
+            pid = pcbTable[process].pid;
+            kill(pid, SIGKILL);
+        }
+        while(!isEmpty(blockedQueue)){
+            process = dequeue(blockedQueue);
+            pid = pcbTable[process].pid;
+            kill(pid, SIGKILL);
+        }
+
+        /*Detach clock from shared memory*/
+        if (shmdt(memoryClock) == -1) {
+            snprintf(errorArr, 200, "\n\n%s Failed to detach the virtual clock from shared memory", errorString);
+            perror(errorArr);
+            exit(EXIT_FAILURE);
+        }
+
+
+        /*Detach process control block shared memory*/
+        if (shmdt(pcbTable) == -1) {
+            snprintf(errorArr, 200, "\n\n%s Failed to detach from proccess control blocks shared memory", errorString);
+            perror(errorArr);
+            exit(EXIT_FAILURE);
+        }
+
+        /*Clear shared memory*/
+        fclose(outputLog);
         shmctl(pcbID, IPC_RMID, NULL);
         shmctl(clocKID, IPC_RMID, NULL);
         msgctl(msqID, IPC_RMID, NULL);
@@ -147,11 +293,59 @@ int main(int argc, char *argv[]) {
     }
 
 
-    if (setjmp(timerjmp) == 1) {
-        int process;
 
+    if (setjmp(timerjmp) == 1) {
+        avgwait = blockedWaitTime / totalBlockedProcesses;
+        if (avgwait > 1000000000) {
+            sec = avgwait / 1000000000;
+            nsec = (long) avgwait - (sec * 1000000000);
+        } else {
+            sec = 0;
+            nsec = (long)avgwait;
+        }
+        fprintf(outputLog, "\n\nAverage time a process spent blocked: %d:%ld  \n", sec, nsec);
+
+        avgwait = timeWaitedToLaunch / totalLaunches;
+        if (avgwait > 1000000000) {
+            sec = avgwait / 1000000000;
+            nsec = (long) avgwait - (sec * 1000000000);
+        } else {
+            sec = 0;
+            nsec = avgwait;
+        }
+        fprintf(outputLog, "Average time a process waited to be launched: %d:%ld\n", sec, nsec);
+
+        avgwait = idleTime;
+        if (avgwait > 1000000000) {
+            sec = avgwait / 1000000000;
+            nsec = (long) avgwait - (sec * 1000000000);
+        }
+        fprintf(outputLog, "CPU was idle with no processes for: %d:%ld \n", sec, nsec);
+        fprintf(outputLog, "Average CPU utilization %f%% \n", totalCPUUtilization / cycles * 100);
+
+
+        while(!isEmpty(queue0)){
+            process = dequeue(queue0);
+            pid = pcbTable[process].pid;
+            kill(pid, SIGKILL);
+        }
         while (!isEmpty(queue1)) {
             process = dequeue(queue1);
+            pid = pcbTable[process].pid;
+            kill(pid, SIGKILL);
+        }
+        while(!isEmpty(queue2)){
+            process = dequeue(queue2);
+            pid = pcbTable[process].pid;
+            kill(pid, SIGKILL);
+        }
+        while(!isEmpty(queue3)){
+            process = dequeue(queue3);
+            pid = pcbTable[process].pid;
+            kill(pid, SIGKILL);
+        }
+        while(!isEmpty(blockedQueue)){
+            process = dequeue(blockedQueue);
             pid = pcbTable[process].pid;
             kill(pid, SIGKILL);
         }
@@ -171,12 +365,15 @@ int main(int argc, char *argv[]) {
         }
 
         /*Clear shared memory*/
+        fclose(outputLog);
         shmctl(pcbID, IPC_RMID, NULL);
         shmctl(clocKID, IPC_RMID, NULL);
         msgctl(msqID, IPC_RMID, NULL);
 
         exit(EXIT_SUCCESS);
     }
+
+
 
 
 
@@ -196,7 +393,7 @@ int main(int argc, char *argv[]) {
 
     currentTime = (memoryClock->seconds, memoryClock->nanoseconds);
     /*get a starting idle time */
-    if(isEmpty(queue0) && isEmpty(queue1) && isEmpty(queue2) && isEmpty(queue3) && isEmpty(blockedQueue)) {
+    if (isEmpty(queue0) && isEmpty(queue1) && isEmpty(queue2) && isEmpty(queue3) && isEmpty(blockedQueue)) {
         idleStart = currentTime;
     }
 
@@ -212,15 +409,37 @@ int main(int argc, char *argv[]) {
 
         currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
 
-       /* printf("Current time: %ld\n", currentTime);*/
+        /* printf("Current time: %ld\n", currentTime);*/
         /*Only allow a certian number of concurrent processes*/
-        if (runningProcesses < 18 && currentTime > nextLaunchTime && totalProcesses < 100) {
+        if (runningProcesses <= 18 && currentTime > nextLaunchTime && totalProcesses < 100) {
 
             /*Start launching processes, find an open space in pcb table first*/
             if ((openTableLocation = findTableLocation(bitVector, totalPCBs)) != -1) {
 
                 /*Launch process*/
                 pid = launchProcess(errorString, openTableLocation);
+
+                srand(getppid() * memoryClock->nanoseconds);
+
+                int classProbability = (rand() % 100 + 1);
+                /*Basically saying less than 10% of the time we will
+ *                 * have a process be real-time class*/
+                if (classProbability < 20) {
+                    fprintf(outputLog,
+                            "OSS: generated process with PID %d as real-time process and placed it in queue 0 at time %ld:%ld\n",
+                            pcbTable[openTableLocation].pid, memoryClock->seconds, memoryClock->nanoseconds);
+                    lineCount += 1;
+                    pcbTable[openTableLocation].processClass = 0;
+                } else {
+                    fprintf(outputLog,
+                            "OSS: generated process with PID %d as a user process and placed it in queue 1 at time %ld:%ld\n",
+                            pcbTable[openTableLocation].pid, memoryClock->seconds, memoryClock->nanoseconds);
+                    lineCount += 1;
+                    pcbTable[openTableLocation].processClass = 1;
+                }
+
+                usleep(1000);
+
                 pcbTable[openTableLocation].timeWaitedToLaunch = currentTime;
                 runningProcesses += 1;
                 totalProcesses += 1;
@@ -239,24 +458,24 @@ int main(int argc, char *argv[]) {
  *                  * the bitvector which will directly relate to the pcb table*/
                 bitVector[openTableLocation] = 1;
 
-               /* printf("\nOSS: generating process with PID: %d, Putting into Queue 1 at time: %ld:%ld totalproccesses: %d.\n",
- *                        pid, memoryClock->seconds, memoryClock->nanoseconds, totalProcesses);*/
+                /* printf("\nOSS: generating process with PID: %d, Putting into Queue 1 at time: %ld:%ld totalproccesses: %d.\n",
+ *                         pid, memoryClock->seconds, memoryClock->nanoseconds, totalProcesses);*/
 
                 addTime(100);
             }
         }
 
         currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
-        if(isEmpty(queue0) && isEmpty(queue1) && isEmpty(queue2) && isEmpty(queue3) && isEmpty(blockedQueue)) {
+        if (isEmpty(queue0) && isEmpty(queue1) && isEmpty(queue2) && isEmpty(queue3) && isEmpty(blockedQueue)) {
             idleTime += currentTime - idleStart;
             idleStart = currentTime;
         }
 
-       /* printf("\n\n\n\n concurrent procs: %f util: %f  \n\n\n",concurrentProcesses, cpuUtilization);*/
+        /* printf("\n\n\n\n concurrent procs: %f util: %f  \n\n\n",concurrentProcesses, cpuUtilization);*/
 
-       /*Let initial processes launch to start system up */
+        /*Let initial processes launch to start system up */
         if (currentTime > initializeScheduler) {
-            scheduleProcess(tempQueue, queue0, queue1, queue2, queue3, blockedQueue, bitVector, errorString);
+            scheduleProcess(tempQueue, queue0, queue1, queue2, queue3, blockedQueue, bitVector, errorString, outputLog);
 
             cycles += 1;
             double concurrentProcesses = runningProcesses;
@@ -269,11 +488,15 @@ int main(int argc, char *argv[]) {
             flag = 0;
         }
 
+
+        if(lineCount >= 10000){
+            longjmp(fileLinejmp, 1);
+        }
         addTime(100000);
     }
 
 
-    printf("Program exited after running %d processes\n\n", totalProcesses);
+    fprintf(stderr, "Program exited after running %d processes data stored to %s\n\n", totalProcesses, fileName);
 
 
     /*detach structures from shared memory*/
@@ -295,43 +518,43 @@ int main(int argc, char *argv[]) {
     shmctl(pcbID, IPC_RMID, NULL);
     msgctl(msqID, IPC_RMID, NULL);
 
-    int sec = 0;
-    long nsec = 0;
-    double avgwait = blockedWaitTime / totalBlockedProcesses;
-    printf("avgwait: %f blockedWait: %f totalBlocked: %d\n", avgwait, blockedWaitTime, totalBlockedProcesses);
-    if(avgwait > 1000000000){
-        sec = avgwait / 1000000000;
-        nsec = (long)avgwait - (sec * 1000000000);
-    } else {
-        sec = 0;
-        nsec = avgwait; 
-    }
-    printf("Average time a process spent blocked: %d:%ld  \n", sec, nsec);
 
-    avgwait = timeWaitedToLaunch / totalLaunches;
-    printf("avgwait: %f timewaited: %f total launch %d\n", avgwait, timeWaitedToLaunch, totalLaunches);
-    if(avgwait > 1000000000) {
+    avgwait = blockedWaitTime / totalBlockedProcesses;
+    if (avgwait > 1000000000) {
         sec = avgwait / 1000000000;
         nsec = (long) avgwait - (sec * 1000000000);
-    }else {
+    } else {
         sec = 0;
-        nsec = avgwait;
+        nsec = (long)avgwait;
     }
-    printf("Average time a process waited to be launched: %d:%ld\n", sec, nsec);
+    fprintf(outputLog, "\n\nAverage time a process spent blocked: %d:%ld  \n", sec, nsec);
+
+    avgwait = timeWaitedToLaunch / totalLaunches;
+    if (avgwait > 1000000000) {
+        sec = avgwait / 1000000000;
+        nsec = (long) avgwait - (sec * 1000000000);
+    } else {
+        sec = 0;
+        nsec = (long)avgwait;
+    }
+    fprintf(outputLog, "Average time a process waited to be launched: %d:%ld\n", sec, nsec);
 
     avgwait = idleTime;
-    if(avgwait > 1000000000){
+    if (avgwait > 1000000000) {
         sec = avgwait / 1000000000;
-        nsec = (long)avgwait - (sec * 1000000000);
+        nsec = (long) avgwait - (sec * 1000000000);
     }
-    printf("CPU was idle with no processes for: %d:%ld \n", sec, nsec);
-    printf("Average CPU utilization %f%% \n", totalCPUUtilization / cycles * 100);
+    fprintf(outputLog, "CPU was idle with no processes for: %d:%ld \n", sec, nsec);
+    fprintf(outputLog, "Average CPU utilization %f%% \n", totalCPUUtilization / cycles * 100);
+
+    fclose(outputLog);
 
     return 0;
 }
 
 void
-scheduleProcess(Queue *tq, Queue *q0, Queue *q1, Queue *q2, Queue *q3, Queue *bq, int bitVector[], char *errorString) {
+scheduleProcess(Queue *tq, Queue *q0, Queue *q1, Queue *q2, Queue *q3, Queue *bq, int bitVector[], char *errorString,
+                FILE *outputLog) {
     long currentTime;
     long quantum = 1000000;
     int blockedprocess;
@@ -364,17 +587,18 @@ scheduleProcess(Queue *tq, Queue *q0, Queue *q1, Queue *q2, Queue *q3, Queue *bq
         /*printf("Checking blocked process: %d\n", pcbTable[blockedprocess].pid);*/
 
         if (pcbTable[blockedprocess].blockedTime < currentTime) {
-            if(pcbTable[blockedprocess].processClass == 0){
-                printf("OSS: Process %d has became unblocked and is being placed back into queue 0\n",
+            if (pcbTable[blockedprocess].processClass == 0) {
+                fprintf(outputLog, "OSS: Process %d has became unblocked and is being placed back into queue 0\n",
                         pcbTable[blockedprocess].pid);
+                lineCount += 1;
                 blockedWaitTime += currentTime - pcbTable[blockedprocess].waitTime;
                 totalBlockedProcesses += 1;
                 enqueue(q0, blockedprocess);
                 addTime(100);
-            }
-            else {
-                printf("OSS: Process %d has became unblocked and is being placed into queue 1\n",
-                       pcbTable[blockedprocess].pid);
+            } else {
+                fprintf(outputLog, "OSS: Process %d has became unblocked and is being placed into queue 1\n",
+                        pcbTable[blockedprocess].pid);
+                lineCount += 1;
                 blockedWaitTime += currentTime - pcbTable[blockedprocess].waitTime;
                 totalBlockedProcesses += 1;
                 enqueue(q1, blockedprocess);
@@ -392,7 +616,7 @@ scheduleProcess(Queue *tq, Queue *q0, Queue *q1, Queue *q2, Queue *q3, Queue *bq
  *      * until they are empty, Break out of loop to re launch a process if
  *           * concurrent processes falls under 10 finish to keep processes coming into the system*/
     while (!isEmpty(q0)) {
-        dispatchProcess(0, q0, q0, q1, q2, q3, bq, bitVector, errorString, q0Quantum);
+        dispatchProcess(0, q0, q0, q1, q2, q3, bq, bitVector, errorString, q0Quantum, outputLog);
 
 
         currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
@@ -402,7 +626,7 @@ scheduleProcess(Queue *tq, Queue *q0, Queue *q1, Queue *q2, Queue *q3, Queue *bq
     }
 
     while (!isEmpty(q1)) {
-        dispatchProcess(1, q1, q0, q1, q2, q3, bq, bitVector, errorString, q1Quantum);
+        dispatchProcess(1, q1, q0, q1, q2, q3, bq, bitVector, errorString, q1Quantum, outputLog);
 
         currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
         if (runningProcesses < 5 && nextLaunchTime < currentTime) {
@@ -411,7 +635,7 @@ scheduleProcess(Queue *tq, Queue *q0, Queue *q1, Queue *q2, Queue *q3, Queue *bq
     }
 
     while (!isEmpty(q2)) {
-        dispatchProcess(2, q2, q0, q1, q2, q3, bq, bitVector, errorString, q2Quantum);
+        dispatchProcess(2, q2, q0, q1, q2, q3, bq, bitVector, errorString, q2Quantum, outputLog);
 
         currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
         if (runningProcesses < 5 && nextLaunchTime < currentTime) {
@@ -420,7 +644,7 @@ scheduleProcess(Queue *tq, Queue *q0, Queue *q1, Queue *q2, Queue *q3, Queue *bq
     }
 
     while (!isEmpty(q3)) {
-        dispatchProcess(3, q3, q0, q1, q2, q3, bq, bitVector, errorString, q3Quantum);
+        dispatchProcess(3, q3, q0, q1, q2, q3, bq, bitVector, errorString, q3Quantum, outputLog);
 
         currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
         if (runningProcesses < 5 && nextLaunchTime < currentTime) {
@@ -432,7 +656,7 @@ scheduleProcess(Queue *tq, Queue *q0, Queue *q1, Queue *q2, Queue *q3, Queue *bq
 }
 
 void dispatchProcess(int Qnum, Queue *dispatchQ, Queue *q0, Queue *q1, Queue *q2, Queue *q3, Queue *bq, int bitVector[],
-                     char *errorString, long quantum) {
+                     char *errorString, long quantum, FILE *outputLog) {
     int statusCode = 0;
     char errorArr[200];
     char message[20];
@@ -444,17 +668,18 @@ void dispatchProcess(int Qnum, Queue *dispatchQ, Queue *q0, Queue *q1, Queue *q2
 
     currentTime = getTimeInNanoseconds(memoryClock->seconds, memoryClock->nanoseconds);
 
-    if(pcbTable[processToLaunch].processClass == 0) {
-        printf("OSS: Dispatching real-time process %d from queue %d at time %ld:%ld\n",
-               pid, Qnum, memoryClock->seconds, memoryClock->nanoseconds);
+    if (pcbTable[processToLaunch].processClass == 0) {
+        fprintf(outputLog, "OSS: Dispatching real-time process %d from queue %d at time %ld:%ld\n",
+                 pid, Qnum, memoryClock->seconds, memoryClock->nanoseconds);
+        lineCount += 1;
         timeWaitedToLaunch += currentTime - pcbTable[processToLaunch].timeWaitedToLaunch;
         pcbTable[processToLaunch].timeWaitedToLaunch = currentTime;
         totalLaunches += 1;
         addTime(100);
-    }
-    else {
-        printf("OSS: Dispatching user process %d from queue %d at time %ld:%ld\n",
-               pid, Qnum, memoryClock->seconds, memoryClock->nanoseconds);
+    } else {
+        fprintf(outputLog, "OSS: Dispatching user process %d from queue %d at time %ld:%ld\n",
+                 pid, Qnum, memoryClock->seconds, memoryClock->nanoseconds);
+        lineCount += 1;
         timeWaitedToLaunch = currentTime - pcbTable[processToLaunch].timeWaitedToLaunch;
         pcbTable[processToLaunch].timeWaitedToLaunch = currentTime;
         totalLaunches += 1;
@@ -480,18 +705,16 @@ void dispatchProcess(int Qnum, Queue *dispatchQ, Queue *q0, Queue *q1, Queue *q2
         exit(EXIT_FAILURE);
     }
 
-    printf("OSS: %s\n", msq.mesq_text);
+
+
+    fprintf(outputLog, "OSS: %s\n", msq.mesq_text);
+    lineCount += 1;
 
 
 
     /*if process job finished parent signals to kill the process*/
     if (pcbTable[processToLaunch].jobFinished == 1) {
         pid = wait(&statusCode);
-        if (pid > 0) {
-           /* fprintf(stderr,
- *                     "Child with PID %ld exited with status 0x%x\n",
- *                                         (long) pid, statusCode);*/
-        }
 
         runningProcesses -= 1;
         bitVector[processToLaunch] = 0;
@@ -503,13 +726,16 @@ void dispatchProcess(int Qnum, Queue *dispatchQ, Queue *q0, Queue *q1, Queue *q2
  *          * into the next lower queue or if it is a real-time
  *                   * process requeue to q0*/
         if (Qnum == 0) {
-            printf("OSS: process with PID %d being requeued to queue 0\n", pcbTable[processToLaunch].pid);
+            fprintf(outputLog, "OSS: process with PID %d being requeued to queue 0\n", pcbTable[processToLaunch].pid);
+            lineCount += 1;
             enqueue(q0, processToLaunch);
         } else if (Qnum == 1) {
-            printf("OSS: process with PID %d being requeued to queue 2\n", pcbTable[processToLaunch].pid);
+            fprintf(outputLog, "OSS: process with PID %d being requeued to queue 2\n", pcbTable[processToLaunch].pid);
+            lineCount += 1;
             enqueue(q2, processToLaunch);
         } else {
-            printf("OSS: process with PID %d being requeued to queue 3\n", pcbTable[processToLaunch].pid);
+            fprintf(outputLog, "OSS: process with PID %d being requeued to queue 3\n", pcbTable[processToLaunch].pid);
+            lineCount += 1;
             enqueue(q3, processToLaunch);
         }
 
@@ -518,24 +744,34 @@ void dispatchProcess(int Qnum, Queue *dispatchQ, Queue *q0, Queue *q1, Queue *q2
         /*Process has been preempted and will go back to its same queue to be
  *          * relaunched and finish its full quantum at the same priority*/
         if (Qnum == 0) {
-            printf("OSS: Process with PID %d was preempted and replaced back in queue 0\n", pcbTable[processToLaunch].pid);
+            fprintf(outputLog, "OSS: Process with PID %d was preempted and replaced back in queue 0\n",
+                    pcbTable[processToLaunch].pid);
+            lineCount += 1;
             enqueue(q0, processToLaunch);
         } else if (Qnum == 1) {
-            printf("OSS: Process with PID %d was preempted and replaced back in queue 1\n", pcbTable[processToLaunch].pid);
+            fprintf(outputLog, "OSS: Process with PID %d was preempted and replaced back in queue 1\n",
+                    pcbTable[processToLaunch].pid);
+            lineCount += 1;
             enqueue(q1, processToLaunch);
         } else if (Qnum == 2) {
-            printf("OSS: Process with PID %d was preempted and replaced back in queue 2\n", pcbTable[processToLaunch].pid);
+            fprintf(outputLog, "OSS: Process with PID %d was preempted and replaced back in queue 2\n",
+                    pcbTable[processToLaunch].pid);
+            lineCount += 1;
             enqueue(q2, processToLaunch);
         } else if (Qnum == 3) {
-            printf("OSS: Process with PID %d was preempted and replaced back in queue 3\n", pcbTable[processToLaunch].pid);
+            fprintf(outputLog, "OSS: Process with PID %d was preempted and replaced back in queue 3\n",
+                    pcbTable[processToLaunch].pid);
+            lineCount += 1;
             enqueue(q3, processToLaunch);
         }
 
     } else {
         /*The process has ran for a portion of its quantum and has become blocked
  *          * Place in the blocked queue until for a certain amount of time.*/
-        printf("OSS: Process with PID %d was blocked and being placed in the blocked queue\n", pcbTable[processToLaunch].pid);
+        fprintf(outputLog, "OSS: Process with PID %d was blocked and being placed in the blocked queue\n",
+                pcbTable[processToLaunch].pid);
         enqueue(bq, processToLaunch);
+        lineCount += 1;
     }
 
     addTime(10000);
@@ -666,7 +902,6 @@ pid_t launchProcess(char *error, int openTableLocation) {
     if (pid == 0) {
         /*Set initial values of process control block of process*/
         initializePCB(openTableLocation);
-        usleep(500);
 
         /*executes files, Name of file to be execute, list of args following,
  *          * must be terminated with null*/
@@ -677,7 +912,7 @@ pid_t launchProcess(char *error, int openTableLocation) {
         exit(EXIT_FAILURE);
 
     } else {
-        usleep(500);
+        usleep(5000);
         return pid;
     }
 
@@ -689,26 +924,6 @@ void initializePCB(int tableLocation) {
     pcbTable[tableLocation].uId = getuid();
     pcbTable[tableLocation].gId = getgid();
 
-    srand(getppid() * memoryClock->nanoseconds);
-
-    int classProbability = (rand() % 100 + 1);
-    /*printf("process class probability: %d\n", classProbability);*/
-
-    /*Basically saying less than 10% of the time we will
- *      * have a process be real-time class*/
-    if (classProbability < 20) {
-        pcbTable[tableLocation].processClass = 0;
-        printf("OSS: generated process with PID %d as real-time process and placed it in queue 0 at time %ld:%ld\n",
-                getpid(), memoryClock->seconds, memoryClock->nanoseconds);
-    } else {
-        printf("OSS: generated process with PID %d as a user process and placed it in queue 1 at time %ld:%ld\n",
-                getpid(), memoryClock->seconds, memoryClock->nanoseconds);
-        pcbTable[tableLocation].processClass = 1;
-    }
-
-    /* printf("oss: Process pid: %d\n ppid: %d\n gid: %d\n uid: %d\n\n",
- *              pcbTable[tableLocation].pid, pcbTable[tableLocation].ppid, pcbTable[tableLocation].gId,
- *                           pcbTable[tableLocation].uId);*/
 }
 
 
@@ -737,7 +952,7 @@ void enqueue(Queue *queue, int item) {
     queue->array[queue->rear] = item;
     queue->size = queue->size + 1;
 
-   /* printf("%d enqueued to queue\n", pcbTable[item].pid);*/
+    /* printf("%d enqueued to queue\n", pcbTable[item].pid);*/
 }
 
 /*Function to remove an item from queue.

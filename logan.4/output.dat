@@ -1,0 +1,1388 @@
+OSS: generated process with PID 24646 as a user process and placed it in queue 1 at time 0:100
+OSS: generated process with PID 24647 as a user process and placed it in queue 1 at time 0:3109600
+OSS: generated process with PID 24648 as a user process and placed it in queue 1 at time 0:12538600
+OSS: generated process with PID 24649 as real-time process and placed it in queue 0 at time 0:50254600
+OSS: generated process with PID 24650 as a user process and placed it in queue 1 at time 0:201118600
+OSS: generated process with PID 24651 as a user process and placed it in queue 1 at time 0:804574600
+OSS: generated process with PID 24652 as a user process and placed it in queue 1 at time 1:609249300
+OSS: generated process with PID 24653 as a user process and placed it in queue 1 at time 2:218598700
+OSS: generated process with PID 24654 as a user process and placed it in queue 1 at time 2:874495000
+OSS: generated process with PID 24655 as a user process and placed it in queue 1 at time 3:749090100
+OSS: generated process with PID 24656 as a user process and placed it in queue 1 at time 4:498280300
+OSS: generated process with PID 24657 as a user process and placed it in queue 1 at time 4:1993221400
+OSS: generated process with PID 24658 as a user process and placed it in queue 1 at time 5:1986543000
+OSS: generated process with PID 24659 as real-time process and placed it in queue 0 at time 6:1973186200
+OSS: Dispatching real-time process 24649 from queue 0 at time 7:1946382600
+OSS: Process PID 24649 used 494939 of time quantum 1000000 and terminated
+
+OSS: Dispatching real-time process 24659 from queue 0 at time 8:1892775400
+OSS: Process 24659 ran 943114 ns of time provided quantum 1000000 and is waiting 2220 ns for I/O
+
+OSS: Process with PID 24659 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24646 from queue 1 at time 9:1785561000
+OSS: Process with PID 24646 used full time quantum of 1000000
+
+OSS: process with PID 24646 being requeued to queue 2
+OSS: Dispatching user process 24647 from queue 1 at time 10:1571132200
+OSS: Process 24647 ran 40124 ns of time provided quantum 1000000 and is waiting 2538 ns for I/O
+
+OSS: Process with PID 24647 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24648 from queue 1 at time 11:1142274600
+OSS: Process 24648 ran 393666 ns of time provided quantum 1000000 and is waiting 2493 ns for I/O
+
+OSS: Process with PID 24648 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24650 from queue 1 at time 12:284559400
+OSS: Process PID 24650 used 360000 ns (36 %) of 1000000 time quantum
+OSS: Process with PID 24650 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24651 from queue 1 at time 12:1138247800
+OSS: Process PID 24651 used 980000 ns (98 %) of 1000000 time quantum
+OSS: Process with PID 24651 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24652 from queue 1 at time 13:276505800
+OSS: Process with PID 24652 used full time quantum of 1000000
+
+OSS: process with PID 24652 being requeued to queue 2
+OSS: Dispatching user process 24653 from queue 1 at time 13:1106033400
+OSS: Process with PID 24653 used full time quantum of 1000000
+
+OSS: process with PID 24653 being requeued to queue 2
+OSS: Dispatching user process 24654 from queue 1 at time 14:212077000
+OSS: Process PID 24654 used 10000 ns (1 %) of 1000000 time quantum
+OSS: Process with PID 24654 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24655 from queue 1 at time 14:848318200
+OSS: Process with PID 24655 used full time quantum of 1000000
+
+OSS: process with PID 24655 being requeued to queue 2
+OSS: Dispatching user process 24656 from queue 1 at time 15:696646500
+OSS: Process 24656 ran 638005 ns of time provided quantum 1000000 and is waiting 2303 ns for I/O
+
+OSS: Process with PID 24656 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24657 from queue 1 at time 16:393303100
+OSS: Process PID 24657 used 315807 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24658 from queue 1 at time 16:1573222600
+OSS: Process with PID 24658 used full time quantum of 1000000
+
+OSS: process with PID 24658 being requeued to queue 2
+OSS: Dispatching user process 24650 from queue 1 at time 17:1146455400
+OSS: Process 24650 ran 443970 ns of time provided quantum 1000000 and is waiting 2861 ns for I/O
+
+OSS: Process with PID 24650 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24651 from queue 1 at time 18:292921000
+OSS: Process PID 24651 used 790000 ns (79 %) of 1000000 time quantum
+OSS: Process with PID 24651 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24654 from queue 1 at time 18:1171694200
+OSS: Process 24654 ran 653703 ns of time provided quantum 1000000 and is waiting 2705 ns for I/O
+
+OSS: Process with PID 24654 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24651 from queue 1 at time 19:343398600
+OSS: Process PID 24651 used 530000 ns (53 %) of 1000000 time quantum
+OSS: Process with PID 24651 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24651 from queue 1 at time 19:1373604600
+OSS: Process 24651 ran 766883 ns of time provided quantum 1000000 and is waiting 2028 ns for I/O
+
+OSS: Process with PID 24651 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24646 from queue 2 at time 20:747219400
+OSS: Process PID 24646 used 240000 ns (48 %) of 500000 time quantum
+OSS: Process with PID 24646 was preempted and replaced back in queue 2
+OSS: Dispatching user process 24652 from queue 2 at time 21:494448900
+OSS: Process PID 24652 used 499580 of time quantum 500000 and terminated
+
+OSS: Dispatching user process 24653 from queue 2 at time 21:1977805800
+OSS: Process with PID 24653 used full time quantum of 500000
+
+OSS: process with PID 24653 being requeued to queue 3
+OSS: Dispatching user process 24655 from queue 2 at time 22:1955621800
+OSS: Process 24655 ran 299747 ns of time provided quantum 500000 and is waiting 2455 ns for I/O
+
+OSS: Process with PID 24655 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24658 from queue 2 at time 23:1911253800
+OSS: Process 24658 ran 40986 ns of time provided quantum 500000 and is waiting 2662 ns for I/O
+
+OSS: Process with PID 24658 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24646 from queue 2 at time 24:1822517800
+OSS: Process with PID 24646 used full time quantum of 500000
+
+OSS: process with PID 24646 being requeued to queue 3
+OSS: Dispatching user process 24653 from queue 3 at time 25:1645045800
+OSS: Process PID 24653 used 5726 of time quantum 250000 and terminated
+
+OSS: Dispatching user process 24646 from queue 3 at time 26:1290101800
+OSS: Process with PID 24646 used full time quantum of 250000
+
+OSS: process with PID 24646 being requeued to queue 3
+OSS: Dispatching user process 24646 from queue 3 at time 27:580213800
+OSS: Process PID 24646 used 205000 ns (82 %) of 250000 time quantum
+OSS: Process with PID 24646 was preempted and replaced back in queue 3
+OSS: Dispatching user process 24646 from queue 3 at time 28:160437700
+OSS: Process with PID 24646 used full time quantum of 250000
+
+OSS: process with PID 24646 being requeued to queue 3
+OSS: Dispatching user process 24646 from queue 3 at time 28:641761000
+OSS: Process 24646 ran 158009 ns of time provided quantum 250000 and is waiting 2999 ns for I/O
+
+OSS: Process with PID 24646 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24660 as a user process and placed it in queue 1 at time 29:567164200
+OSS: Process 24659 has became unblocked and is being placed back into queue 0
+OSS: Process 24647 has became unblocked and is being placed into queue 1
+OSS: Process 24648 has became unblocked and is being placed into queue 1
+OSS: Process 24656 has became unblocked and is being placed into queue 1
+OSS: Process 24650 has became unblocked and is being placed into queue 1
+OSS: Process 24654 has became unblocked and is being placed into queue 1
+OSS: Process 24651 has became unblocked and is being placed into queue 1
+OSS: Process 24655 has became unblocked and is being placed into queue 1
+OSS: Process 24658 has became unblocked and is being placed into queue 1
+OSS: Process 24646 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24659 from queue 0 at time 32:388160400
+OSS: Process 24659 ran 828212 ns of time provided quantum 1000000 and is waiting 2985 ns for I/O
+
+OSS: Process with PID 24659 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24660 from queue 1 at time 32:1552651800
+OSS: Process 24660 ran 402093 ns of time provided quantum 1000000 and is waiting 2315 ns for I/O
+
+OSS: Process with PID 24660 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24647 from queue 1 at time 33:1105313800
+OSS: Process with PID 24647 used full time quantum of 1000000
+
+OSS: process with PID 24647 being requeued to queue 2
+OSS: Dispatching user process 24648 from queue 1 at time 34:210637800
+OSS: Process PID 24648 used 411666 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24656 from queue 1 at time 34:842561400
+OSS: Process 24656 ran 383886 ns of time provided quantum 1000000 and is waiting 2481 ns for I/O
+
+OSS: Process with PID 24656 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24650 from queue 1 at time 35:685132900
+OSS: Process PID 24650 used 299 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24654 from queue 1 at time 36:370275900
+OSS: Process with PID 24654 used full time quantum of 1000000
+
+OSS: process with PID 24654 being requeued to queue 2
+OSS: Dispatching user process 24651 from queue 1 at time 36:1481113800
+OSS: Process 24651 ran 812534 ns of time provided quantum 1000000 and is waiting 2470 ns for I/O
+
+OSS: Process with PID 24651 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24655 from queue 1 at time 37:962237800
+OSS: Process with PID 24655 used full time quantum of 1000000
+
+OSS: process with PID 24655 being requeued to queue 2
+OSS: Dispatching user process 24658 from queue 1 at time 38:924485700
+OSS: Process with PID 24658 used full time quantum of 1000000
+
+OSS: process with PID 24658 being requeued to queue 2
+OSS: Dispatching user process 24646 from queue 1 at time 39:848981500
+OSS: Process 24646 ran 169661 ns of time provided quantum 1000000 and is waiting 2129 ns for I/O
+
+OSS: Process with PID 24646 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24647 from queue 2 at time 40:697973100
+OSS: Process 24647 ran 391937 ns of time provided quantum 500000 and is waiting 2944 ns for I/O
+
+OSS: Process with PID 24647 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24654 from queue 2 at time 41:395956300
+OSS: Process 24654 ran 360785 ns of time provided quantum 500000 and is waiting 2523 ns for I/O
+
+OSS: Process with PID 24654 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24655 from queue 2 at time 41:1583835400
+OSS: Process PID 24655 used 383358 of time quantum 500000 and terminated
+
+OSS: Dispatching user process 24658 from queue 2 at time 42:1167681000
+OSS: Process PID 24658 used 425000 ns (85 %) of 500000 time quantum
+OSS: Process with PID 24658 was preempted and replaced back in queue 2
+OSS: Dispatching user process 24658 from queue 2 at time 43:335372200
+OSS: Process 24658 ran 6621 ns of time provided quantum 500000 and is waiting 2764 ns for I/O
+
+OSS: Process with PID 24658 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24661 as a user process and placed it in queue 1 at time 44:341599000
+OSS: Process 24659 has became unblocked and is being placed back into queue 0
+OSS: Process 24660 has became unblocked and is being placed into queue 1
+OSS: Process 24656 has became unblocked and is being placed into queue 1
+OSS: Process 24651 has became unblocked and is being placed into queue 1
+OSS: Process 24646 has became unblocked and is being placed into queue 1
+OSS: Process 24647 has became unblocked and is being placed into queue 1
+OSS: Process 24654 has became unblocked and is being placed into queue 1
+OSS: Process 24658 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24659 from queue 0 at time 47:1724698800
+OSS: Process with PID 24659 used full time quantum of 1000000
+
+OSS: process with PID 24659 being requeued to queue 0
+OSS: Dispatching user process 24661 from queue 1 at time 48:1449407800
+OSS: Process with PID 24661 used full time quantum of 1000000
+
+OSS: process with PID 24661 being requeued to queue 2
+OSS: Dispatching user process 24660 from queue 1 at time 49:898825800
+OSS: Process PID 24660 used 170906 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24656 from queue 1 at time 50:797661700
+OSS: Process PID 24656 used 516906 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24651 from queue 1 at time 51:595333500
+OSS: Process PID 24651 used 685600 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24646 from queue 1 at time 52:190677100
+OSS: Process 24646 ran 179708 ns of time provided quantum 1000000 and is waiting 2504 ns for I/O
+
+OSS: Process with PID 24646 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24647 from queue 1 at time 52:762718600
+OSS: Process with PID 24647 used full time quantum of 1000000
+
+OSS: process with PID 24647 being requeued to queue 2
+OSS: Dispatching user process 24654 from queue 1 at time 53:525447300
+OSS: Process with PID 24654 used full time quantum of 1000000
+
+OSS: process with PID 24654 being requeued to queue 2
+OSS: Dispatching user process 24658 from queue 1 at time 54:50904700
+OSS: Process PID 24658 used 751281 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24661 from queue 2 at time 54:203629000
+OSS: Process PID 24661 used 134858 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24662 as a user process and placed it in queue 1 at time 54:1629152400
+OSS: Process 24646 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24659 from queue 0 at time 56:258315100
+OSS: Process PID 24659 used 20000 ns (2 %) of 1000000 time quantum
+OSS: Process with PID 24659 was preempted and replaced back in queue 0
+OSS: Dispatching user process 24662 from queue 1 at time 56:1033270600
+OSS: Process PID 24662 used 770000 ns (77 %) of 1000000 time quantum
+OSS: Process with PID 24662 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24646 from queue 1 at time 57:66551400
+OSS: Process with PID 24646 used full time quantum of 1000000
+
+OSS: process with PID 24646 being requeued to queue 2
+OSS: Dispatching user process 24662 from queue 1 at time 57:266215800
+OSS: Process 24662 ran 262358 ns of time provided quantum 1000000 and is waiting 2893 ns for I/O
+
+OSS: Process with PID 24662 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24647 from queue 2 at time 57:1064873400
+OSS: Process with PID 24647 used full time quantum of 500000
+
+OSS: process with PID 24647 being requeued to queue 3
+OSS: Dispatching user process 24654 from queue 2 at time 58:129757000
+OSS: Process PID 24654 used 245000 ns (49 %) of 500000 time quantum
+OSS: Process with PID 24654 was preempted and replaced back in queue 2
+OSS: Dispatching user process 24646 from queue 2 at time 58:519038200
+OSS: Process PID 24646 used 74146 of time quantum 500000 and terminated
+
+OSS: Dispatching user process 24647 from queue 3 at time 59:38086500
+OSS: Process with PID 24647 used full time quantum of 250000
+
+OSS: process with PID 24647 being requeued to queue 3
+OSS: generated process with PID 24663 as real-time process and placed it in queue 0 at time 59:304812400
+OSS: Process 24662 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24659 from queue 0 at time 60:219259900
+OSS: Process PID 24659 used 806015 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24662 from queue 1 at time 60:877049800
+OSS: Process PID 24662 used 254059 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24654 from queue 2 at time 61:754109700
+OSS: Process PID 24654 used 130000 ns (26 %) of 500000 time quantum
+OSS: Process with PID 24654 was preempted and replaced back in queue 2
+OSS: Dispatching user process 24647 from queue 3 at time 62:508229500
+OSS: Process PID 24647 used 32235 of time quantum 250000 and terminated
+
+OSS: generated process with PID 24664 as a user process and placed it in queue 1 at time 63:33038200
+OSS: Dispatching real-time process 24663 from queue 0 at time 63:132163000
+OSS: Process with PID 24663 used full time quantum of 1000000
+
+OSS: process with PID 24663 being requeued to queue 0
+OSS: Dispatching user process 24664 from queue 1 at time 63:528662200
+OSS: Process 24664 ran 352398 ns of time provided quantum 1000000 and is waiting 2236 ns for I/O
+
+OSS: Process with PID 24664 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24654 from queue 2 at time 64:57334500
+OSS: Process PID 24654 used 80456 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24665 as a user process and placed it in queue 1 at time 64:458796400
+OSS: Process 24664 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24663 from queue 0 at time 65:835195900
+OSS: Process with PID 24663 used full time quantum of 1000000
+
+OSS: process with PID 24663 being requeued to queue 0
+OSS: Dispatching user process 24665 from queue 1 at time 66:670401900
+OSS: Process with PID 24665 used full time quantum of 1000000
+
+OSS: process with PID 24665 being requeued to queue 2
+OSS: Dispatching user process 24665 from queue 2 at time 67:340813900
+OSS: Process PID 24665 used 404214 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24666 as a user process and placed it in queue 1 at time 68:363365800
+OSS: Dispatching real-time process 24663 from queue 0 at time 68:1453473400
+OSS: Process with PID 24663 used full time quantum of 1000000
+
+OSS: process with PID 24663 being requeued to queue 0
+OSS: Dispatching user process 24664 from queue 1 at time 69:906957000
+OSS: Process PID 24664 used 805904 of time quantum 1000000 and terminated
+
+OSS: generated process with PID 24667 as a user process and placed it in queue 1 at time 70:1627948200
+OSS: Dispatching real-time process 24663 from queue 0 at time 71:1255906600
+OSS: Process PID 24663 used 268676 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24666 from queue 1 at time 72:511823400
+OSS: Process with PID 24666 used full time quantum of 1000000
+
+OSS: process with PID 24666 being requeued to queue 2
+OSS: Dispatching user process 24666 from queue 2 at time 73:23656900
+OSS: Process PID 24666 used 205000 ns (41 %) of 500000 time quantum
+OSS: Process with PID 24666 was preempted and replaced back in queue 2
+OSS: generated process with PID 24668 as a user process and placed it in queue 1 at time 73:189375600
+OSS: Dispatching user process 24667 from queue 1 at time 73:757512600
+OSS: Process PID 24667 used 84809 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24666 from queue 2 at time 74:515035300
+OSS: Process 24666 ran 246754 ns of time provided quantum 500000 and is waiting 2936 ns for I/O
+
+OSS: Process with PID 24666 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24669 as a user process and placed it in queue 1 at time 75:60261400
+OSS: Process 24666 has became unblocked and is being placed into queue 1
+OSS: Dispatching user process 24668 from queue 1 at time 75:482101800
+OSS: Process PID 24668 used 800000 ns (80 %) of 1000000 time quantum
+OSS: Process with PID 24668 was preempted and replaced back in queue 1
+OSS: generated process with PID 24670 as a user process and placed it in queue 1 at time 76:928517400
+OSS: Dispatching user process 24669 from queue 1 at time 77:857044900
+OSS: Process PID 24669 used 861195 of time quantum 1000000 and terminated
+
+OSS: generated process with PID 24671 as real-time process and placed it in queue 0 at time 78:1428299800
+OSS: Dispatching real-time process 24671 from queue 0 at time 79:856609800
+OSS: Process PID 24671 used 673180 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24666 from queue 1 at time 80:713229700
+OSS: Process PID 24666 used 938565 of time quantum 1000000 and terminated
+
+OSS: generated process with PID 24672 as real-time process and placed it in queue 0 at time 81:853039000
+OSS: Dispatching real-time process 24672 from queue 0 at time 82:706088100
+OSS: Process PID 24672 used 640000 ns (64 %) of 1000000 time quantum
+OSS: Process with PID 24672 was preempted and replaced back in queue 0
+OSS: Dispatching user process 24668 from queue 1 at time 83:412186300
+OSS: Process PID 24668 used 480000 ns (48 %) of 1000000 time quantum
+OSS: Process with PID 24668 was preempted and replaced back in queue 1
+OSS: generated process with PID 24673 as a user process and placed it in queue 1 at time 84:648855400
+OSS: Dispatching real-time process 24672 from queue 0 at time 85:297720900
+OSS: Process with PID 24672 used full time quantum of 1000000
+
+OSS: process with PID 24672 being requeued to queue 0
+OSS: Dispatching user process 24670 from queue 1 at time 85:1190893800
+OSS: Process with PID 24670 used full time quantum of 1000000
+
+OSS: process with PID 24670 being requeued to queue 2
+OSS: Dispatching user process 24670 from queue 2 at time 86:381797800
+OSS: Process with PID 24670 used full time quantum of 500000
+
+OSS: process with PID 24670 being requeued to queue 3
+OSS: Dispatching user process 24670 from queue 3 at time 86:1527201400
+OSS: Process PID 24670 used 121304 of time quantum 250000 and terminated
+
+OSS: generated process with PID 24674 as a user process and placed it in queue 1 at time 88:54513000
+OSS: Dispatching real-time process 24672 from queue 0 at time 88:218062200
+OSS: Process PID 24672 used 70000 ns (7 %) of 1000000 time quantum
+OSS: Process with PID 24672 was preempted and replaced back in queue 0
+OSS: Dispatching user process 24668 from queue 1 at time 88:872259000
+OSS: Process with PID 24668 used full time quantum of 1000000
+
+OSS: process with PID 24668 being requeued to queue 2
+OSS: Dispatching user process 24668 from queue 2 at time 89:744528100
+OSS: Process PID 24668 used 290996 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24675 as a user process and placed it in queue 1 at time 90:978232600
+OSS: Dispatching real-time process 24672 from queue 0 at time 91:956475300
+OSS: Process with PID 24672 used full time quantum of 1000000
+
+OSS: process with PID 24672 being requeued to queue 0
+OSS: Dispatching user process 24673 from queue 1 at time 92:912960700
+OSS: Process PID 24673 used 850000 ns (85 %) of 1000000 time quantum
+OSS: Process with PID 24673 was preempted and replaced back in queue 1
+OSS: generated process with PID 24676 as a user process and placed it in queue 1 at time 93:1651963000
+OSS: Dispatching real-time process 24672 from queue 0 at time 94:1303936200
+OSS: Process 24672 ran 413593 ns of time provided quantum 1000000 and is waiting 2993 ns for I/O
+
+OSS: Process with PID 24672 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24674 from queue 1 at time 95:607882600
+OSS: Process with PID 24674 used full time quantum of 1000000
+
+OSS: process with PID 24674 being requeued to queue 2
+OSS: Dispatching user process 24675 from queue 1 at time 96:215775300
+OSS: Process with PID 24675 used full time quantum of 1000000
+
+OSS: process with PID 24675 being requeued to queue 2
+OSS: Dispatching user process 24673 from queue 1 at time 96:863111400
+OSS: Process PID 24673 used 760000 ns (76 %) of 1000000 time quantum
+OSS: Process with PID 24673 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24676 from queue 1 at time 97:726232900
+OSS: Process with PID 24676 used full time quantum of 1000000
+
+OSS: process with PID 24676 being requeued to queue 2
+OSS: Dispatching user process 24673 from queue 1 at time 98:452475900
+OSS: Process with PID 24673 used full time quantum of 1000000
+
+OSS: process with PID 24673 being requeued to queue 2
+OSS: Dispatching user process 24674 from queue 2 at time 98:1809913800
+OSS: Process with PID 24674 used full time quantum of 500000
+
+OSS: process with PID 24674 being requeued to queue 3
+OSS: Dispatching user process 24675 from queue 2 at time 99:1619837800
+OSS: Process with PID 24675 used full time quantum of 500000
+
+OSS: process with PID 24675 being requeued to queue 3
+OSS: Dispatching user process 24676 from queue 2 at time 100:1239685800
+OSS: Process PID 24676 used 174862 of time quantum 500000 and terminated
+
+OSS: Dispatching user process 24674 from queue 3 at time 101:479381800
+OSS: Process PID 24674 used 63190 of time quantum 250000 and terminated
+
+OSS: generated process with PID 24677 as a user process and placed it in queue 1 at time 102:917637400
+OSS: Process 24672 has became unblocked and is being placed back into queue 0
+OSS: Dispatching real-time process 24672 from queue 0 at time 103:1670560000
+OSS: Process PID 24672 used 145413 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24677 from queue 1 at time 104:1341130200
+OSS: Process PID 24677 used 613739 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24673 from queue 2 at time 105:682270600
+OSS: Process with PID 24673 used full time quantum of 500000
+
+OSS: process with PID 24673 being requeued to queue 3
+OSS: Dispatching user process 24675 from queue 3 at time 106:364551300
+OSS: Process PID 24675 used 106733 of time quantum 250000 and terminated
+
+OSS: generated process with PID 24678 as a user process and placed it in queue 1 at time 107:458315400
+OSS: Dispatching user process 24678 from queue 1 at time 107:1833271800
+OSS: Process PID 24678 used 106145 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24673 from queue 3 at time 108:1666553800
+OSS: Process with PID 24673 used full time quantum of 250000
+
+OSS: process with PID 24673 being requeued to queue 3
+OSS: generated process with PID 24679 as a user process and placed it in queue 1 at time 110:333217800
+OSS: Dispatching user process 24679 from queue 1 at time 110:1332881400
+OSS: Process with PID 24679 used full time quantum of 1000000
+
+OSS: process with PID 24679 being requeued to queue 2
+OSS: Dispatching user process 24679 from queue 2 at time 111:665773000
+OSS: Process PID 24679 used 395078 of time quantum 500000 and terminated
+
+OSS: Dispatching user process 24673 from queue 3 at time 112:331556100
+OSS: Process PID 24673 used 144205 of time quantum 250000 and terminated
+
+OSS: generated process with PID 24680 as a user process and placed it in queue 1 at time 113:326334600
+OSS: Dispatching user process 24680 from queue 1 at time 113:1305348600
+OSS: Process PID 24680 used 409334 of time quantum 1000000 and terminated
+
+OSS: generated process with PID 24681 as a user process and placed it in queue 1 at time 114:1221514800
+OSS: Dispatching user process 24681 from queue 1 at time 115:443039800
+OSS: Process PID 24681 used 180000 ns (18 %) of 1000000 time quantum
+OSS: Process with PID 24681 was preempted and replaced back in queue 1
+OSS: generated process with PID 24682 as a user process and placed it in queue 1 at time 116:772269400
+OSS: Dispatching user process 24681 from queue 1 at time 117:544548900
+OSS: Process PID 24681 used 409234 of time quantum 1000000 and terminated
+
+OSS: generated process with PID 24683 as real-time process and placed it in queue 0 at time 118:178315800
+OSS: Dispatching real-time process 24683 from queue 0 at time 118:713273400
+OSS: Process PID 24683 used 615063 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24682 from queue 1 at time 119:426556900
+OSS: Process PID 24682 used 611278 of time quantum 1000000 and terminated
+
+OSS: generated process with PID 24684 as a user process and placed it in queue 1 at time 120:706337800
+OSS: Dispatching user process 24684 from queue 1 at time 121:412685700
+OSS: Process with PID 24684 used full time quantum of 1000000
+
+OSS: process with PID 24684 being requeued to queue 2
+OSS: Dispatching user process 24684 from queue 2 at time 121:1650753000
+OSS: Process PID 24684 used 429407 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24685 as a user process and placed it in queue 1 at time 123:301616200
+OSS: Dispatching user process 24685 from queue 1 at time 123:1206475000
+OSS: Process 24685 ran 973966 ns of time provided quantum 1000000 and is waiting 2007 ns for I/O
+
+OSS: Process with PID 24685 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24686 as a user process and placed it in queue 1 at time 124:826020400
+OSS: Process 24685 has became unblocked and is being placed into queue 1
+OSS: Dispatching user process 24686 from queue 1 at time 125:1304092000
+OSS: Process with PID 24686 used full time quantum of 1000000
+
+OSS: process with PID 24686 being requeued to queue 2
+OSS: Dispatching user process 24686 from queue 2 at time 126:608194200
+OSS: Process with PID 24686 used full time quantum of 500000
+
+OSS: process with PID 24686 being requeued to queue 3
+OSS: Dispatching user process 24686 from queue 3 at time 127:216398500
+OSS: Process with PID 24686 used full time quantum of 250000
+
+OSS: process with PID 24686 being requeued to queue 3
+OSS: generated process with PID 24687 as a user process and placed it in queue 1 at time 127:1731308400
+OSS: Dispatching user process 24685 from queue 1 at time 128:1462627000
+OSS: Process with PID 24685 used full time quantum of 1000000
+
+OSS: process with PID 24685 being requeued to queue 2
+OSS: Dispatching user process 24685 from queue 2 at time 129:925264200
+OSS: Process PID 24685 used 476626 of time quantum 500000 and terminated
+
+OSS: Dispatching user process 24686 from queue 3 at time 130:850538500
+OSS: Process with PID 24686 used full time quantum of 250000
+
+OSS: process with PID 24686 being requeued to queue 3
+OSS: generated process with PID 24688 as real-time process and placed it in queue 0 at time 131:1402274200
+OSS: Dispatching real-time process 24688 from queue 0 at time 132:804558600
+OSS: Process 24688 ran 664517 ns of time provided quantum 1000000 and is waiting 2930 ns for I/O
+
+OSS: Process with PID 24688 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24687 from queue 1 at time 133:609127300
+OSS: Process with PID 24687 used full time quantum of 1000000
+
+OSS: process with PID 24687 being requeued to queue 2
+OSS: Dispatching user process 24687 from queue 2 at time 134:218264700
+OSS: Process PID 24687 used 215000 ns (43 %) of 500000 time quantum
+OSS: Process with PID 24687 was preempted and replaced back in queue 2
+OSS: Dispatching user process 24686 from queue 3 at time 134:873069000
+OSS: Process PID 24686 used 177782 of time quantum 250000 and terminated
+
+OSS: generated process with PID 24689 as a user process and placed it in queue 1 at time 135:1492396200
+OSS: Process 24688 has became unblocked and is being placed back into queue 0
+OSS: Dispatching real-time process 24688 from queue 0 at time 136:1969595400
+OSS: Process with PID 24688 used full time quantum of 1000000
+
+OSS: process with PID 24688 being requeued to queue 0
+OSS: Dispatching user process 24689 from queue 1 at time 137:1939201000
+OSS: Process PID 24689 used 160000 ns (16 %) of 1000000 time quantum
+OSS: Process with PID 24689 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24687 from queue 2 at time 138:1878412200
+OSS: Process 24687 ran 327423 ns of time provided quantum 500000 and is waiting 2687 ns for I/O
+
+OSS: Process with PID 24687 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24690 as a user process and placed it in queue 1 at time 140:756934600
+OSS: Process 24687 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24688 from queue 0 at time 141:1027748800
+OSS: Process 24688 ran 416353 ns of time provided quantum 1000000 and is waiting 2044 ns for I/O
+
+OSS: Process with PID 24688 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24689 from queue 1 at time 142:55507800
+OSS: Process 24689 ran 119694 ns of time provided quantum 1000000 and is waiting 2296 ns for I/O
+
+OSS: Process with PID 24689 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24691 as a user process and placed it in queue 1 at time 142:444182800
+OSS: Process 24688 has became unblocked and is being placed back into queue 0
+OSS: Process 24689 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24688 from queue 0 at time 143:1553473200
+OSS: Process with PID 24688 used full time quantum of 1000000
+
+OSS: process with PID 24688 being requeued to queue 0
+OSS: Dispatching user process 24690 from queue 1 at time 144:1106956600
+OSS: Process 24690 ran 436104 ns of time provided quantum 1000000 and is waiting 2811 ns for I/O
+
+OSS: Process with PID 24690 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24687 from queue 1 at time 145:213923400
+OSS: Process with PID 24687 used full time quantum of 1000000
+
+OSS: process with PID 24687 being requeued to queue 2
+OSS: Dispatching user process 24691 from queue 1 at time 145:855703800
+OSS: Process 24691 ran 237262 ns of time provided quantum 1000000 and is waiting 2655 ns for I/O
+
+OSS: Process with PID 24691 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24689 from queue 1 at time 146:711417700
+OSS: Process with PID 24689 used full time quantum of 1000000
+
+OSS: process with PID 24689 being requeued to queue 2
+OSS: Dispatching user process 24687 from queue 2 at time 147:422845500
+OSS: Process 24687 ran 272132 ns of time provided quantum 500000 and is waiting 2767 ns for I/O
+
+OSS: Process with PID 24687 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24689 from queue 2 at time 147:1691392200
+OSS: Process PID 24689 used 5000 ns (1 %) of 500000 time quantum
+OSS: Process with PID 24689 was preempted and replaced back in queue 2
+OSS: Dispatching user process 24689 from queue 2 at time 148:1382794600
+OSS: Process with PID 24689 used full time quantum of 500000
+
+OSS: process with PID 24689 being requeued to queue 3
+OSS: Dispatching user process 24689 from queue 3 at time 149:765599400
+OSS: Process with PID 24689 used full time quantum of 250000
+
+OSS: process with PID 24689 being requeued to queue 3
+OSS: Dispatching user process 24689 from queue 3 at time 150:531208900
+OSS: Process with PID 24689 used full time quantum of 250000
+
+OSS: process with PID 24689 being requeued to queue 3
+OSS: Dispatching user process 24689 from queue 3 at time 151:62427900
+OSS: Process with PID 24689 used full time quantum of 250000
+
+OSS: process with PID 24689 being requeued to queue 3
+OSS: Dispatching user process 24689 from queue 3 at time 151:249721800
+OSS: Process with PID 24689 used full time quantum of 250000
+
+OSS: process with PID 24689 being requeued to queue 3
+OSS: Dispatching user process 24689 from queue 3 at time 151:998897400
+OSS: Process PID 24689 used 170952 of time quantum 250000 and terminated
+
+OSS: generated process with PID 24692 as a user process and placed it in queue 1 at time 152:1995709800
+OSS: Process 24690 has became unblocked and is being placed into queue 1
+OSS: Process 24691 has became unblocked and is being placed into queue 1
+OSS: Process 24687 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24688 from queue 0 at time 155:982850100
+OSS: Process with PID 24688 used full time quantum of 1000000
+
+OSS: process with PID 24688 being requeued to queue 0
+OSS: Dispatching user process 24692 from queue 1 at time 156:965710300
+OSS: Process with PID 24692 used full time quantum of 1000000
+
+OSS: process with PID 24692 being requeued to queue 2
+OSS: Dispatching user process 24690 from queue 1 at time 157:931430700
+OSS: Process 24690 ran 997375 ns of time provided quantum 1000000 and is waiting 2992 ns for I/O
+
+OSS: Process with PID 24690 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24691 from queue 1 at time 158:862871500
+OSS: Process PID 24691 used 745108 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24692 from queue 2 at time 159:725753100
+OSS: Process 24692 ran 193723 ns of time provided quantum 500000 and is waiting 2215 ns for I/O
+
+OSS: Process with PID 24692 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24693 as a user process and placed it in queue 1 at time 160:903132600
+OSS: Process 24690 has became unblocked and is being placed into queue 1
+OSS: Process 24692 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24688 from queue 0 at time 162:612540900
+OSS: Process with PID 24688 used full time quantum of 1000000
+
+OSS: process with PID 24688 being requeued to queue 0
+OSS: Dispatching user process 24687 from queue 1 at time 163:225091900
+OSS: Process with PID 24687 used full time quantum of 1000000
+
+OSS: process with PID 24687 being requeued to queue 2
+OSS: Dispatching user process 24693 from queue 1 at time 163:900377800
+OSS: Process PID 24693 used 550000 ns (55 %) of 1000000 time quantum
+OSS: Process with PID 24693 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24690 from queue 1 at time 164:800765700
+OSS: Process with PID 24690 used full time quantum of 1000000
+
+OSS: process with PID 24690 being requeued to queue 2
+OSS: Dispatching user process 24692 from queue 1 at time 165:601541500
+OSS: Process PID 24692 used 867170 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24687 from queue 2 at time 166:203093100
+OSS: Process with PID 24687 used full time quantum of 500000
+
+OSS: process with PID 24687 being requeued to queue 3
+OSS: Dispatching user process 24687 from queue 3 at time 166:812382600
+OSS: Process PID 24687 used 103862 of time quantum 250000 and terminated
+
+OSS: generated process with PID 24694 as real-time process and placed it in queue 0 at time 167:1249650600
+OSS: Dispatching real-time process 24688 from queue 0 at time 168:499311400
+OSS: Process 24688 ran 965106 ns of time provided quantum 1000000 and is waiting 2889 ns for I/O
+
+OSS: Process with PID 24688 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24693 from queue 1 at time 168:1997255800
+OSS: Process PID 24693 used 30000 ns (3 %) of 1000000 time quantum
+OSS: Process with PID 24693 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24690 from queue 2 at time 169:1994521800
+OSS: Process PID 24690 used 21890 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24695 as a user process and placed it in queue 1 at time 171:989153800
+OSS: Process 24688 has became unblocked and is being placed back into queue 0
+OSS: Dispatching real-time process 24694 from queue 0 at time 172:1956625600
+OSS: Process PID 24694 used 696326 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24693 from queue 1 at time 173:1913261400
+OSS: Process with PID 24693 used full time quantum of 1000000
+
+OSS: process with PID 24693 being requeued to queue 2
+OSS: Dispatching user process 24693 from queue 2 at time 174:1826533000
+OSS: Process PID 24693 used 490000 ns (98 %) of 500000 time quantum
+OSS: Process with PID 24693 was preempted and replaced back in queue 2
+OSS: generated process with PID 24696 as a user process and placed it in queue 1 at time 176:653176200
+OSS: Dispatching real-time process 24688 from queue 0 at time 177:306362500
+OSS: Process PID 24688 used 954684 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24695 from queue 1 at time 177:1225460200
+OSS: Process PID 24695 used 10000 ns (1 %) of 1000000 time quantum
+OSS: Process with PID 24695 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24693 from queue 2 at time 178:450930600
+OSS: Process with PID 24693 used full time quantum of 500000
+
+OSS: process with PID 24693 being requeued to queue 3
+OSS: Dispatching user process 24693 from queue 3 at time 178:1803732600
+OSS: Process PID 24693 used 68768 of time quantum 250000 and terminated
+
+OSS: generated process with PID 24697 as a user process and placed it in queue 1 at time 180:607575400
+OSS: Dispatching user process 24696 from queue 1 at time 181:215160900
+OSS: Process PID 24696 used 17222 of time quantum 1000000 and terminated
+
+OSS: generated process with PID 24698 as real-time process and placed it in queue 0 at time 181:1721407600
+OSS: Dispatching real-time process 24698 from queue 0 at time 182:1442825400
+OSS: Process PID 24698 used 296001 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24695 from queue 1 at time 183:885661000
+OSS: Process with PID 24695 used full time quantum of 1000000
+
+OSS: process with PID 24695 being requeued to queue 2
+OSS: Dispatching user process 24695 from queue 2 at time 184:771332100
+OSS: Process with PID 24695 used full time quantum of 500000
+
+OSS: process with PID 24695 being requeued to queue 3
+OSS: Dispatching user process 24695 from queue 3 at time 185:542674300
+OSS: Process with PID 24695 used full time quantum of 250000
+
+OSS: process with PID 24695 being requeued to queue 3
+OSS: generated process with PID 24699 as a user process and placed it in queue 1 at time 186:170817400
+OSS: Dispatching user process 24697 from queue 1 at time 186:683279800
+OSS: Process PID 24697 used 300000 ns (30 %) of 1000000 time quantum
+OSS: Process with PID 24697 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24695 from queue 3 at time 187:366569700
+OSS: Process PID 24695 used 32500 ns (13 %) of 250000 time quantum
+OSS: Process with PID 24695 was preempted and replaced back in queue 3
+OSS: generated process with PID 24700 as a user process and placed it in queue 1 at time 188:466389000
+OSS: Dispatching user process 24699 from queue 1 at time 188:1865566200
+OSS: Process PID 24699 used 33923 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24695 from queue 3 at time 189:1731142600
+OSS: Process PID 24695 used 215000 ns (86 %) of 250000 time quantum
+OSS: Process with PID 24695 was preempted and replaced back in queue 3
+OSS: generated process with PID 24701 as a user process and placed it in queue 1 at time 191:462395400
+OSS: Dispatching user process 24697 from queue 1 at time 191:1849591800
+OSS: Process with PID 24697 used full time quantum of 1000000
+
+OSS: process with PID 24697 being requeued to queue 2
+OSS: Dispatching user process 24697 from queue 2 at time 192:1699193800
+OSS: Process PID 24697 used 87657 of time quantum 500000 and terminated
+
+OSS: Dispatching user process 24695 from queue 3 at time 193:1398397800
+OSS: Process PID 24695 used 150000 ns (60 %) of 250000 time quantum
+OSS: Process with PID 24695 was preempted and replaced back in queue 3
+OSS: generated process with PID 24702 as a user process and placed it in queue 1 at time 194:1593711600
+OSS: Dispatching user process 24700 from queue 1 at time 195:1187433400
+OSS: Process 24700 ran 739101 ns of time provided quantum 1000000 and is waiting 2574 ns for I/O
+
+OSS: Process with PID 24700 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24695 from queue 3 at time 196:374877000
+OSS: Process PID 24695 used 189923 of time quantum 250000 and terminated
+
+OSS: generated process with PID 24703 as real-time process and placed it in queue 0 at time 197:499618200
+OSS: Process 24700 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24703 from queue 0 at time 198:998483100
+OSS: Process 24703 ran 872041 ns of time provided quantum 1000000 and is waiting 2123 ns for I/O
+
+OSS: Process with PID 24703 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24701 from queue 1 at time 199:996976300
+OSS: Process with PID 24701 used full time quantum of 1000000
+
+OSS: process with PID 24701 being requeued to queue 2
+OSS: Dispatching user process 24701 from queue 2 at time 200:993962700
+OSS: Process PID 24701 used 23402 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24704 as real-time process and placed it in queue 0 at time 201:1975971000
+OSS: Process 24703 has became unblocked and is being placed back into queue 0
+OSS: Dispatching real-time process 24704 from queue 0 at time 203:951952300
+OSS: Process 24704 ran 190745 ns of time provided quantum 1000000 and is waiting 2563 ns for I/O
+
+OSS: Process with PID 24704 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24702 from queue 1 at time 204:903914700
+OSS: Process 24702 ran 737517 ns of time provided quantum 1000000 and is waiting 2039 ns for I/O
+
+OSS: Process with PID 24702 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24705 as a user process and placed it in queue 1 at time 205:1615779000
+OSS: Process 24704 has became unblocked and is being placed back into queue 0
+OSS: Process 24702 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24703 from queue 0 at time 207:463126800
+OSS: Process PID 24703 used 840000 ns (84 %) of 1000000 time quantum
+OSS: Process with PID 24703 was preempted and replaced back in queue 0
+OSS: Dispatching user process 24700 from queue 1 at time 207:1852517400
+OSS: Process PID 24700 used 990000 ns (99 %) of 1000000 time quantum
+OSS: Process with PID 24700 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24705 from queue 1 at time 208:1705045000
+OSS: Process with PID 24705 used full time quantum of 1000000
+
+OSS: process with PID 24705 being requeued to queue 2
+OSS: Dispatching user process 24702 from queue 1 at time 209:1410100200
+OSS: Process PID 24702 used 906686 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24705 from queue 2 at time 210:820210600
+OSS: Process PID 24705 used 190000 ns (38 %) of 500000 time quantum
+OSS: Process with PID 24705 was preempted and replaced back in queue 2
+OSS: generated process with PID 24706 as a user process and placed it in queue 1 at time 211:1280962600
+OSS: Dispatching real-time process 24704 from queue 0 at time 212:561935400
+OSS: Process 24704 ran 794696 ns of time provided quantum 1000000 and is waiting 2920 ns for I/O
+
+OSS: Process with PID 24704 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24700 from queue 1 at time 213:123880900
+OSS: Process PID 24700 used 111334 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24705 from queue 2 at time 213:495533800
+OSS: Process PID 24705 used 206538 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24707 as a user process and placed it in queue 1 at time 214:982245400
+OSS: Process 24704 has became unblocked and is being placed back into queue 0
+OSS: Dispatching real-time process 24703 from queue 0 at time 215:1928992000
+OSS: Process PID 24703 used 400000 ns (40 %) of 1000000 time quantum
+OSS: Process with PID 24703 was preempted and replaced back in queue 0
+OSS: Dispatching user process 24706 from queue 1 at time 216:1857994200
+OSS: Process PID 24706 used 865139 of time quantum 1000000 and terminated
+
+OSS: generated process with PID 24708 as a user process and placed it in queue 1 at time 218:716098600
+OSS: Dispatching real-time process 24704 from queue 0 at time 219:432207300
+OSS: Process PID 24704 used 229035 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24707 from queue 1 at time 219:1728839400
+OSS: Process PID 24707 used 833911 of time quantum 1000000 and terminated
+
+OSS: generated process with PID 24709 as real-time process and placed it in queue 0 at time 221:457789000
+OSS: Dispatching real-time process 24703 from queue 0 at time 221:1831166200
+OSS: Process with PID 24703 used full time quantum of 1000000
+
+OSS: process with PID 24703 being requeued to queue 0
+OSS: Dispatching user process 24708 from queue 1 at time 222:1662342600
+OSS: Process with PID 24708 used full time quantum of 1000000
+
+OSS: process with PID 24708 being requeued to queue 2
+OSS: Dispatching user process 24708 from queue 2 at time 223:1324695400
+OSS: Process PID 24708 used 97074 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24710 as a user process and placed it in queue 1 at time 224:1298902000
+OSS: Dispatching real-time process 24709 from queue 0 at time 225:597814200
+OSS: Process PID 24709 used 380000 ns (38 %) of 1000000 time quantum
+OSS: Process with PID 24709 was preempted and replaced back in queue 0
+OSS: Dispatching user process 24710 from queue 1 at time 226:195638500
+OSS: Process with PID 24710 used full time quantum of 1000000
+
+OSS: process with PID 24710 being requeued to queue 2
+OSS: Dispatching user process 24710 from queue 2 at time 226:782564200
+OSS: Process PID 24710 used 333683 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24711 as real-time process and placed it in queue 0 at time 227:1130377000
+OSS: Dispatching real-time process 24703 from queue 0 at time 228:260764200
+OSS: Process 24703 ran 254875 ns of time provided quantum 1000000 and is waiting 2713 ns for I/O
+
+OSS: Process with PID 24703 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24712 as a user process and placed it in queue 1 at time 229:43167000
+OSS: Process 24703 has became unblocked and is being placed back into queue 0
+OSS: Dispatching real-time process 24709 from queue 0 at time 229:345346600
+OSS: Process 24709 ran 575493 ns of time provided quantum 1000000 and is waiting 2419 ns for I/O
+
+OSS: Process with PID 24709 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24712 from queue 1 at time 229:1381396600
+OSS: Process with PID 24712 used full time quantum of 1000000
+
+OSS: process with PID 24712 being requeued to queue 2
+OSS: Dispatching user process 24712 from queue 2 at time 230:762803400
+OSS: Process PID 24712 used 393616 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24713 as a user process and placed it in queue 1 at time 231:1051333800
+OSS: Process 24709 has became unblocked and is being placed back into queue 0
+OSS: Dispatching real-time process 24711 from queue 0 at time 232:205345800
+OSS: Process PID 24711 used 892582 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24713 from queue 1 at time 232:821393400
+OSS: Process 24713 ran 895942 ns of time provided quantum 1000000 and is waiting 2711 ns for I/O
+
+OSS: Process with PID 24713 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24714 as a user process and placed it in queue 1 at time 233:1285693800
+OSS: Process 24713 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24703 from queue 0 at time 234:1142785800
+OSS: Process with PID 24703 used full time quantum of 1000000
+
+OSS: process with PID 24703 being requeued to queue 0
+OSS: Dispatching user process 24714 from queue 1 at time 235:285581800
+OSS: Process with PID 24714 used full time quantum of 1000000
+
+OSS: process with PID 24714 being requeued to queue 2
+OSS: Dispatching user process 24714 from queue 2 at time 235:1142337400
+OSS: Process PID 24714 used 429755 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24715 as real-time process and placed it in queue 0 at time 236:569470000
+OSS: Dispatching real-time process 24709 from queue 0 at time 237:138950100
+OSS: Process PID 24709 used 88843 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24713 from queue 1 at time 237:555810600
+OSS: Process PID 24713 used 510000 ns (51 %) of 1000000 time quantum
+OSS: Process with PID 24713 was preempted and replaced back in queue 1
+OSS: generated process with PID 24716 as a user process and placed it in queue 1 at time 238:223362600
+OSS: Dispatching real-time process 24703 from queue 0 at time 238:893460600
+OSS: Process with PID 24703 used full time quantum of 1000000
+
+OSS: process with PID 24703 being requeued to queue 0
+OSS: Dispatching user process 24713 from queue 1 at time 239:786931300
+OSS: Process 24713 ran 625532 ns of time provided quantum 1000000 and is waiting 2521 ns for I/O
+
+OSS: Process with PID 24713 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24717 as a user process and placed it in queue 1 at time 240:1147845400
+OSS: Process 24713 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24715 from queue 0 at time 241:591392200
+OSS: Process PID 24715 used 480000 ns (48 %) of 1000000 time quantum
+OSS: Process with PID 24715 was preempted and replaced back in queue 0
+OSS: Dispatching user process 24716 from queue 1 at time 242:182794500
+OSS: Process PID 24716 used 972159 of time quantum 1000000 and terminated
+
+OSS: generated process with PID 24718 as a user process and placed it in queue 1 at time 242:1462476400
+OSS: Dispatching real-time process 24703 from queue 0 at time 243:924963000
+OSS: Process PID 24703 used 492064 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24717 from queue 1 at time 244:849936100
+OSS: Process with PID 24717 used full time quantum of 1000000
+
+OSS: process with PID 24717 being requeued to queue 2
+OSS: Dispatching user process 24717 from queue 2 at time 245:699882300
+OSS: Process PID 24717 used 188818 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24719 as real-time process and placed it in queue 0 at time 246:799649400
+OSS: Dispatching real-time process 24715 from queue 0 at time 247:599308900
+OSS: Process with PID 24715 used full time quantum of 1000000
+
+OSS: process with PID 24715 being requeued to queue 0
+OSS: Dispatching user process 24713 from queue 1 at time 248:198627900
+OSS: Process with PID 24713 used full time quantum of 1000000
+
+OSS: process with PID 24713 being requeued to queue 2
+OSS: Dispatching user process 24713 from queue 2 at time 248:794521800
+OSS: Process 24713 ran 249930 ns of time provided quantum 500000 and is waiting 2454 ns for I/O
+
+OSS: Process with PID 24713 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24721 as a user process and placed it in queue 1 at time 249:1178207400
+OSS: Process 24713 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24719 from queue 0 at time 250:712840200
+OSS: Process 24719 ran 460285 ns of time provided quantum 1000000 and is waiting 2915 ns for I/O
+
+OSS: Process with PID 24719 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24718 from queue 1 at time 251:425690500
+OSS: Process with PID 24718 used full time quantum of 1000000
+
+OSS: process with PID 24718 being requeued to queue 2
+OSS: Dispatching user process 24721 from queue 1 at time 251:1702772200
+OSS: Process with PID 24721 used full time quantum of 1000000
+
+OSS: process with PID 24721 being requeued to queue 2
+OSS: Dispatching user process 24713 from queue 1 at time 252:1405554600
+OSS: Process PID 24713 used 886284 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24718 from queue 2 at time 253:811119400
+OSS: Process PID 24718 used 211766 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24722 as real-time process and placed it in queue 0 at time 254:1244597800
+OSS: Process 24719 has became unblocked and is being placed back into queue 0
+OSS: Dispatching real-time process 24715 from queue 0 at time 255:978401800
+OSS: Process with PID 24715 used full time quantum of 1000000
+
+OSS: process with PID 24715 being requeued to queue 0
+OSS: Dispatching user process 24721 from queue 2 at time 256:956813700
+OSS: Process with PID 24721 used full time quantum of 500000
+
+OSS: process with PID 24721 being requeued to queue 3
+OSS: Dispatching user process 24721 from queue 3 at time 257:913637500
+OSS: Process with PID 24721 used full time quantum of 250000
+
+OSS: process with PID 24721 being requeued to queue 3
+OSS: generated process with PID 24723 as a user process and placed it in queue 1 at time 258:1654670200
+OSS: Dispatching real-time process 24722 from queue 0 at time 259:1309350600
+OSS: Process 24722 ran 694540 ns of time provided quantum 1000000 and is waiting 2896 ns for I/O
+
+OSS: Process with PID 24722 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24723 from queue 1 at time 260:618711400
+OSS: Process with PID 24723 used full time quantum of 1000000
+
+OSS: process with PID 24723 being requeued to queue 2
+OSS: Dispatching user process 24723 from queue 2 at time 261:237432900
+OSS: Process PID 24723 used 68205 of time quantum 500000 and terminated
+
+OSS: Dispatching user process 24721 from queue 3 at time 261:949741800
+OSS: Process 24721 ran 17992 ns of time provided quantum 250000 and is waiting 2317 ns for I/O
+
+OSS: Process with PID 24721 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24724 as a user process and placed it in queue 1 at time 262:1799087400
+OSS: Process 24722 has became unblocked and is being placed back into queue 0
+OSS: Process 24721 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24719 from queue 0 at time 264:1196360400
+OSS: Process with PID 24719 used full time quantum of 1000000
+
+OSS: process with PID 24719 being requeued to queue 0
+OSS: Dispatching user process 24724 from queue 1 at time 265:392731000
+OSS: Process PID 24724 used 680000 ns (68 %) of 1000000 time quantum
+OSS: Process with PID 24724 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24721 from queue 1 at time 265:1570934200
+OSS: Process PID 24721 used 50000 ns (5 %) of 1000000 time quantum
+OSS: Process with PID 24721 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24724 from queue 1 at time 266:1141878600
+OSS: Process with PID 24724 used full time quantum of 1000000
+
+OSS: process with PID 24724 being requeued to queue 2
+OSS: Dispatching user process 24721 from queue 1 at time 267:283767400
+OSS: Process with PID 24721 used full time quantum of 1000000
+
+OSS: process with PID 24721 being requeued to queue 2
+OSS: Dispatching user process 24724 from queue 2 at time 267:1135079800
+OSS: Process PID 24724 used 498396 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24725 as a user process and placed it in queue 1 at time 268:540439600
+OSS: Dispatching real-time process 24715 from queue 0 at time 269:80889300
+OSS: Process with PID 24715 used full time quantum of 1000000
+
+OSS: process with PID 24715 being requeued to queue 0
+OSS: Dispatching user process 24725 from queue 1 at time 269:323567400
+OSS: Process with PID 24725 used full time quantum of 1000000
+
+OSS: process with PID 24725 being requeued to queue 2
+OSS: Dispatching user process 24721 from queue 2 at time 269:1294279800
+OSS: Process 24721 ran 39504 ns of time provided quantum 500000 and is waiting 2511 ns for I/O
+
+OSS: Process with PID 24721 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24725 from queue 2 at time 270:588569800
+OSS: Process PID 24725 used 86511 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24726 as real-time process and placed it in queue 0 at time 271:354399400
+OSS: Process 24721 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24722 from queue 0 at time 272:417607900
+OSS: Process PID 24722 used 397398 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24721 from queue 1 at time 272:1670441800
+OSS: Process PID 24721 used 870000 ns (87 %) of 1000000 time quantum
+OSS: Process with PID 24721 was preempted and replaced back in queue 1
+OSS: generated process with PID 24727 as a user process and placed it in queue 1 at time 274:340993800
+OSS: Dispatching real-time process 24719 from queue 0 at time 274:1363985400
+OSS: Process PID 24719 used 641988 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24721 from queue 1 at time 275:727981000
+OSS: Process with PID 24721 used full time quantum of 1000000
+
+OSS: process with PID 24721 being requeued to queue 2
+OSS: Dispatching user process 24721 from queue 2 at time 276:455972100
+OSS: Process with PID 24721 used full time quantum of 500000
+
+OSS: process with PID 24721 being requeued to queue 3
+OSS: Dispatching user process 24721 from queue 3 at time 276:1823898600
+OSS: Process 24721 ran 97905 ns of time provided quantum 250000 and is waiting 2994 ns for I/O
+
+OSS: Process with PID 24721 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24728 as a user process and placed it in queue 1 at time 278:647907400
+OSS: Process 24721 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24715 from queue 0 at time 279:591640000
+OSS: Process PID 24715 used 406440 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24727 from queue 1 at time 280:183290100
+OSS: Process 24727 ran 245310 ns of time provided quantum 1000000 and is waiting 2921 ns for I/O
+
+OSS: Process with PID 24727 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24729 as a user process and placed it in queue 1 at time 280:1466441200
+OSS: Process 24727 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24726 from queue 0 at time 281:1865775400
+OSS: Process PID 24726 used 641995 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24728 from queue 1 at time 282:1731561000
+OSS: Process PID 24728 used 380000 ns (38 %) of 1000000 time quantum
+OSS: Process with PID 24728 was preempted and replaced back in queue 1
+OSS: generated process with PID 24730 as a user process and placed it in queue 1 at time 284:463232200
+OSS: Dispatching user process 24721 from queue 1 at time 284:1852939000
+OSS: Process PID 24721 used 820000 ns (82 %) of 1000000 time quantum
+OSS: Process with PID 24721 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24729 from queue 1 at time 285:1705888200
+OSS: Process with PID 24729 used full time quantum of 1000000
+
+OSS: process with PID 24729 being requeued to queue 2
+OSS: Dispatching user process 24727 from queue 1 at time 286:1411786600
+OSS: Process PID 24727 used 640000 ns (64 %) of 1000000 time quantum
+OSS: Process with PID 24727 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24728 from queue 1 at time 287:823583400
+OSS: Process with PID 24728 used full time quantum of 1000000
+
+OSS: process with PID 24728 being requeued to queue 2
+OSS: Dispatching user process 24730 from queue 1 at time 288:647176900
+OSS: Process 24730 ran 512750 ns of time provided quantum 1000000 and is waiting 2533 ns for I/O
+
+OSS: Process with PID 24730 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24721 from queue 1 at time 289:294363900
+OSS: Process PID 24721 used 630812 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24729 from queue 2 at time 289:1177465800
+OSS: Process 24729 ran 367660 ns of time provided quantum 500000 and is waiting 2600 ns for I/O
+
+OSS: Process with PID 24729 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24731 as a user process and placed it in queue 1 at time 290:709983600
+OSS: Process 24730 has became unblocked and is being placed into queue 1
+OSS: Process 24729 has became unblocked and is being placed into queue 1
+OSS: Dispatching user process 24727 from queue 1 at time 291:1679879800
+OSS: Process with PID 24727 used full time quantum of 1000000
+
+OSS: process with PID 24727 being requeued to queue 2
+OSS: Dispatching user process 24731 from queue 1 at time 292:1359769800
+OSS: Process with PID 24731 used full time quantum of 1000000
+
+OSS: process with PID 24731 being requeued to queue 2
+OSS: Dispatching user process 24730 from queue 1 at time 293:719549800
+OSS: Process PID 24730 used 180000 ns (18 %) of 1000000 time quantum
+OSS: Process with PID 24730 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24729 from queue 1 at time 294:439109700
+OSS: Process PID 24729 used 471757 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24728 from queue 2 at time 294:1756449000
+OSS: Process PID 24728 used 450000 ns (90 %) of 500000 time quantum
+OSS: Process with PID 24728 was preempted and replaced back in queue 2
+OSS: generated process with PID 24732 as a user process and placed it in queue 1 at time 296:513008200
+OSS: Dispatching user process 24730 from queue 1 at time 297:26026500
+OSS: Process PID 24730 used 575315 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24727 from queue 2 at time 297:104116200
+OSS: Process with PID 24727 used full time quantum of 500000
+
+OSS: process with PID 24727 being requeued to queue 3
+OSS: Dispatching user process 24727 from queue 3 at time 297:416475000
+OSS: Process with PID 24727 used full time quantum of 250000
+
+OSS: process with PID 24727 being requeued to queue 3
+OSS: generated process with PID 24733 as real-time process and placed it in queue 0 at time 298:666010200
+OSS: Dispatching real-time process 24733 from queue 0 at time 299:332030500
+OSS: Process with PID 24733 used full time quantum of 1000000
+
+OSS: process with PID 24733 being requeued to queue 0
+OSS: Dispatching user process 24732 from queue 1 at time 299:1328132200
+OSS: Process with PID 24732 used full time quantum of 1000000
+
+OSS: process with PID 24732 being requeued to queue 2
+OSS: Dispatching user process 24731 from queue 2 at time 300:656274600
+OSS: Process with PID 24731 used full time quantum of 500000
+
+OSS: process with PID 24731 being requeued to queue 3
+OSS: Dispatching user process 24728 from queue 2 at time 301:312559300
+OSS: Process with PID 24728 used full time quantum of 500000
+
+OSS: process with PID 24728 being requeued to queue 3
+OSS: Dispatching user process 24732 from queue 2 at time 301:1250247400
+OSS: Process PID 24732 used 240000 ns (48 %) of 500000 time quantum
+OSS: Process with PID 24732 was preempted and replaced back in queue 2
+OSS: Dispatching user process 24732 from queue 2 at time 302:500505000
+OSS: Process PID 24732 used 40000 ns (8 %) of 500000 time quantum
+OSS: Process with PID 24732 was preempted and replaced back in queue 2
+OSS: Dispatching user process 24732 from queue 2 at time 303:1020100
+OSS: Process with PID 24732 used full time quantum of 500000
+
+OSS: process with PID 24732 being requeued to queue 3
+OSS: Dispatching user process 24727 from queue 3 at time 303:4090600
+OSS: Process 24727 ran 116235 ns of time provided quantum 250000 and is waiting 2133 ns for I/O
+
+OSS: Process with PID 24727 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24731 from queue 3 at time 303:16372600
+OSS: Process PID 24731 used 238511 of time quantum 250000 and terminated
+
+OSS: generated process with PID 24734 as a user process and placed it in queue 1 at time 303:131101200
+OSS: Process 24727 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24733 from queue 0 at time 303:1048820200
+OSS: Process with PID 24733 used full time quantum of 1000000
+
+OSS: process with PID 24733 being requeued to queue 0
+OSS: Dispatching user process 24734 from queue 1 at time 304:97650600
+OSS: Process with PID 24734 used full time quantum of 1000000
+
+OSS: process with PID 24734 being requeued to queue 2
+OSS: Dispatching user process 24727 from queue 1 at time 304:390612600
+OSS: Process 24727 ran 344527 ns of time provided quantum 1000000 and is waiting 2068 ns for I/O
+
+OSS: Process with PID 24727 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24734 from queue 2 at time 304:1562460600
+OSS: Process PID 24734 used 415000 ns (83 %) of 500000 time quantum
+OSS: Process with PID 24734 was preempted and replaced back in queue 2
+OSS: Dispatching user process 24734 from queue 2 at time 305:1124931400
+OSS: Process PID 24734 used 50025 of time quantum 500000 and terminated
+
+OSS: Dispatching user process 24728 from queue 3 at time 306:249873000
+OSS: Process with PID 24728 used full time quantum of 250000
+
+OSS: process with PID 24728 being requeued to queue 3
+OSS: generated process with PID 24735 as a user process and placed it in queue 1 at time 306:1999104400
+OSS: Process 24727 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24733 from queue 0 at time 308:998219100
+OSS: Process with PID 24733 used full time quantum of 1000000
+
+OSS: process with PID 24733 being requeued to queue 0
+OSS: Dispatching user process 24735 from queue 1 at time 309:996448300
+OSS: Process PID 24735 used 364113 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24732 from queue 3 at time 310:992906700
+OSS: Process PID 24732 used 132500 ns (53 %) of 250000 time quantum
+OSS: Process with PID 24732 was preempted and replaced back in queue 3
+OSS: generated process with PID 24736 as a user process and placed it in queue 1 at time 311:1971747000
+OSS: Dispatching real-time process 24733 from queue 0 at time 312:1943504200
+OSS: Process with PID 24733 used full time quantum of 1000000
+
+OSS: process with PID 24733 being requeued to queue 0
+OSS: Dispatching user process 24727 from queue 1 at time 313:1887018600
+OSS: Process with PID 24727 used full time quantum of 1000000
+
+OSS: process with PID 24727 being requeued to queue 2
+OSS: Dispatching user process 24736 from queue 1 at time 314:1774047400
+OSS: Process 24736 ran 40306 ns of time provided quantum 1000000 and is waiting 2234 ns for I/O
+
+OSS: Process with PID 24736 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24727 from queue 2 at time 315:1548105000
+OSS: Process with PID 24727 used full time quantum of 500000
+
+OSS: process with PID 24727 being requeued to queue 3
+OSS: Dispatching user process 24728 from queue 3 at time 316:1096220200
+OSS: Process PID 24728 used 227400 of time quantum 250000 and terminated
+
+OSS: generated process with PID 24737 as a user process and placed it in queue 1 at time 317:385001200
+OSS: Process 24736 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24733 from queue 0 at time 318:540015100
+OSS: Process with PID 24733 used full time quantum of 1000000
+
+OSS: process with PID 24733 being requeued to queue 0
+OSS: Dispatching user process 24737 from queue 1 at time 319:80040300
+OSS: Process 24737 ran 645984 ns of time provided quantum 1000000 and is waiting 2459 ns for I/O
+
+OSS: Process with PID 24737 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24736 from queue 1 at time 319:320171400
+OSS: Process with PID 24736 used full time quantum of 1000000
+
+OSS: process with PID 24736 being requeued to queue 2
+OSS: Dispatching user process 24736 from queue 2 at time 319:1280695800
+OSS: Process with PID 24736 used full time quantum of 500000
+
+OSS: process with PID 24736 being requeued to queue 3
+OSS: Dispatching user process 24732 from queue 3 at time 320:561401800
+OSS: Process with PID 24732 used full time quantum of 250000
+
+OSS: process with PID 24732 being requeued to queue 3
+OSS: Dispatching user process 24727 from queue 3 at time 321:122813700
+OSS: Process with PID 24727 used full time quantum of 250000
+
+OSS: process with PID 24727 being requeued to queue 3
+OSS: Dispatching user process 24736 from queue 3 at time 321:491265000
+OSS: Process 24736 ran 161904 ns of time provided quantum 250000 and is waiting 2565 ns for I/O
+
+OSS: Process with PID 24736 was blocked and being placed in the blocked queue
+OSS: Dispatching user process 24732 from queue 3 at time 321:1965070200
+OSS: Process PID 24732 used 10000 ns (4 %) of 250000 time quantum
+OSS: Process with PID 24732 was preempted and replaced back in queue 3
+OSS: Dispatching user process 24727 from queue 3 at time 322:1930150600
+OSS: Process with PID 24727 used full time quantum of 250000
+
+OSS: process with PID 24727 being requeued to queue 3
+OSS: Dispatching user process 24732 from queue 3 at time 323:1860311400
+OSS: Process PID 24732 used 104142 of time quantum 250000 and terminated
+
+OSS: generated process with PID 24738 as a user process and placed it in queue 1 at time 325:720733000
+OSS: Process 24737 has became unblocked and is being placed into queue 1
+OSS: Process 24736 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24733 from queue 0 at time 326:1765875000
+OSS: Process PID 24733 used 316406 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24738 from queue 1 at time 327:1531760200
+OSS: Process PID 24738 used 568417 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24727 from queue 3 at time 328:1063530600
+OSS: Process 24727 ran 2352 ns of time provided quantum 250000 and is waiting 2207 ns for I/O
+
+OSS: Process with PID 24727 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24739 as a user process and placed it in queue 1 at time 329:254242800
+OSS: Process 24727 has became unblocked and is being placed into queue 1
+OSS: Dispatching user process 24737 from queue 1 at time 330:16981500
+OSS: Process with PID 24737 used full time quantum of 1000000
+
+OSS: process with PID 24737 being requeued to queue 2
+OSS: Dispatching user process 24737 from queue 2 at time 330:67936200
+OSS: Process 24737 ran 284207 ns of time provided quantum 500000 and is waiting 2069 ns for I/O
+
+OSS: Process with PID 24737 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24740 as real-time process and placed it in queue 0 at time 330:543610000
+OSS: Process 24737 has became unblocked and is being placed into queue 1
+OSS: Dispatching real-time process 24740 from queue 0 at time 331:174450400
+OSS: Process PID 24740 used 898329 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24736 from queue 1 at time 331:697811800
+OSS: Process PID 24736 used 218676 of time quantum 1000000 and terminated
+
+OSS: generated process with PID 24741 as a user process and placed it in queue 1 at time 332:791367400
+OSS: Dispatching user process 24739 from queue 1 at time 333:582744900
+OSS: Process with PID 24739 used full time quantum of 1000000
+
+OSS: process with PID 24739 being requeued to queue 2
+OSS: Dispatching user process 24739 from queue 2 at time 334:165499900
+OSS: Process with PID 24739 used full time quantum of 500000
+
+OSS: process with PID 24739 being requeued to queue 3
+OSS: Dispatching user process 24739 from queue 3 at time 334:662009800
+OSS: Process PID 24739 used 216593 of time quantum 250000 and terminated
+
+OSS: generated process with PID 24742 as real-time process and placed it in queue 0 at time 335:648159400
+OSS: Dispatching real-time process 24742 from queue 0 at time 336:296328900
+OSS: Process PID 24742 used 779903 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24727 from queue 1 at time 336:1185325800
+OSS: Process with PID 24727 used full time quantum of 1000000
+
+OSS: process with PID 24727 being requeued to queue 2
+OSS: Dispatching user process 24727 from queue 2 at time 337:370661800
+OSS: Process PID 24727 used 387058 of time quantum 500000 and terminated
+
+OSS: generated process with PID 24743 as a user process and placed it in queue 1 at time 338:482757400
+OSS: Dispatching user process 24737 from queue 1 at time 338:1931039800
+OSS: Process PID 24737 used 100000 ns (10 %) of 1000000 time quantum
+OSS: Process with PID 24737 was preempted and replaced back in queue 1
+OSS: generated process with PID 24744 as a user process and placed it in queue 1 at time 340:862189800
+OSS: Dispatching user process 24741 from queue 1 at time 341:724389700
+OSS: Process PID 24741 used 900471 of time quantum 1000000 and terminated
+
+OSS: generated process with PID 24745 as real-time process and placed it in queue 0 at time 342:897679000
+OSS: Dispatching real-time process 24745 from queue 0 at time 343:795368100
+OSS: Process PID 24745 used 241106 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24743 from queue 1 at time 344:590746300
+OSS: Process with PID 24743 used full time quantum of 1000000
+
+OSS: process with PID 24743 being requeued to queue 2
+OSS: Dispatching user process 24743 from queue 2 at time 345:181502700
+OSS: Process 24743 ran 248293 ns of time provided quantum 500000 and is waiting 2640 ns for I/O
+
+OSS: Process with PID 24743 was blocked and being placed in the blocked queue
+OSS: generated process with PID 24746 as a user process and placed it in queue 1 at time 345:1452142000
+OSS: Process 24743 has became unblocked and is being placed into queue 1
+OSS: Dispatching user process 24737 from queue 1 at time 346:1808578600
+OSS: Process PID 24737 used 39491 of time quantum 1000000 and terminated
+
+OSS: Dispatching user process 24744 from queue 1 at time 348:1234544800
+OSS: Process 24744 ran 825250 ns of time provided quantum 1000000 and is waiting 2929 ns for I/O
+
+OSS: Process with PID 24744 was blocked and being placed in the blocked queue
+OSS: Process 24744 has became unblocked and is being placed into queue 1
+OSS: Dispatching user process 24746 from queue 1 at time 350:876609300
+OSS: Process with PID 24746 used full time quantum of 1000000
+
+OSS: process with PID 24746 being requeued to queue 2
+OSS: Dispatching user process 24746 from queue 2 at time 351:753228700
+OSS: Process PID 24746 used 384987 of time quantum 500000 and terminated
+
+OSS: Dispatching user process 24743 from queue 1 at time 353:13045000
+OSS: Process PID 24743 used 540000 ns (54 %) of 1000000 time quantum
+OSS: Process with PID 24743 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24744 from queue 1 at time 353:208970800
+OSS: Process PID 24744 used 730000 ns (73 %) of 1000000 time quantum
+OSS: Process with PID 24744 was preempted and replaced back in queue 1
+OSS: Dispatching user process 24743 from queue 1 at time 354:671896800
+OSS: Process 24743 ran 587283 ns of time provided quantum 1000000 and is waiting 2147 ns for I/O
+
+OSS: Process with PID 24743 was blocked and being placed in the blocked queue
+OSS: Process 24743 has became unblocked and is being placed into queue 1
+OSS: Dispatching user process 24744 from queue 1 at time 356:375424900
+OSS: Process with PID 24744 used full time quantum of 1000000
+
+OSS: process with PID 24744 being requeued to queue 2
+OSS: Dispatching user process 24744 from queue 2 at time 356:1501709800
+OSS: Process 24744 ran 433616 ns of time provided quantum 500000 and is waiting 2812 ns for I/O
+
+OSS: Process with PID 24744 was blocked and being placed in the blocked queue
+OSS: Process 24744 has became unblocked and is being placed into queue 1
+OSS: Dispatching user process 24743 from queue 1 at time 358:14129400
+OSS: Process 24743 ran 828627 ns of time provided quantum 1000000 and is waiting 2097 ns for I/O
+
+OSS: Process with PID 24743 was blocked and being placed in the blocked queue
+OSS: Process 24743 has became unblocked and is being placed into queue 1
+OSS: Dispatching user process 24744 from queue 1 at time 358:452632600
+OSS: Process with PID 24744 used full time quantum of 1000000
+
+OSS: process with PID 24744 being requeued to queue 2
+OSS: Dispatching user process 24744 from queue 2 at time 358:1810540600
+OSS: Process PID 24744 used 395071 of time quantum 500000 and terminated
+
+OSS: Dispatching user process 24743 from queue 1 at time 360:1242392800
+OSS: Process with PID 24743 used full time quantum of 1000000
+
+OSS: process with PID 24743 being requeued to queue 2
+OSS: Dispatching user process 24743 from queue 2 at time 361:484795800
+OSS: Process PID 24743 used 184269 of time quantum 500000 and terminated
+
+
+
+Average time a process spent blocked: 4:4524641174  
+Average time a process waited to be launched: 0:706714
+CPU was idle with no processes for: 123:125157283984 
+Average CPU utilization 16.087963% 

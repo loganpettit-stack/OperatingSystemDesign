@@ -159,7 +159,7 @@ int main(int argc, char *argv[]){
                 msq.mesq_type = getppid();
 
                 snprintf(msq.mesq_text, sizeof(msq.mesq_text),
-                        "Process PID %d used %d of time quantum %d and terminated",
+                        "Process PID %d used %d of time quantum %d and terminated\n",
                         pcbTable[tableLocation].pid,  pcbTable[tableLocation].burstTime, pcbTable[tableLocation].quantum);
 
 
