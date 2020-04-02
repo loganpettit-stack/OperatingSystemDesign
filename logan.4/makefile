@@ -23,5 +23,5 @@ $(TARGETP): $(OBJECTP)
 
 .PHONY: clean
 clean:
-	rm -f *.o *.log adder_log input.dat $(TARGETO) $(TARGETP)
+	rm -f *.o *.dat $(TARGETO) $(TARGETP)
 

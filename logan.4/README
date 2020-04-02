@@ -1,0 +1,16 @@
+AUTHOR: Logan Pettit
+
+HOW TO RUN: This project can be ran by typing make which compiles the .c files inot exectuables oss and userProcess. You will then use the command ./oss which will call upon userProcess executable as needed.
+
+DESCRIPTION: This project will simulate a scheduler in an operating system by randomly spawning processes that will accomplish various tasks based on random number generation. The scheduler uses a multi-level feedback queue with 3 queues for user processes, 1 queue for real-time processes, and a queue for blocked processes. The queue is implemented in a round robin fashion when it comes to scheduling processes to run. Processes that are called can have 1 of 4 different tasks when called upon. 
+
+1. Run for a small amount of time quantum and terminate.
+2. Run for a portion of the quantum and get preempted.
+3. Run for a portion of the quantum and get blocked by an incoming event.
+4. Run for a full quantum and get rescheduled.
+
+The processes then return their job in the message queue and are rescheduled based on the job. The sheduler prevents process aging by making sure it visits each queue and visits each process before moving on to schedule more processes making sure each process gets cpu time. Every process will get a chance to run each cycle of the scheduler. 
+
+ISSUES: When it comes to running multiple processes in loops many times strange behavior has occured. Some example cases that have come up were deadlocks 1 out of every 10 runs or so. I considered these issues possible corruption in shared memory and moved on from them. The project runs perfectly as it should most of the time, but may require more than one run to get a succesful run sometimes. The last issue I had was printing into the file rather than stdout at the end. The program can print into the file much faster than it can to stdout therefore, when I went to swap I ran into an issue. The file was trying to be accessed by multiple deep nested functions at the same time causing some lines to be overwritten mid line by another funciton trying to acess the file as well. My solution for this was to move the file printing code out of the deep nested functions and bringing them up a couple layers. 
+
+PERFORMANCE: The project overall runs as it should and is tuned to complete all 100 processes should most of the time use all the queues in the multilevel queue. It is tuned to generate real-time processes 10% of the time and for a process to terminate about 30% of the time. 

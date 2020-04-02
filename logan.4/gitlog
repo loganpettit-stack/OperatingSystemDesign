@@ -1,0 +1,43 @@
+commit 679cc7496e646528c01cc094a01217f24c6d51ea
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Wed Apr 1 21:44:45 2020 -0500
+
+    added file printing and rearranged outputs to fix issues with printing to file, finished signal work
+
+commit 79caac4f3e24d735f9ba7e6006c0d3f4313b5ef1
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Wed Apr 1 12:42:10 2020 -0500
+
+    added metrics to measure different stats, finalized multilevel queue functionality
+
+commit a089fcacac92101f6c077ae4a4039042ca2332a4
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Tue Mar 31 20:00:36 2020 -0500
+
+    finished off user process use cases and multilevel queue functionality
+
+commit eee7b9b2c8e3c3e5778390a927640f216c19fd0a
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Tue Mar 31 11:00:52 2020 -0500
+
+    added ability for the user proces to choose different tasks to complete based on random number generation
+
+commit ba843dd617fff8b4a2bd56fe43f7197a16c21f56
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Mon Mar 30 20:55:40 2020 -0500
+
+    Fixed message queue and issues with launching processes past 100, now allow processes to launch properly
+
+commit ac463368aa286f946fab779d78f7f46a8bbda085
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Mon Mar 30 13:28:39 2020 -0500
+
+    have multiple processes launching and attempting to get scheduled, some issues with message queue passing
+
+commit 7d457b6cfd5b027fb554951856cac9a8f9618a1f
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Tue Mar 24 18:40:47 2020 -0500
+
+    initial commit
+
+
