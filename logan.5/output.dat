@@ -1,0 +1,380 @@
+./oss: has detected process 30959 is requesting resources
+
+./oss: Deadlock detected  at time 53:1187581000.
+./oss: child 30959 was granted resources
+
+./oss: Child 30959 is terminating./oss: has detected process 30960 is requesting resources
+
+./oss: Deadlock detected  at time 73:1666693000.
+./oss: child 30960 was granted resources
+
+./oss: Child 30960 is terminating
+./oss: Child 30961 is terminating
+./oss: Child 30962 is terminating
+./oss: Child 30963 is terminating./oss: has detected process 30964 is requesting resources
+
+./oss: Deadlock detected  at time 126:276820000.
+./oss: child 30964 was granted resources
+
+./oss: Child 30965 is terminating./oss: has detected process 30964 is requesting resources
+
+./oss: Deadlock detected  at time 148:537820000.
+./oss: child 30964 was granted resources
+
+./oss: Child 30966 is terminating./oss: has detected process 30964 is requesting resources
+
+./oss: child 30964 was granted resources
+
+./oss: Child 30964 is terminating
+./oss: Child 30967 is terminating
+./oss: Child 30968 is terminating
+./oss: Child 30969 is terminating
+./oss: Child 30970 is terminating
+./oss: Child 30971 is terminating./oss: has detected process 30972 is requesting resources
+
+./oss: Deadlock detected  at time 261:902047000.
+./oss: child 30972 was granted resources
+
+./oss: Child 30973 is terminating
+./oss: Child 30973 is terminating
+./oss: Child 30974 is terminating./oss: has detected process 30975 is requesting resources
+
+./oss: Deadlock detected  at time 316:686386000.
+./oss: child 30975 was granted resources
+
+./oss: Child 30976 is terminating./oss: has detected process 30975 is requesting resources
+
+./oss: Deadlock detected  at time 343:570000.
+./oss: child 30975 was granted resources
+
+./oss: Child 30975 is terminating
+./oss: Child 30975 is terminating
+./oss: Child 30978 is terminating
+./oss: Child 30979 is terminating./oss: has detected process 30980 is requesting resources
+
+./oss: Deadlock detected  at time 403:265716000.
+./oss: child 30980 was granted resources
+
+./oss: Child 30981 is terminating
+./oss: Child 30982 is terminating
+./oss: Child 30982 is terminating
+./oss: Child 30983 is terminating
+./oss: Child 30984 is terminating./oss: has detected process 30985 is requesting resources
+
+./oss: Deadlock detected  at time 486:231414000.
+./oss: child 30985 was granted resources
+
+./oss 10 resource requests have been granted, printing matrix
+
+	R00  R01  R02  R03  R04  R05  R06  R07  R08  R09  R10  R11  R12  R13  R14  R15  R16  R17  R18  R19  
+
+P30987	| 02 | 02 | 00 | 03 | 00 | 03 | 00 | 01 | 01 | 01 | 02 | 02 | 06 | 01 | 10 | 02 | 01 | 01 | 02 | 05 |
+P30988	| 07 | 02 | 10 | 02 | 00 | 01 | 03 | 02 | 02 | 00 | 04 | 01 | 02 | 03 | 00 | 04 | 04 | 03 | 01 | 05 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P30986	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P30985	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+
+
+./oss: Child 30986 is terminating
+./oss: Child 30986 is terminating./oss: has detected process 30987 is requesting resources
+
+./oss: Deadlock detected  at time 516:135733000.
+./oss: child 30987 was granted resources
+
+./oss: Child 30987 is terminating./oss: has detected process 30988 is requesting resources
+
+./oss: child 30988 was granted resources
+
+./oss: Child 30988 is terminating
+./oss: Child 30988 is terminating
+./oss: Child 30990 is terminating./oss: has detected process 30991 is requesting resources
+
+./oss: Deadlock detected  at time 576:190554000.
+./oss: child 30991 was granted resources
+
+./oss: Child 30991 is terminating./oss: has detected process 30992 is requesting resources
+
+./oss: Deadlock detected  at time 590:830005000.
+./oss: child 30992 was granted resources
+
+./oss: Child 30992 is terminating
+./oss: Child 30992 is terminating./oss: has detected process 30994 is requesting resources
+
+./oss: Deadlock detected  at time 623:1355109000.
+./oss: child 30994 was granted resources
+
+./oss: Child 30995 is terminating./oss: has detected process 30994 is requesting resources
+
+./oss: Deadlock detected  at time 645:875589000.
+./oss: child 30994 was granted resources
+
+./oss: Child 30996 is terminating./oss: has detected process 30994 is requesting resources
+
+./oss: Deadlock detected  at time 668:984904000.
+./oss: child 30994 was granted resources
+
+./oss: Child 30994 is terminating
+./oss: Child 30997 is terminating./oss: has detected process 30998 is requesting resources
+
+./oss: Deadlock detected  at time 699:875302000.
+./oss: child 30998 was granted resources
+
+./oss: Child 30998 is terminating
+./oss: Child 30998 is terminating
+./oss: Child 31000 is terminating
+./oss: Child 31001 is terminating
+./oss: Child 31002 is terminating./oss: has detected process 31003 is requesting resources
+
+./oss: Deadlock detected  at time 777:218629000.
+./oss: child 31003 was granted resources
+
+./oss: Child 31003 is terminating./oss: has detected process 31004 is requesting resources
+
+./oss: Deadlock detected  at time 792:585895000.
+./oss: child 31004 was granted resources
+
+./oss 10 resource requests have been granted, printing matrix
+
+	R00  R01  R02  R03  R04  R05  R06  R07  R08  R09  R10  R11  R12  R13  R14  R15  R16  R17  R18  R19  
+
+P31004	| 03 | 03 | 03 | 04 | 08 | 01 | 04 | 05 | 02 | 02 | 05 | 00 | 03 | 03 | 06 | 01 | 05 | 04 | 01 | 02 |
+P31005	| 06 | 02 | 05 | 07 | 02 | 01 | 01 | 00 | 02 | 01 | 00 | 03 | 00 | 00 | 00 | 01 | 05 | 00 | 02 | 00 |
+P31006	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P31007	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+
+
+./oss: Child 31004 is terminating./oss: has detected process 31005 is requesting resources
+
+./oss: child 31005 was granted resources
+
+./oss: Child 31005 is terminating
+./oss: Child 31005 is terminating
+./oss: Child 31007 is terminating./oss: has detected process 31008 is requesting resources
+
+./oss: Deadlock detected  at time 861:1133029000.
+./oss: child 31008 was granted resources
+
+./oss: Child 31008 is terminating./oss: has detected process 31009 is requesting resources
+
+./oss: Deadlock detected  at time 874:990865000.
+./oss: child 31009 was granted resources
+
+./oss: Child 31010 is terminating./oss: has detected process 31009 is requesting resources
+
+./oss: Deadlock detected  at time 897:781830000.
+./oss: child 31009 was granted resources
+
+./oss: Child 31009 is terminating./oss: has detected process 31011 is requesting resources
+
+./oss: child 31011 was granted resources
+
+./oss: Child 31012 is terminating./oss: has detected process 31011 is requesting resources
+
+./oss: Deadlock detected  at time 937:1400019000.
+./oss: child 31011 was granted resources
+
+./oss: Child 31011 is terminating
+./oss: Child 31011 is terminating
+./oss: Child 31014 is terminating
+./oss: Child 31015 is terminating
+./oss: Child 31016 is terminating
+./oss: Child 31017 is terminating
+./oss: Child 31018 is terminating./oss: has detected process 31019 is requesting resources
+
+./oss: Deadlock detected  at time 1042:924250000.
+./oss: child 31019 was granted resources
+
+./oss: Child 31020 is terminating./oss: has detected process 31019 is requesting resources
+
+./oss: Deadlock detected  at time 1064:190957000.
+./oss: child 31019 was granted resources
+
+./oss: Child 31019 is terminating
+./oss: Child 31019 is terminating
+./oss: Child 31022 is terminating
+./oss: Child 31023 is terminating./oss: has detected process 31024 is requesting resources
+
+./oss: Deadlock detected  at time 1128:748867000.
+./oss: child 31024 was granted resources
+
+./oss: Child 31024 is terminating
+./oss: Child 31025 is terminating./oss: has detected process 31026 is requesting resources
+
+./oss: Deadlock detected  at time 1169:829006000.
+./oss: child 31026 was granted resources
+
+./oss 10 resource requests have been granted, printing matrix
+
+	R00  R01  R02  R03  R04  R05  R06  R07  R08  R09  R10  R11  R12  R13  R14  R15  R16  R17  R18  R19  
+
+P31026	| 02 | 03 | 07 | 02 | 01 | 01 | 01 | 00 | 01 | 03 | 01 | 05 | 02 | 02 | 01 | 01 | 01 | 01 | 01 | 07 |
+P31027	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P31029	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P31028	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+
+
+./oss: Child 31027 is terminating./oss: has detected process 31026 is requesting resources
+
+./oss: Deadlock detected  at time 1187:704359000.
+./oss: child 31026 was granted resources
+
+./oss: Child 31026 is terminating
+./oss: Child 31026 is terminating
+./oss: Child 31029 is terminating
+./oss: Child 31030 is terminating./oss: has detected process 31031 is requesting resources
+
+./oss: Deadlock detected  at time 1247:252868000.
+./oss: child 31031 was granted resources
+
+./oss: Child 31031 is terminating
+./oss: Child 31032 is terminating./oss: has detected process 31033 is requesting resources
+
+./oss: Deadlock detected  at time 1281:469950000.
+./oss: child 31033 was granted resources
+
+./oss: Child 31034 is terminating./oss: has detected process 31033 is requesting resources
+
+./oss: Deadlock detected  at time 1301:22473000.
+./oss: child 31033 was granted resources
+
+./oss: Child 31033 is terminating
+./oss: Child 31035 is terminating./oss: has detected process 31036 is requesting resources
+
+./oss: Deadlock detected  at time 1327:1452433000.
+./oss: child 31036 was granted resources
+
+./oss: Child 31036 is terminating
+./oss: Child 31037 is terminating
+./oss: Child 31038 is terminating
+./oss: Child 31039 is terminating./oss: has detected process 31040 is requesting resources
+
+./oss: Deadlock detected  at time 1384:45160000.
+./oss: child 31040 was granted resources
+
+./oss: Child 31040 is terminating./oss: has detected process 31041 is requesting resources
+
+./oss: Deadlock detected  at time 1404:536541000.
+./oss: child 31041 was granted resources
+
+./oss: Child 31041 is terminating
+./oss: Child 31042 is terminating./oss: has detected process 31043 is requesting resources
+
+./oss: Deadlock detected  at time 1432:862021000.
+./oss: child 31043 was granted resources
+
+./oss: Child 31044 is terminating./oss: has detected process 31043 is requesting resources
+
+./oss: Deadlock detected  at time 1455:222705000.
+./oss: child 31043 was granted resources
+
+./oss: Child 31045 is terminating./oss: has detected process 31043 is requesting resources
+
+./oss: Deadlock detected  at time 1473:120786000.
+./oss: child 31043 was granted resources
+
+./oss 10 resource requests have been granted, printing matrix
+
+	R00  R01  R02  R03  R04  R05  R06  R07  R08  R09  R10  R11  R12  R13  R14  R15  R16  R17  R18  R19  
+
+P31043	| 04 | 04 | 08 | 02 | 08 | 10 | 01 | 03 | 02 | 01 | 09 | 07 | 03 | 03 | 05 | 05 | 09 | 02 | 04 | 03 |
+P31046	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P31047	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P31048	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+P0	| 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 | 00 |
+
+
+./oss: Child 31046 is terminating./oss: has detected process 31043 is requesting resources
+
+./oss: Deadlock detected  at time 1497:843060000.
+./oss: child 31043 was granted resources
+
+./oss: Child 31047 is terminating./oss: has detected process 31043 is requesting resources
+
+./oss: Deadlock detected  at time 1520:145477000.
+./oss: child 31043 was granted resources
+
+./oss: Child 31048 is terminating./oss: has detected process 31043 is requesting resources
+
+./oss: Deadlock detected  at time 1537:383391000.
+./oss: child 31043 was granted resources
+
+./oss: Child 31043 is terminating
+./oss: Child 31049 is terminating
+./oss: Child 31050 is terminating
+./oss: Child 31051 is terminating
+./oss: Child 31052 is terminating./oss: has detected process 31053 is requesting resources
+
+./oss: Deadlock detected  at time 1610:1851681000.
+./oss: child 31053 was granted resources
+
+./oss: Child 31053 is terminating
+./oss: Child 31054 is terminating
+./oss: Child 31055 is terminating
+./oss: Child 31056 is terminating./oss: has detected process 31057 is requesting resources
+
+./oss: Deadlock detected  at time 1681:658809000.
+./oss: child 31057 was granted resources
+
+./oss: Child 31057 is terminating./oss: has detected process 31058 is requesting resources
+
+./oss: child 31058 was granted resources
+
+./oss: Child 31058 is terminating
+Total processes launched 100
+./oss Total requests granted: 46
+
+./oss Total deadlocks detected: 41

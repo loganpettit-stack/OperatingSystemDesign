@@ -8,6 +8,9 @@
 #include <sys/msg.h>
 #include <stdbool.h>
 #include "Structures.h"
+#include <setjmp.h>
+#include <signal.h>
+
 
 #define CLOCKKEY 0x3574
 #define SEMAPHOREKEY 0x1470
@@ -17,7 +20,7 @@
 
 MemoryClock *memoryClock;
 Semaphore *semaphore;
-MessageQ *mesq;
+MessageQ mesq;
 ResourceDiscriptor *resources;
 ProcessCtrlBlk *pcbTable;
 
@@ -26,6 +29,8 @@ int pcbID;
 int semaphoreID;
 int descriptorID;
 int msqID;
+
+jmp_buf buf;
 
 MemoryClock *connectToClock(char *);
 
@@ -45,6 +50,9 @@ void addTime(long);
 
 void getResources(int);
 
+int checkRequestsSatisfied(int);
+
+void killHandler(int );
 
 int main(int argc, char *argv[]) {
 
@@ -62,6 +70,24 @@ int main(int argc, char *argv[]) {
     long nextCheckTermination;
     int terminationProbability;
     int resourceGrants = 0;
+
+
+    /* Signal Handling */
+    signal(SIGINT, killHandler);
+    signal(SIGTSTP, killHandler);
+
+    if (setjmp(buf) == 1) {
+        snprintf(errorArr, 200, "\n\n%s: Interrupt signal was sent, cleaning up memory segments ", errorString);
+        perror(errorArr);
+
+        /* Detaching shared memory */
+        shmdt(pcbTable);
+        shmdt(memoryClock);
+        shmdt(semaphore);
+        shmdt(resources);
+
+        exit(EXIT_SUCCESS);
+    }
 
     /*Connect to shared memory*/
     connectToClock(errorString);
@@ -88,6 +114,7 @@ int main(int argc, char *argv[]) {
     terminationChecktime = (rand() % 250000000);
     nextCheckTermination = processEndTimeNanos;
 
+    printf("userprocess %d starting\n", pcbTable[tableLocation].pid);
 
     /*Process requests resources and populates
  *      * its request matrix*/
@@ -98,50 +125,19 @@ int main(int argc, char *argv[]) {
     /*Generate initial resource requests*/
     generateRequests(tableLocation);
 
-    int i;
-    printf("\n\n%d process generated requests: \n", getpid());
-    int h;
-    for( h = 0; h < numResources; h++){
-        printf(" %d ", resources->requestMatrix[tableLocation][h]);
-    }
-
-
-    printf("\nResources that can be allocated for %d\n", getpid());
-    int y;
-    for (y = 0; y < numResources; y++){
-        printf(" %d ", resources->allocationVector[y]);
-    }
-
 
     /*Generate initial resources that the process will recieve*/
     getResources(tableLocation);
 
 
-    usleep(500);
-
-    printf("\nsharable resources \n");
-    for (y = 0; y < numResources; y++){
-        printf(" %d ", resources->sharableResources[y]);
-    }
-    printf("\n\nresources recieved by %d \n", getpid());
-    for(y = 0; y < numResources; y++){
-        printf(" %d ", resources->allocationMatrix[tableLocation][y]);
-    }
-    printf("\nAllocation vector after for %d\n", getpid());
-    for (y = 0; y < numResources; y++){
-        printf(" %d ", resources->allocationVector[y]);
-    }
-    printf("\nresources still left to request for %d\n", getpid());
-    for (y = 0; y < numResources; y++){
-        printf(" %d ", resources->requestMatrix[tableLocation][y]);
-    }
-
     printf("\nprocess %d leaving first critical section\n", getpid());
     sem_post(&(semaphore->mutex));
 
+    usleep(20000);
 
+    printf("\n");
     while (flag) {
-        usleep(500);
+        usleep(2000);
         /*send message on mutex that we want
  *          * to enter the critical section*/
         sem_wait(&(semaphore->mutex));
@@ -155,8 +151,8 @@ int main(int argc, char *argv[]) {
 
         if (timeForResourceActivity <= currentTime) {
 
+            /*Check if process should terminate*/
             if (currentTime >= nextCheckTermination) {
-
 
                 /*Generate random number between 0 - 100*/
                 terminationProbability = (rand() % 101);
@@ -173,83 +169,66 @@ int main(int argc, char *argv[]) {
                 nextCheckTermination = currentTime + terminationChecktime;
             }
 
-                /*Process is not ready to terminate and
- *                  * is granted resources*/
-            else if (resources->allocate[tableLocation] == 1) {
 
-                printf("process %d is granted a request for resources\n", getpid());
-                /*No longer requesting so tell parent*/
-                resources->request[tableLocation] = 0;
+            /*If process decided not to terminate request resources
+ *              * or allocate them*/
+            if (resources->terminating[tableLocation] == 0) {
+                /*If process granted a request for resources allow it
+ *                  * to grab more resources and */
+                if (resources->allocate[tableLocation] == 1) {
+                    printf("Userprocess: %d granted chance to obtain more resources", getpid());
+                    resources->allocate[tableLocation] = 0;
+                    getResources(tableLocation);
 
-                resourceGrants += 1;
+                    int check = checkRequestsSatisfied(tableLocation);
 
-                /*If the process is granted resources
- *                  * five times terminate*/
-                if (resourceGrants >= 5) {
+                    if (check == 0) {
+                        resources->terminating[tableLocation] = 1;
+                    }
+                }
+
+                    /*If a process is in a deadlock and told to release it's resources*/
+                else if (resources->release[tableLocation] == 1) {
+                    printf("userprocess: %d told to release resources and terminate due to deadlock \n", getpid());
                     resources->terminating[tableLocation] = 1;
                 }
+                    /*Otherwise request the rest of the resouces this process requires*/
+                else {
+                    resources->request[tableLocation] = 1;
 
-                getResources(tableLocation);
-            }
+                    printf("userprocess: %d waiting for request for resources\n", getpid());
 
-                /*Process was terminated due to deadlock prevention*/
-            else if (resources->release[tableLocation] == 1) {
-                printf("process %d is  being terminated for deadlock prevention\n", getpid());
+                    /*Send message to parent that user wants resouces
+ *                     mesq.mesq_type = getppid();
+ *                                         snprintf(mesq.mesq_text, sizeof(mesq.mesq_text), "Requesting resources");
+ *                                                             if (msgsnd(msqID, &mesq, sizeof(mesq.mesq_text), MSG_NOERROR) == -1) {
+ *                                                                                     perror("Error: OSS failed to send message");
+ *                                                                                                             exit(1);
+ *                                                                                                                                 }*/
 
-                resources->terminating[tableLocation] = 1;
-            }
+                    sem_post(&(semaphore->mutex));
 
-                /*Process has not requested any resources yet*/
-            else if (resources->request[tableLocation] == 0) {
-                printf("process %d is looking to request some resources \n", getpid());
-                resources->request[tableLocation] = 1;
-            }
+                    /*wait to recieve message from parent when granted to get more resources*/
+                    if (msgrcv(msqID, &mesq, sizeof(mesq), getpid(), MSG_NOERROR) == -1) {
+                        snprintf(errorArr, 200, "\n%s User failed to receive message", errorString);
+                        perror(errorArr);
+                        exit(1);
+                    }
 
-                /*Process is suspended and will wait for message to
- *                  * wake up*/
-            else if (resources->suspended[tableLocation] == 1) {
-                printf("process %d was suspended waiting for message to wake up from master\n", getpid());
-                sem_post(&(semaphore->mutex));
-
-                if (msgrcv(msqID, &mesq, sizeof(mesq), getpid(), MSG_NOERROR) == -1) {
-                    snprintf(errorArr, 200, "\n%s User failed to receive message", errorString);
-                    perror(errorArr);
-                    exit(1);
+                    printf("userprocess: %d recieved message: %s ,to obtain more resources\n", getpid(),
+                           mesq.mesq_text);
                 }
 
-                printf("process %d has been woken from suspended state \n", getpid());
-                continue;
+
+                timeForResourceActivity = resourceActivityTime + currentTime;
             }
-                /*Process requests resources, but they are have not
- *                  * been granted*/
-            else {
-
-                printf("process %d requesting resources but they have not been granted yet\n", getpid());
-                resources->request[tableLocation] = 0;
-
-                currentTime = getTimeInNanoseconds();
-                timeForResourceActivity = currentTime + resourceActivityTime;
-
-            }
-
-
-            timeForResourceActivity = resourceActivityTime + currentTime;
         }
 
-
-        /*Check if all resource grants have been made
- *          * if so the process has terminated*/
-        int k;
-        int resourceCheck = 0;
-        for(k = 0; k < numResources; k++){
-            resourceCheck += resources->requestMatrix[tableLocation][k];
-        }
-
-        if(resourceCheck == 0){
-            resources->terminating[tableLocation] = 1;
-        }
 
         printf("process %d leaving critical section\n", getpid());
+
+
+        usleep(1000);
         /*Leave the critical section*/
         sem_post(&(semaphore->mutex));
 
@@ -263,16 +242,28 @@ int main(int argc, char *argv[]) {
     }
 
 
+    printf("userprocess: made it to end of process clearning memory segments\n");
     /*Clear shared memory*/
-    shmctl(clocKID, IPC_RMID, NULL);
-    shmctl(pcbID, IPC_RMID, NULL);
-    shmctl(semaphoreID, IPC_RMID, NULL);
-    shmctl(descriptorID, IPC_RMID, NULL);
-    msgctl(msqID, IPC_RMID, NULL);
+    shmdt(pcbTable);
+    shmdt(memoryClock);
+    shmdt(semaphore);
+    shmdt(resources);
     return 0;
 }
 
-void generateRequests(int tableLocation){
+int checkRequestsSatisfied(int tableLocation) {
+    /*Check if all resource grants have been made
+ *       * if so the process has terminated*/
+    int k;
+    int resourceCheck = 0;
+    for (k = 0; k < numResources; k++) {
+        resourceCheck += resources->requestMatrix[tableLocation][k];
+    }
+
+    return resourceCheck;
+}
+
+void generateRequests(int tableLocation) {
     int i;
     for (i = 0; i < numResources; i++) {
 
@@ -288,7 +279,30 @@ void generateRequests(int tableLocation){
     }
 }
 
-void getResources(int tableLocation){
+void getResources(int tableLocation) {
+
+    int tempVector[numResources] = {0};
+
+    printf("\n\nuser process: %d current requests: \n", getpid());
+    int h;
+    for (h = 0; h < numResources; h++) {
+        printf(" %d ", resources->requestMatrix[tableLocation][h]);
+    }
+
+    printf("\n\n userProcess: %d current holdings: \n", getpid());
+    for (h = 0; h < numResources; h++) {
+        printf(" %d ", resources->allocationMatrix[tableLocation][h]);
+    }
+
+
+    printf("\nuser process: Resources that can be allocated for %d\n", getpid());
+    int y;
+    for (y = 0; y < numResources; y++) {
+        printf(" %d ", resources->allocationVector[y]);
+    }
+
+
+
     int i;
     for (i = 0; i < numResources; i++) {
 
@@ -298,29 +312,47 @@ void getResources(int tableLocation){
             /*Request resources based on how much is left, if we are requesting more than what is left then
  *              * receive random amount from whats left otherwise recieve random amount of full request*/
             if (resources->requestMatrix[tableLocation][i] > resources->allocationVector[i]) {
-                resources->allocationMatrix[tableLocation][i] = (rand() % (resources->allocationVector[i] + 1));
+                tempVector[i] = (rand() % (resources->allocationVector[i] + 1));
+                resources->allocationMatrix[tableLocation][i] += tempVector [i];
             } else {
-                resources->allocationMatrix[tableLocation][i] =
-                        (rand() % resources->requestMatrix[tableLocation][i] + 1);
+                tempVector[i] = (rand() % resources->requestMatrix[tableLocation][i] + 1);
+                resources->allocationMatrix[tableLocation][i] += tempVector[i];
             }
 
             /*Remove nonshareable resources from allocation vector to show they are no longer available,
  *              * if sharable then provide the resource to the process update processes request matrix
  *                           * to what it will still need*/
             if (resources->sharableResources[i] != 1) {
-                resources->allocationVector[i] -= resources->allocationMatrix[tableLocation][i];
+                resources->allocationVector[i] -= tempVector[i];
                 /*Remove resources that have been allocated from this processes requests*/
-                resources->requestMatrix[tableLocation][i] -= resources->allocationMatrix[tableLocation][i];
+                resources->requestMatrix[tableLocation][i] -= tempVector[i];
             } else {
 
-                resources->allocationMatrix[tableLocation][i] = resources->requestMatrix[tableLocation][i];
-                resources->requestMatrix[tableLocation][i] -= resources->allocationMatrix[tableLocation][i];
+                resources->requestMatrix[tableLocation][i] -= tempVector[i];
 
             }
         }
 
         addTime(1000);
     }
+
+    printf("\nsharable resources \n");
+    for (y = 0; y < numResources; y++) {
+        printf(" %d ", resources->sharableResources[y]);
+    }
+    printf("\n\nuser process allocations after reciving resources %d \n", getpid());
+    for (y = 0; y < numResources; y++) {
+        printf(" %d ", resources->allocationMatrix[tableLocation][y]);
+    }
+    printf("\nAllocation vector after for %d\n", getpid());
+    for (y = 0; y < numResources; y++) {
+        printf(" %d ", resources->allocationVector[y]);
+    }
+    printf("\nresources still left to request for %d\n", getpid());
+    for (y = 0; y < numResources; y++) {
+        printf(" %d ", resources->requestMatrix[tableLocation][y]);
+    }
+
 }
 
 /*Function to connect to shared memory and error check*/
@@ -450,3 +482,5 @@ void addTime(long nanoseconds) {
         memoryClock->nanoseconds += nanoseconds;
     }
 }
+
+void killHandler(int dummy) { longjmp(buf, 1); }
