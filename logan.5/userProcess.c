@@ -125,24 +125,22 @@ int main(int argc, char *argv[]) {
     /*Generate initial resources that the process will recieve*/
     getResources(tableLocation);
 
+    addTime(1000);
 
     sem_post(&(semaphore->mutex));
 
     usleep(20000);
 
-    printf("\n");
     while (flag) {
         usleep(2000);
         /*send message on mutex that we want
  *          * to enter the critical section*/
         sem_wait(&(semaphore->mutex));
 
-        printf("user process %d entered  second critical section\n", getpid());
 
         /*Check time to see if we are ready to do resource activities*/
         currentTime = getTimeInNanoseconds();
 
-        printf("current time: %ld, time for resource activity %ld\n", currentTime, timeForResourceActivity);
 
         if (timeForResourceActivity <= currentTime) {
 
@@ -151,17 +149,13 @@ int main(int argc, char *argv[]) {
 
                 /*Generate random number between 0 - 100*/
                 terminationProbability = (rand() % 101);
-                printf("checking to terminate termination probabilty %d\n", terminationProbability);
 
                 /*Process will terminate if random number is
  *                  * less than equal to 20 making process terminate
  *                                   * 20% of the time*/
                 if (terminationProbability <= 30) {
                     resources->terminating[tableLocation] = 1;
-                    printf("process %d flagging to terminate", getpid());
                 }
-
-
 
                 nextCheckTermination = currentTime + terminationChecktime;
             }
@@ -173,7 +167,6 @@ int main(int argc, char *argv[]) {
                 /*If process granted a request for resources allow it
  *                  * to grab more resources and */
                 if (resources->allocate[tableLocation] == 1) {
-                    printf("Userprocess: %d granted chance to obtain more resources", getpid());
                     resources->allocate[tableLocation] = 0;
                     getResources(tableLocation);
 
@@ -186,15 +179,11 @@ int main(int argc, char *argv[]) {
 
                     /*If a process is in a deadlock and told to release it's resources*/
                 else if (resources->release[tableLocation] == 1) {
-                    printf("userprocess: %d told to release resources and terminate due to deadlock \n", getpid());
                     resources->terminating[tableLocation] = 1;
                 }
                     /*Otherwise request the rest of the resouces this process requires*/
                 else {
                     resources->request[tableLocation] = 1;
-
-                    printf("userprocess: %d waiting for request for resources\n", getpid());
-
                     sem_post(&(semaphore->mutex));
 
                     /*wait to recieve message from parent when granted to get more resources*/
@@ -203,35 +192,23 @@ int main(int argc, char *argv[]) {
                         perror(errorArr);
                         exit(1);
                     }
-
-                    printf("userprocess: %d recieved message: %s ,to obtain more resources\n", getpid(),
-                           mesq.mesq_text);
                 }
-
 
                 timeForResourceActivity = resourceActivityTime + currentTime;
             }
         }
 
-
-        printf("process %d leaving critical section\n", getpid());
-
-
         /*Leave the critical section*/
         sem_post(&(semaphore->mutex));
 
         if (resources->terminating[tableLocation] == 1) {
-            printf("process %d terminating\n", getpid());
             flag = false;
         }
-
 
         addTime(10000);
     }
 
 
-
-    printf("userprocess: made it to end of process clearning memory segments\n");
     /*Clear shared memory*/
     shmdt(pcbTable);
     shmdt(memoryClock);
@@ -272,23 +249,23 @@ void getResources(int tableLocation) {
 
     int tempVector[numResources] = {0};
 
-    printf("\n\nuser process: %d current requests: \n", getpid());
-    int h;
-    for (h = 0; h < numResources; h++) {
-        printf(" %d ", resources->requestMatrix[tableLocation][h]);
-    }
-
-    printf("\n\n userProcess: %d current holdings: \n", getpid());
-    for (h = 0; h < numResources; h++) {
-        printf(" %d ", resources->allocationMatrix[tableLocation][h]);
-    }
-
-
-    printf("\nuser process: Resources that can be allocated for %d\n", getpid());
-    int y;
-    for (y = 0; y < numResources; y++) {
-        printf(" %d ", resources->allocationVector[y]);
-    }
+  /*  printf("\n\nuser process: %d current requests: \n", getpid());
+ *      int h;
+ *          for (h = 0; h < numResources; h++) {
+ *                  printf(" %d ", resources->requestMatrix[tableLocation][h]);
+ *                      }
+ *
+ *                          printf("\n\n userProcess: %d current holdings: \n", getpid());
+ *                              for (h = 0; h < numResources; h++) {
+ *                                      printf(" %d ", resources->allocationMatrix[tableLocation][h]);
+ *                                          }
+ *
+ *
+ *                                              printf("\nuser process: Resources that can be allocated for %d\n", getpid());
+ *                                                  int y;
+ *                                                      for (y = 0; y < numResources; y++) {
+ *                                                              printf(" %d ", resources->allocationVector[y]);
+ *                                                                  }*/
 
 
 
@@ -325,22 +302,22 @@ void getResources(int tableLocation) {
         addTime(1000);
     }
 
-    printf("\nsharable resources \n");
-    for (y = 0; y < numResources; y++) {
-        printf(" %d ", resources->sharableResources[y]);
-    }
-    printf("\n\nuser process allocations after reciving resources %d \n", getpid());
-    for (y = 0; y < numResources; y++) {
-        printf(" %d ", resources->allocationMatrix[tableLocation][y]);
-    }
-    printf("\nAllocation vector after for %d\n", getpid());
-    for (y = 0; y < numResources; y++) {
-        printf(" %d ", resources->allocationVector[y]);
-    }
-    printf("\nresources still left to request for %d\n", getpid());
-    for (y = 0; y < numResources; y++) {
-        printf(" %d ", resources->requestMatrix[tableLocation][y]);
-    }
+  /*  printf("\nsharable resources \n");
+ *      for (y = 0; y < numResources; y++) {
+ *              printf(" %d ", resources->sharableResources[y]);
+ *                  }
+ *                      printf("\n\nuser process allocations after reciving resources %d \n", getpid());
+ *                          for (y = 0; y < numResources; y++) {
+ *                                  printf(" %d ", resources->allocationMatrix[tableLocation][y]);
+ *                                      }
+ *                                          printf("\nAllocation vector after for %d\n", getpid());
+ *                                              for (y = 0; y < numResources; y++) {
+ *                                                      printf(" %d ", resources->allocationVector[y]);
+ *                                                          }
+ *                                                              printf("\nresources still left to request for %d\n", getpid());
+ *                                                                  for (y = 0; y < numResources; y++) {
+ *                                                                          printf(" %d ", resources->requestMatrix[tableLocation][y]);
+ *                                                                              }*/
 
 }
 

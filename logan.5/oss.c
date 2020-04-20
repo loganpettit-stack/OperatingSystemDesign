@@ -68,8 +68,6 @@ Queue *createQueue(unsigned int);
 
 void enqueue(Queue *, int);
 
-int dequeue(Queue *);
-
 void initializeResources();
 
 unsigned int startTimer(int);
@@ -94,6 +92,8 @@ int findPid(int);
 
 bool eliminateDeadlock(FILE *, char *, char*);
 
+void help_message(char*);
+
 int main(int argc, char *argv[]) {
 
     char *exe = strdup(argv[0]);
@@ -103,12 +103,9 @@ int main(int argc, char *argv[]) {
     long currentTimeNanos = 0;
     int seconds = 3;
     int c;
-    int process = 0;
     int tableLocation = 0;
     FILE *outFile;
     char *fileName = "output.dat";
-    bool runFlag;
-    int processToRun;
     int statusCode = 0;
 
     launchedProcesses = createQueue(totalPcbs);
@@ -137,7 +134,7 @@ int main(int argc, char *argv[]) {
         int u;
         for (u = 0; u < totalPcbs; u++) {
             if (bitVector[u] == 1) {
-                printf("killing process %d \n", pcbTable[u].pid);
+                fprintf(stderr, "killing process %d \n", pcbTable[u].pid);
                 kill(pcbTable[u].pid, SIGKILL);
             }
         }
@@ -169,7 +166,7 @@ int main(int argc, char *argv[]) {
         int u;
         for (u = 0; u < totalPcbs; u++) {
             if (bitVector[u] == 1) {
-                printf("killing process %d \n", pcbTable[u].pid);
+                fprintf(stderr, "killing process %d \n", pcbTable[u].pid);
                 kill(pcbTable[u].pid, SIGKILL);
             }
         }
@@ -202,7 +199,7 @@ int main(int argc, char *argv[]) {
     while ((c = getopt(argc, argv, "hv")) != -1)
         switch (c) {
             case 'h':
-                printf("h chose\n");
+                help_message(executable);
                 break;
             case 'v':
                 verbose = true;
@@ -245,8 +242,6 @@ int main(int argc, char *argv[]) {
 
     while (true) {
 
-        printf("time is: %ld:%ld\n", memoryClock->seconds, memoryClock->nanoseconds);
-
         /*Terminate program if we have no running processes and
  *          * we have ran 100 processes*/
         if (totalLaunched >= 100 && runningProcesses == 0) {
@@ -271,7 +266,6 @@ int main(int argc, char *argv[]) {
             if ((tableLocation = findTableLocation(bitVector)) != -1) {
 
                 pid = launchProcess(errorString, tableLocation);
-                printf("\nLaunching process %d\n", pid);
                 enqueue(launchedProcesses, pid);
 
 
@@ -293,8 +287,6 @@ int main(int argc, char *argv[]) {
         /*Enter critical section*/
         sem_wait(&(semaphore->mutex));
 
-        printf("oss is entering crit section running processes: %d\n", runningProcesses);
-
         if (runningProcesses > 0) {
 
             /*Check to see if a process is trying to terminate*/
@@ -304,22 +296,13 @@ int main(int argc, char *argv[]) {
                 /*If process is trying to terminate de-allocate resources*/
                 if (resources->terminating[i] == 1) {
 
-                    printf("oss: process %d is trying to terminate\n", pcbTable[i].pid);
-
-                    /* kill(pcbTable[i].pid, SIGKILL);
- *                      printf("\n%s: Child %d is terminating with status code\n", executable, pcbTable[i].pid);*/
-
                     pid = wait(&statusCode);
-                    printf("\n%s: Child %d is terminating with status code %d\n", executable, pid, statusCode);
                     runningProcesses -= 1;
-
 
                     if (verbose) {
                         char resourcesReleased[200] = {""};
                         char resourceString[200] = {""};
                         int processToKill = findPid(pid);
-
-                        printf("process to kill %d has release %d\n", pcbTable[processToKill].pid, resources->release[processToKill]);
 
                         if (resources->release[processToKill] != 1) {
                             for (i = 0; i < numResources; i++) {
@@ -348,7 +331,6 @@ int main(int argc, char *argv[]) {
             for (i = 0; i < totalPcbs; i++) {
                 /*upon resource request check if we are not
  *                  in a deadlock state and allocate*/
-                printf("oss: process %d is trying to request resources %d\n", pcbTable[i].pid, resources->request[i]);
                 if (resources->request[i] == 1) {
                     allocateResources(i, executable, outFile, errorString);
                 }
@@ -406,30 +388,6 @@ void allocateResources(int location, char *executable, FILE *outFile, char *erro
             displayMatrix(resources->allocationMatrix, outFile);
         }
     }
-
-
-
-    /*set up needs matrix*/
-    int m;
-    int k;
-    int resourceCheck = 0;
-
-    for (k = 0; k < numResources; k++) {
-        printf(" %d ", resources->requestMatrix[location][k]);
-    }
-
-
-    printf("Allocation vector\n");
-
-    for (m = 0; m < numResources; m++) {
-        printf(" %d ", resources->allocationVector[m]);
-        if (resources->requestMatrix[location][m] <= resources->allocationVector[m]) {
-            resourceCheck += 1;
-        }
-    }
-
-
-    printf("Checking deadlock state\n");
 
     safe = checkSafeState(outFile, executable);
 
@@ -656,37 +614,29 @@ bool checkSafeState(FILE *outFile, char *executable) {
     bool finish[totalPcbs] = {0};
     int safe[totalPcbs];
     bool found;
-
-
-    printf("OSS: checking for deadlocks, current allocations are:\n");
+    int i;
 
     fprintf(outFile, "%s: running deadlock detection at time %ld:%ld\n",
             executable, memoryClock->seconds, memoryClock->nanoseconds);
 
-    /*current allocation matrix*/
-    int m;
-    int k;
-    for (m = 0; m < totalPcbs; m++) {
-        for (k = 0; k < numResources; k++) {
-            printf(" %d ", resources->allocationMatrix[m][k]);
-        }
+    /*current allocation matrix
+ *     int m;
+ *         int k;
+ *             for (m = 0; m < totalPcbs; m++) {
+ *                     for (k = 0; k < numResources; k++) {
+ *                                 printf(" %d ", resources->allocationMatrix[m][k]);
+ *                                         }
+ *
+ *                                                 printf("\n");
+ *                                                     }*/
 
-        printf("\n");
-    }
 
-
-    printf("\n");
 
     /*set resourceQuantity to the current resource vector state*/
-    printf("allocation vector\n");
-
-    int i;
     for (i = 0; i < numResources; i++) {
         work[i] = resources->allocationVector[i];
-        printf(" %d ", work[i]);
     }
 
-    printf("\n");
 
     /*Find a process whos needs we can grant*/
     int count = 0;
@@ -705,7 +655,6 @@ bool checkSafeState(FILE *outFile, char *executable) {
                 int j;
                 for (j = 0; j < numResources; j++) {
                     if (resources->requestMatrix[i][j] > work[j]) {
-                        printf("needs exceeded available resources breaking\n");
                         break;
                     }
                 }
@@ -713,8 +662,6 @@ bool checkSafeState(FILE *outFile, char *executable) {
                 /*if a process can request all resources
  *                  * it needs */
                 if (j == numResources) {
-
-                    printf("safe number of requests found\n");
 
                     for (j = 0; j < numResources; j++) {
                         work[j] += resources->allocationMatrix[i][j];
@@ -733,7 +680,6 @@ bool checkSafeState(FILE *outFile, char *executable) {
 
         /*If any process is marked as not safe*/
         if (found == false) {
-            printf("OSS: deadlock state detected\n");
             return false;
         }
 
@@ -759,9 +705,6 @@ void updateResourceDescriptor(int pid) {
         }
     }
 
-
-    printf("oss: process %d found at %d\n", pid, processLocation);
-
     bitVector[processLocation] = 0;
 
     pcbTable[processLocation].pid = 0;
@@ -774,10 +717,10 @@ void updateResourceDescriptor(int pid) {
 
 
     int g;
-    printf("OSS: %d allocation vector before \n", pcbTable[processLocation].pid);
-    for (g = 0; g < numResources; g++) {
-        printf(" %d ", resources->allocationVector[g]);
-    }
+   /* printf("OSS: %d allocation vector before \n", pcbTable[processLocation].pid);
+ *     for (g = 0; g < numResources; g++) {
+ *             printf(" %d ", resources->allocationVector[g]);
+ *                 }*/
 
     /*Reset resources in descriptor*/
     int i;
@@ -793,14 +736,14 @@ void updateResourceDescriptor(int pid) {
         resources->requestMatrix[processLocation][i] = 0;
     }
 
-    printf("\n");
-
-    printf("OSS: %d allocation vector after \n", pcbTable[processLocation].pid);
-    for (g = 0; g < numResources; g++) {
-        printf(" %d ", resources->allocationVector[g]);
-    }
-
-    printf("\n");
+   /* printf("\n");
+ *
+ *     printf("OSS: %d allocation vector after \n", pcbTable[processLocation].pid);
+ *         for (g = 0; g < numResources; g++) {
+ *                 printf(" %d ", resources->allocationVector[g]);
+ *                     }
+ *
+ *                         printf("\n");*/
 }
 
 void initializeResources() {
@@ -813,7 +756,6 @@ void initializeResources() {
         /*Give each resource a random number
  *          * between 1 an 10 instances*/
         resources->resourceVector[i] = (rand() % (20 - 1 + 1)) + 1;
-        printf("random Resources: %d\n", resources->resourceVector[i]);
 
         /*resouces available to be used*/
         resources->allocationVector[i] = resources->resourceVector[i];
@@ -1110,4 +1052,15 @@ int findPid(int pid) {
     }
 
     return i;
+}
+void help_message(char *executable) {
+    fprintf(stderr, "\nHelp Option Selected [-h]: The following is the proper format for executing the file:\n\n%s", executable);
+    fprintf(stderr, " [-h] [-v]\n\n");
+    fprintf(stderr, "By default just typing %s will give you information on deadlock management\n\n", executable);
+    fprintf(stderr, "[-h] : Print a help message and exit.\n"
+                    "[-v] : This option will be used to enable a verbose mode. In verbose mode you will get information\n"
+                    "\ton the resource management as well as deadlock management\n");
+
+    exit(EXIT_SUCCESS);
+
 }
