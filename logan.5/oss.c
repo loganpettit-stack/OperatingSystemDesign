@@ -82,23 +82,23 @@ void initializePCB(int);
 
 void updateResourceDescriptor(int);
 
-void allocateResources(int, char *, FILE *, char*);
+void allocateResources(int, char *, FILE *, char *);
 
-bool checkSafeState();
+bool checkSafeState(FILE *, char *);
 
 void addTime(long);
 
 void displayMatrix(int[totalPcbs][numResources], FILE *);
 
-bool eliminateDeadlock();
+int findPid(int);
+
+bool eliminateDeadlock(FILE *, char *, char*);
 
 int main(int argc, char *argv[]) {
 
     char *exe = strdup(argv[0]);
     char *executable = strdup(argv[0]);
     char *errorString = strcat(exe, ": Error: ");
-    char errorArr[200];
-    long nextLaunchTimeSeconds = 0;
     long nextLaunchTimeNanos = 0;
     long currentTimeNanos = 0;
     int seconds = 3;
@@ -145,9 +145,11 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "\nTotal processes launched %d", totalLaunched);
         fprintf(stderr, "\n%s Total requests granted: %d\n", executable, requestGrantCount);
         fprintf(stderr, "\n%s Total deadlocks detected: %d\n", executable, deadlockCount);
+        fprintf(stderr, "\n%s Deadlock detection algorithm ran %d times\n", executable, deadlockAlgorithmCount);
         fprintf(outFile, "\nTotal processes launched %d", totalLaunched);
         fprintf(outFile, "\n%s Total requests granted: %d\n", executable, requestGrantCount);
         fprintf(outFile, "\n%s Total deadlocks detected: %d\n", executable, deadlockCount);
+        fprintf(outFile, "\n%s Deadlock detection algorithm ran %d times\n", executable, deadlockAlgorithmCount);
 
         fclose(outFile);
         shmdt(pcbTable);
@@ -174,10 +176,12 @@ int main(int argc, char *argv[]) {
 
         fprintf(stderr, "\nTotal processes launched %d", totalLaunched);
         fprintf(stderr, "\n%s Total requests granted: %d\n", executable, requestGrantCount);
+        fprintf(stderr, "\n%s Deadlock detection algorithm ran %d times\n", executable, deadlockAlgorithmCount);
         fprintf(stderr, "\n%s Total deadlocks detected: %d\n", executable, deadlockCount);
         fprintf(outFile, "\nTotal processes launched %d", totalLaunched);
         fprintf(outFile, "\n%s Total requests granted: %d\n", executable, requestGrantCount);
         fprintf(outFile, "\n%s Total deadlocks detected: %d\n", executable, deadlockCount);
+        fprintf(outFile, "\n%s Deadlock detection algorithm ran %d times\n", executable, deadlockAlgorithmCount);
 
         fclose(outFile);
         shmdt(pcbTable);
@@ -309,10 +313,27 @@ int main(int argc, char *argv[]) {
                     printf("\n%s: Child %d is terminating with status code %d\n", executable, pid, statusCode);
                     runningProcesses -= 1;
 
+
                     if (verbose) {
-                        fprintf(outFile, "\n%s: Child %d is terminating", executable, pcbTable[i].pid);
-                        printf("\n%s: Child %d is terminating", executable, pcbTable[i].pid);
+                        char resourcesReleased[200] = {""};
+                        char resourceString[200] = {""};
+                        int processToKill = findPid(pid);
+
+                        printf("process to kill %d has release %d\n", pcbTable[processToKill].pid, resources->release[processToKill]);
+
+                        if (resources->release[processToKill] != 1) {
+                            for (i = 0; i < numResources; i++) {
+                                snprintf(resourcesReleased, 200, " R%d:%d, ", i,
+                                         resources->allocationMatrix[processToKill][i]);
+                                strcat(resourceString, resourcesReleased);
+                            }
+
+                            fprintf(outFile, "\n%s: Child %d is terminating and releasing resources: %s\n",
+                                    executable, pcbTable[processToKill].pid, resourceString);
+                            linesWritten += 1;
+                        }
                     }
+
 
                     /*Reset data in descriptor and add resources
  *                      * back to the allocation vector*/
@@ -321,6 +342,7 @@ int main(int argc, char *argv[]) {
 
                 addTime(1000);
             }
+
 
             /*Check if any processes are requesting resources*/
             for (i = 0; i < totalPcbs; i++) {
@@ -342,14 +364,15 @@ int main(int argc, char *argv[]) {
 
     }
 
-    /*wait(&statusCode);*/
 
     fprintf(stderr, "\n%s Program exiting after running %d processes\n", executable, totalLaunched);
     fprintf(stderr, "\n%s Total requests granted: %d\n", executable, requestGrantCount);
     fprintf(stderr, "\n%s Total deadlocks detected: %d\n", executable, deadlockCount);
-    fprintf(outFile, "\nTotal processes launched %d", totalLaunched);
+    fprintf(stderr, "\n%s Deadlock detection algorithm ran %d times\n", executable, deadlockAlgorithmCount);
+    fprintf(outFile, "\n%s Total processes launched %d\n", executable, totalLaunched);
     fprintf(outFile, "\n%s Total requests granted: %d\n", executable, requestGrantCount);
     fprintf(outFile, "\n%s Total deadlocks detected: %d\n", executable, deadlockCount);
+    fprintf(outFile, "\n%s Deadlock detection algorithm ran %d times\n", executable, deadlockAlgorithmCount);
 
     fclose(outFile);
 
@@ -373,7 +396,18 @@ void allocateResources(int location, char *executable, FILE *outFile, char *erro
     bool safe;
     char errorArr[200];
 
-    fprintf(outFile, "%s: has detected process %d is requesting resources\n", executable, pcbTable[location].pid);
+    if (verbose) {
+        fprintf(outFile, "%s: has detected process %d is requesting resources at time %ld:%ld\n", executable,
+                pcbTable[location].pid, memoryClock->seconds, memoryClock->nanoseconds);
+
+        if (requestGrantCount % 10 == 0) {
+            fprintf(outFile, "\n%s 10 resource requests have been granted, printing matrix\n", executable);
+            linesWritten += 1;
+            displayMatrix(resources->allocationMatrix, outFile);
+        }
+    }
+
+
 
     /*set up needs matrix*/
     int m;
@@ -397,28 +431,28 @@ void allocateResources(int location, char *executable, FILE *outFile, char *erro
 
     printf("Checking deadlock state\n");
 
-    safe = checkSafeState();
+    safe = checkSafeState(outFile, executable);
 
 
     if (safe) {
 
-        printf("oss: safe state allocate resources: %d sending message to user process\n", safe);
+        fprintf(outFile, "%s: safe state detected sending message to user process %d to allocate resources at time %ld:%ld\n"
+                ,executable, pcbTable[location].pid, memoryClock->seconds, memoryClock->nanoseconds);
 
-        fprintf(stderr, "\n%s: child %d was granted resources.\n", executable, pcbTable[location].pid);
         resources->request[location] = 0;
         resources->allocate[location] = 1;
         requestGrantCount += 1;
 
         if (verbose) {
-            fprintf(outFile, "\n%s: child %d was granted resources\n", executable, pcbTable[location].pid);
             linesWritten += 1;
+            fprintf(outFile, "\n%s: child %d was granted resources at time %ld:%ld\n",
+                    executable, pcbTable[location].pid, memoryClock->seconds, memoryClock->nanoseconds);
 
-
-            if (requestGrantCount % 10 == 0) {
-                fprintf(outFile, "\n%s 10 resource requests have been granted, printing matrix\n", executable);
-                linesWritten += 1;
-                displayMatrix(resources->allocationMatrix, outFile);
-            }
+            /* if (requestGrantCount % 10 == 0) {
+ *                   fprintf(outFile, "\n%s 10 resource requests have been granted, printing matrix\n", executable);
+ *                                     linesWritten += 1;
+ *                                                       displayMatrix(resources->allocationMatrix, outFile);
+ *                                                                     }*/
         }
 
         /*If no deadlock is detected send message to process and let it know
@@ -433,44 +467,32 @@ void allocateResources(int location, char *executable, FILE *outFile, char *erro
 
     } else {
 
-        printf("oss: deadlock detected attempting to handle deadlock\n");
         deadlockCount += 1;
-        if (deadlockCount % 10 == 0) {
-            fprintf(stderr, "\n%s: %d deadlocks detected\n", executable, deadlockCount);
-        }
-
-
-        fprintf(outFile, "\n%s: Deadlock detected ", executable);
-        if (verbose) {
-            fprintf(outFile, " at time %ld:%ld", memoryClock->seconds, memoryClock->nanoseconds);
-            linesWritten += 1;
-        }
-        fprintf(outFile, ".");
         linesWritten += 1;
 
-
-        safe = eliminateDeadlock();
+        safe = eliminateDeadlock(outFile, executable, errorString);
 
         if (safe) {
 
-            printf("oss: safe state allocate resources: %d sending message to user process\n", safe);
+            fprintf(outFile, "%s: safe state detected sending message to user process %d to allocate resources at time %ld:%ld\n"
+                    ,executable, pcbTable[location].pid, memoryClock->seconds, memoryClock->nanoseconds);
 
-            fprintf(stderr, "\n%s: child %d was granted resources.\n", executable, pcbTable[location].pid);
             resources->request[location] = 0;
             resources->allocate[location] = 1;
             requestGrantCount += 1;
 
 
             if (verbose) {
-                fprintf(outFile, "\n%s: child %d was granted resources\n", executable, pcbTable[location].pid);
+                fprintf(outFile, "\n%s: child %d was granted resources at time: %ld:%ld\n",
+                        executable, pcbTable[location].pid, memoryClock->seconds, memoryClock->nanoseconds);
                 linesWritten += 1;
 
 
-                if (requestGrantCount % 10 == 0) {
-                    fprintf(outFile, "\n%s 10 resource requests have been granted, printing matrix\n", executable);
-                    linesWritten += 1;
-                    displayMatrix(resources->allocationMatrix, outFile);
-                }
+                /*if (requestGrantCount % 10 == 0) {
+ *                     fprintf(outFile, "\n%s 10 resource requests have been granted, printing matrix\n", executable);
+ *                                         linesWritten += 1;
+ *                                                             displayMatrix(resources->allocationMatrix, outFile);
+ *                                                                             }*/
             }
 
             /*If no deadlock is detected send message to process and let it know
@@ -488,37 +510,81 @@ void allocateResources(int location, char *executable, FILE *outFile, char *erro
     }
 }
 
-bool eliminateDeadlock(){
+bool eliminateDeadlock(FILE *outFile, char *executable, char *errorString) {
     bool safe = false;
     int processToKill = 0;
     int resourceAccumulation = 0;
     int temp = 0;
+    char errorArr[200];
     int i;
     int j;
 
 
     /*Set bit to terminate user processes from deadlock*/
-    while(safe == false){
+    while (safe == false) {
 
-        /*Find process that holds the most
- *          * resouces */
-        for(i = 0; i < totalPcbs; i++){
-            for(j = 0; j < numResources; j++) {
-               temp += resources->allocationMatrix[i][j];
-            }
+        char processString[100] = {""};
+        char processPID[100] = {""};
+        char resourceString[100] = {""};
+        char resourcesReleased[100] = {""};
 
-            if(temp > resourceAccumulation){
-                resourceAccumulation = temp;
-                processToKill = i;
+
+        for (i = 0; i < totalPcbs; i++) {
+            if (resources->terminating[i] == 0 && pcbTable[i].pid != 0 && resources->release[i] != 1) {
+                snprintf(processPID, 100, "%d, ", pcbTable[i].pid);
+                strcat(processString, processPID);
             }
         }
 
-        printf("OSS: killing process %d to relieve deadlock\n", pcbTable[processToKill].pid);
+        fprintf(outFile, "\t Processes %s deadlocked\n", processString);
+        fprintf(outFile, "\t Attempting to resolve deadlock\n");
+
+        /*Find process that holds the most
+ *          * resouces */
+        resourceAccumulation = 0;
+        for (i = 0; i < totalPcbs; i++) {
+            temp = 0;
+
+            for (j = 0; j < numResources; j++) {
+                temp += resources->allocationMatrix[i][j];
+            }
+
+            if (temp > resourceAccumulation) {
+                resourceAccumulation = temp;
+                processToKill = i;
+
+            }
+        }
+
+
+        fprintf(outFile, "\t Killing process %d to relieve deadlock\n", pcbTable[processToKill].pid);
+
+        for (i = 0; i < numResources; i++) {
+            snprintf(resourcesReleased, 100, " R%d:%d, ", i, resources->allocationMatrix[processToKill][i]);
+            strcat(resourceString, resourcesReleased);
+        }
+
+        fprintf(outFile, "\t\t Resources released are as follows: %s\n", resourceString);
+
+        int g;
+        for (g = 0; g < numResources; g++) {
+            resources->dyingProcessMatrix[processToKill][g] = resources->allocationMatrix[processToKill][g];
+        }
 
         resources->release[processToKill] = 1;
 
         /*Deallocate resources from process while waiting for it to
  *          * terminate later*/
+        if(resources->request[processToKill] == 1){
+            resources->terminating[processToKill] = 1;
+            snprintf(mesq.mesq_text, sizeof(mesq.mesq_text), " killed due to deadlock ");
+            mesq.mesq_type = pcbTable[processToKill].pid;
+            if (msgsnd(msqID, &mesq, sizeof(mesq), IPC_NOWAIT) == -1) {
+                snprintf(errorArr, 200, "\n%s User failed to send message", errorString);
+                perror(errorArr);
+                exit(1);
+            }
+        }
         resources->request[processToKill] = 0;
         resources->allocate[processToKill] = 0;
 
@@ -536,7 +602,7 @@ bool eliminateDeadlock(){
         }
 
         /*Check if we are safe now*/
-        safe = checkSafeState();
+        safe = checkSafeState(outFile, executable);
 
     }
 
@@ -563,14 +629,25 @@ void displayMatrix(int matrix[totalPcbs][numResources], FILE *outFile) {
 
         fprintf(outFile, "|\n");
     }
+
+    /* fprintf(outFile, "\nallocation vector:\n");
+ *      for(i = 0; i < numResources; i++){
+ *               fprintf(outFile, " %d ", resources->allocationVector[i]);
+ *                    }
+ *
+ *                         fprintf(outFile, "\ntotal resources provided\n");
+ *                              for(i = 0; i < numResources; i++){
+ *                                       fprintf(outFile, " %d ", resources->resourceVector[i]);
+ *                                            }*/
+
     fprintf(outFile, "\n");
     linesWritten += 23;
 }
 
 
-/***May need void as a parameter***/
 /*Function checks if the os is in a safe state*/
-bool checkSafeState() {
+bool checkSafeState(FILE *outFile, char *executable) {
+    deadlockAlgorithmCount += 1;
 
     /*Create a work vector and finish vector
  *      * that is initialized to false for every
@@ -582,6 +659,10 @@ bool checkSafeState() {
 
 
     printf("OSS: checking for deadlocks, current allocations are:\n");
+
+    fprintf(outFile, "%s: running deadlock detection at time %ld:%ld\n",
+            executable, memoryClock->seconds, memoryClock->nanoseconds);
+
     /*current allocation matrix*/
     int m;
     int k;
@@ -655,10 +736,11 @@ bool checkSafeState() {
             printf("OSS: deadlock state detected\n");
             return false;
         }
+
+        addTime(100);
     }
 
-
-    printf("deadlock not detected allocate\n");
+    addTime(100);
     return true;
 }
 
@@ -671,11 +753,12 @@ void updateResourceDescriptor(int pid) {
 
     /*Get location of pid in table*/
     int k;
-    for(k = 0; k < totalPcbs; k++){
-        if(pcbTable[k].pid == pid){
+    for (k = 0; k < totalPcbs; k++) {
+        if (pcbTable[k].pid == pid) {
             processLocation = k;
         }
     }
+
 
     printf("oss: process %d found at %d\n", pid, processLocation);
 
@@ -1016,4 +1099,15 @@ void addTime(long nanoseconds) {
     } else {
         memoryClock->nanoseconds += nanoseconds;
     }
+}
+
+int findPid(int pid) {
+    int i;
+    for (i = 0; i < totalPcbs; i++) {
+        if (pcbTable[i].pid == pid) {
+            break;
+        }
+    }
+
+    return i;
 }

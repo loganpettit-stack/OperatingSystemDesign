@@ -43,12 +43,13 @@ typedef struct {
     int requestMatrix[totalPcbs][numResources]; // Resources each process needs to complete
     int allocationMatrix[totalPcbs][numResources]; // The currently allocated resources to the processes
     int needMatrix[totalPcbs][numResources]; // what each process will need to be able to complete
-    int resourceVector[numResources]; // Total resources in the system
+    int resourceVector[numResources]; // Total resources in the system (should not be changed once set)
     int allocationVector[numResources]; // Current resources avalible to be allocated
     int sharableResources[numResources]; // If 1, then that resource is sharable
+    int dyingProcessMatrix[totalPcbs][numResources]; // matrix to hold number of resources of a dying process
 
-    int request[totalPcbs];
-    int allocate[totalPcbs];
+    int request[totalPcbs]; //marks process is granted requested
+    int allocate[totalPcbs]; //marks process is granted to
     int release[totalPcbs];
     int terminating[totalPcbs];
     int suspended[totalPcbs];

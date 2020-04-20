@@ -114,13 +114,9 @@ int main(int argc, char *argv[]) {
     terminationChecktime = (rand() % 250000000);
     nextCheckTermination = processEndTimeNanos;
 
-    printf("userprocess %d starting\n", pcbTable[tableLocation].pid);
-
     /*Process requests resources and populates
  *      * its request matrix*/
-
     sem_wait(&(semaphore->mutex));
-    printf("process %d entering first crit section\n", getpid());
 
     /*Generate initial resource requests*/
     generateRequests(tableLocation);
@@ -130,7 +126,6 @@ int main(int argc, char *argv[]) {
     getResources(tableLocation);
 
 
-    printf("\nprocess %d leaving first critical section\n", getpid());
     sem_post(&(semaphore->mutex));
 
     usleep(20000);
@@ -166,6 +161,8 @@ int main(int argc, char *argv[]) {
                     printf("process %d flagging to terminate", getpid());
                 }
 
+
+
                 nextCheckTermination = currentTime + terminationChecktime;
             }
 
@@ -198,14 +195,6 @@ int main(int argc, char *argv[]) {
 
                     printf("userprocess: %d waiting for request for resources\n", getpid());
 
-                    /*Send message to parent that user wants resouces
- *                     mesq.mesq_type = getppid();
- *                                         snprintf(mesq.mesq_text, sizeof(mesq.mesq_text), "Requesting resources");
- *                                                             if (msgsnd(msqID, &mesq, sizeof(mesq.mesq_text), MSG_NOERROR) == -1) {
- *                                                                                     perror("Error: OSS failed to send message");
- *                                                                                                             exit(1);
- *                                                                                                                                 }*/
-
                     sem_post(&(semaphore->mutex));
 
                     /*wait to recieve message from parent when granted to get more resources*/
@@ -228,7 +217,6 @@ int main(int argc, char *argv[]) {
         printf("process %d leaving critical section\n", getpid());
 
 
-        usleep(1000);
         /*Leave the critical section*/
         sem_post(&(semaphore->mutex));
 
@@ -240,6 +228,7 @@ int main(int argc, char *argv[]) {
 
         addTime(10000);
     }
+
 
 
     printf("userprocess: made it to end of process clearning memory segments\n");
