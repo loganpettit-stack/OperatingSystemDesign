@@ -15,36 +15,117 @@
 MemoryClock *memoryClock;
 Semaphore *semaphore;
 MESQ mesq;
-
+Frame frame;
 
 int clocKID;
 int semaphoreID;
 int msqID;
 
-void connectToClock(char*);
+void connectToClock(char *);
 
 void connectToMessageQueue(char *);
 
 void connectSemaphore(char *);
 
+void addTime(long);
+
 int main(int argc, char *argv[]) {
 
+    char errorArr[200];
     char *exe = strdup(argv[0]);
     char *executable = strdup(argv[0]);
     char *errorString = strcat(exe, ": Error: ");
     int tableLocation = atoi(argv[1]);
+    int requestPage = 0;
+    int requestAddress = 0;
+    int requestType;
+    int requestPropability;
+    int terminationPropability;
+    int requestCount = 0;
 
     connectToClock(errorString);
     connectSemaphore(errorString);
     connectToMessageQueue(errorString);
 
-    printf("user: process %d started  with location %d at time %ld:%ld\n",
-            getpid(), tableLocation, memoryClock->seconds, memoryClock->nanoseconds);
+    srand(getpid() * memoryClock->nanoseconds);
+
+    /*printf("user: process %d started  with location %d at time %ld:%ld\n",
+ *            getpid(), tableLocation, memoryClock->seconds, memoryClock->nanoseconds);*/
+
+
+    while (true) {
+
+        if(requestCount > 1000) {
+
+            terminationPropability = (rand() % 100);
+            if(terminationPropability > 70){
+
+                /*printf("user process %d trying to terminate\n", getpid());*/
+
+                /*Tell master we are ready to terminate*/
+                mesq.mesq_terminate = 1;
+                mesq.mesq_type = getppid();
+                if(msgsnd(msqID, &mesq, sizeof(mesq), IPC_NOWAIT) == -1){
+                    snprintf(errorArr, 200, "\n%s Failed to send message to OSS.\n", errorString);
+                    perror(errorArr);
+                    exit(1);
+                }
+
+                break;
+            }
+        }
+
+
+        /*Generate random number between 0 and 32 for and address to request*/
+        requestPage = (rand() % 32);
+        requestAddress = (rand() % 32000);
+
+        /*Generate if its a read or write*/
+        requestPropability = (rand() % 100);
+        if (requestPropability < 70) {
+            requestType = READ;
+        } else {
+            requestType = WRITE;
+        }
+
+        /*Set generated process information*/
+        mesq.mesq_pageReference = requestPage;
+        mesq.mesq_memoryAddress = requestAddress;
+        mesq.mesq_requestType = requestType;
+        mesq.mesq_type = getppid();
+        mesq.mesq_pid = getpid();
+        mesq.mesq_sentSeconds = memoryClock->seconds;
+        mesq.mesq_sentNS = memoryClock->nanoseconds;
+
+        /*printf("user process %d sending message to request memory space\n", getpid());*/
+
+        if(msgsnd(msqID, &mesq, sizeof(mesq), IPC_NOWAIT) == -1){
+            snprintf(errorArr, 200, "\n%s Failed to send message to OSS.\n", errorString);
+            perror(errorArr);
+            exit(1);
+        }
+
+        if(msgrcv(msqID, &mesq, sizeof(mesq), getpid(), MSG_NOERROR) == -1){
+            snprintf(errorArr, 200, "\n%s Failed to recieve message to OSS.\n", errorString);
+            perror(errorArr);
+            exit(1);
+        }
+
+        requestCount++;
+
+        /*Enter critical resource and add time to clock*/
+        sem_wait(&(semaphore->mutex));
+        addTime(10);
+        sem_post(&(semaphore->mutex));
+
+    }
 
 
     /*Clear shared memory*/
     shmdt(memoryClock);
     shmdt(semaphore);
+
+    return 0;
 }
 
 /*Function to connect to shared memory and error check*/
@@ -103,3 +184,15 @@ void connectSemaphore(char *error) {
         exit(EXIT_FAILURE);
     }
 }
+
+void addTime(long nanoseconds) {
+    nanoseconds += memoryClock->nanoseconds;
+    if (nanoseconds > 1000000000) {
+        memoryClock->seconds += 1;
+        nanoseconds -= 1000000000;
+        memoryClock->nanoseconds = nanoseconds;
+    } else {
+        memoryClock->nanoseconds += nanoseconds;
+    }
+}
+

@@ -8,7 +8,10 @@
 #define MSG_KEY 0x0752
 #define MAX_CONCURRENT_PROCS 18
 #define MAX_PROCS 100
+#define MEM_SIZE 256
 #define PT_SIZE 32
+#define READ 0
+#define WRITE 1
 
 typedef struct {
     long seconds;
@@ -37,8 +40,8 @@ typedef struct {
     int mesq_pageReference;
     int mesq_memoryAddress;
     int mesq_requestType;
-    unsigned int mesq_sentSeconds;
-    unsigned int mesq_sentNS;
+    long mesq_sentSeconds;
+    long mesq_sentNS;
 } MESQ;
 
 
@@ -46,6 +49,14 @@ typedef struct {
     long pid;
     int pageTable[PT_SIZE];
 } ProcessInfo;
+
+typedef struct {
+    int occupiedBit;
+    int referenceByte;
+    int dirtyBit;
+    long pid;
+    int processPageReference;
+} Frame;
 
 
 #endif //MEMORYMANAGEMENT_STRUCTURES_H
