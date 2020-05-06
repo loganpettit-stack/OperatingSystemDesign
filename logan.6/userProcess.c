@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
     char *executable = strdup(argv[0]);
     char *errorString = strcat(exe, ": Error: ");
     int tableLocation = atoi(argv[1]);
+    int dirtyBitNum = atoi(argv[2]);
     int requestPage = 0;
     int requestAddress = 0;
     int requestType;
@@ -47,7 +48,9 @@ int main(int argc, char *argv[]) {
     connectSemaphore(errorString);
     connectToMessageQueue(errorString);
 
-    srand(getpid() * memoryClock->nanoseconds);
+    srand(time(0) * getpid());
+    
+    printf("\n\ndirty bit %d\n\n", dirtyBitNum);
 
     /*printf("user: process %d started  with location %d at time %ld:%ld\n",
  *            getpid(), tableLocation, memoryClock->seconds, memoryClock->nanoseconds);*/
@@ -55,9 +58,8 @@ int main(int argc, char *argv[]) {
 
     while (true) {
 
+        terminationPropability = (rand() % 100 + 1);
         if(requestCount > 1000) {
-
-            terminationPropability = (rand() % 100);
             if(terminationPropability > 70){
 
                 /*printf("user process %d trying to terminate\n", getpid());*/
@@ -89,6 +91,7 @@ int main(int argc, char *argv[]) {
         }
 
         /*Set generated process information*/
+        mesq.mesq_pctLocation = tableLocation;
         mesq.mesq_pageReference = requestPage;
         mesq.mesq_memoryAddress = requestAddress;
         mesq.mesq_requestType = requestType;

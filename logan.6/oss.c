@@ -27,10 +27,15 @@ int clocKID;
 int semaphoreID;
 int msqID;
 int bitVector[MAX_PROCS] = {0};
+int second_chance[MEM_SIZE] = {0};
 int totalLaunched = 0;
 int runningProcesses = 0;
 int pageFaultCount = 0;
+int requestCount = 0;
+int secondChanceFramePlace = 0;
+int dirtyBit;
 
+void initializePCB(int, int);
 
 MemoryClock *connectToClock(char *);
 
@@ -64,11 +69,13 @@ void helpMessage(char *);
 
 void resetFrame(Frame[MEM_SIZE]);
 
-void memoryReferenced(Frame[MEM_SIZE], char*);
+void memoryReferenced(Frame[MEM_SIZE], char *);
 
-void pageFaultOccured(Frame[MEM_SIZE], char*);
+void pageFaultOccured(Frame[MEM_SIZE], char *);
 
 void displayTable(Frame[MEM_SIZE]);
+
+int secondChanceAlgorithm(Frame[MEM_SIZE]);
 
 int main(int argc, char *argv[]) {
 
@@ -82,13 +89,13 @@ int main(int argc, char *argv[]) {
     int seconds = 5;
     char *fileName = "output.dat";
     char c;
-    int dirtyBit;
     long nextLaunchTimeNanos = 0;
     long currentTimeNanos = 0;
     bool pageFault = true;
     long displayTime = 0;
     pid_t pid = 0;
     frameQueue = createQueue(MEM_SIZE);
+    srand(time(0));
 
 
     outFile = fopen(fileName, "w");
@@ -115,6 +122,10 @@ int main(int argc, char *argv[]) {
             }
         }
 
+        printf("oss program ending total page faults %d total launched %d running procs %d\n", pageFaultCount,
+               totalLaunched, runningProcesses);
+
+
         fclose(outFile);
         shmdt(memoryClock);
         shmdt(semaphore);
@@ -135,6 +146,9 @@ int main(int argc, char *argv[]) {
         }
 
 
+        printf("oss program ending total page faults %d total launched %d running proces%d\n", pageFaultCount,
+               totalLaunched, runningProcesses);
+
         fclose(outFile);
         shmdt(memoryClock);
         shmdt(semaphore);
@@ -147,10 +161,11 @@ int main(int argc, char *argv[]) {
 
 
     /* Checking command line options */
-    while ((c = getopt(argc, argv, "m")) != -1)
+    while ((c = getopt(argc, argv, "m:")) != -1)
         switch (c) {
-            case 'v':
+            case 'm':
                 dirtyBit = atoi(optarg);
+                printf("dirty bit %d\n", dirtyBit);
                 break;
             default:
                 helpMessage(executable);
@@ -172,13 +187,13 @@ int main(int argc, char *argv[]) {
     Frame frameTable[MEM_SIZE];
 
     int i;
-    for(i = 0; i < MEM_SIZE; i++){
+    for (i = 0; i < MEM_SIZE; i++) {
         frameTable[i].occupiedBit = 0;
     }
 
     int j;
-    for(i = 0; i < MAX_CONCURRENT_PROCS; i++){
-        for(j = 0; j < PT_SIZE; j++){
+    for (i = 0; i < MAX_CONCURRENT_PROCS; i++) {
+        for (j = 0; j < PT_SIZE; j++) {
             pcbTable[i].pageTable[j] = -1;
         }
     }
@@ -195,9 +210,9 @@ int main(int argc, char *argv[]) {
     while (true) {
 
         currentTimeNanos = getTimeInNanoseconds();
-        if(currentTimeNanos >= displayTime){
+        if (currentTimeNanos >= displayTime) {
             displayTable(frameTable);
-            displayTime = currentTimeNanos + 5000000000;
+            displayTime = currentTimeNanos + 50000000000;
         }
 
         /*Terminate program if we have no running processes and
@@ -222,10 +237,8 @@ int main(int argc, char *argv[]) {
 
                 runningProcesses += 1;
                 totalLaunched += 1;
-                printf("Launching process %d\n", pid);
 
-
-                nextLaunchTimeNanos = (rand() % (5000000 - 1000000 + 1)) + 1000000;
+                nextLaunchTimeNanos = (rand() % (500000 - 100000 + 1)) + 100000;
                 currentTimeNanos = getTimeInNanoseconds();
                 nextLaunchTimeNanos = currentTimeNanos + nextLaunchTimeNanos;
             }
@@ -233,7 +246,7 @@ int main(int argc, char *argv[]) {
 
 
         currentTimeNanos = getTimeInNanoseconds();
-        if(runningProcesses > 0 && currentTimeNanos > 100000) {
+        if (runningProcesses > 0 && currentTimeNanos > 100000) {
 
             if (msgrcv(msqID, &mesq, sizeof(mesq), getpid(), MSG_NOERROR) == -1) {
                 snprintf(errorArr, 200, "\n%s Failed to recieve message to OSS.\n", errorString);
@@ -242,18 +255,19 @@ int main(int argc, char *argv[]) {
             }
 
 
+            requestCount += 1;
 
             /*If the process is terminating*/
-            if(mesq.mesq_terminate == 1) {
-                printf("oss: process trying to terminate\n");
+            if (mesq.mesq_terminate == 1) {
+
+                resetFrame(frameTable);
+
                 pid = wait(&statusCode);
 
                 if (pid != -1) {
-                    printf("oss: process %d exited with status code %d\n", pid, statusCode);
+                    printf("%s: process %d exited with status code %d\n", executable, pid, statusCode);
                     runningProcesses -= 1;
                 }
-
-                resetFrame(frameTable);
 
                 /*Add time  to clock*/
                 sem_wait(&(semaphore->mutex));
@@ -265,9 +279,9 @@ int main(int argc, char *argv[]) {
             pageFault = true;
 
             /*if we found page table reference*/
-            if(pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference] != -1) {
-                printf("%s: process %d  has address %d in frame %d\n",
-                       executable, getpid(), mesq.mesq_memoryAddress,
+            if (pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference] != -1) {
+                printf("%s: Process %ld  has address %d in frame %d\n",
+                       executable, mesq.mesq_pid, mesq.mesq_memoryAddress,
                        pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference]);
 
 
@@ -278,21 +292,30 @@ int main(int argc, char *argv[]) {
 
 
             /*If we detect a page fault*/
-            if(pageFault){
-                printf("%s: Process %ld is requesting address %d\n", executable, mesq.mesq_pid, mesq.mesq_memoryAddress);
-                printf("%s: Address %d is not in a frame, pagefault\n",
-                        executable, mesq.mesq_memoryAddress);
+            if (pageFault) {
+
+                if (mesq.mesq_requestType == READ) {
+                    printf("%s: Process %ld is requesting read of address %d\n", executable, mesq.mesq_pid,
+                           mesq.mesq_memoryAddress);
+                    printf("%s: Address %d is not in a frame, pagefault\n",
+                           executable, mesq.mesq_memoryAddress);
+                } else {
+                    printf("%s: Process %ld is requesting WRITE of address %d\n", executable, mesq.mesq_pid,
+                           mesq.mesq_memoryAddress);
+                    printf("%s: Address %d is not in a frame, pagefault\n",
+                           executable, mesq.mesq_memoryAddress);
+                }
 
                 pageFaultCount += 1;
 
                 pageFaultOccured(frameTable, executable);
-                
+
             }
 
 
             mesq.mesq_type = mesq.mesq_pid;
 
-            if(msgsnd(msqID, &mesq, sizeof(mesq), IPC_NOWAIT) == -1){
+            if (msgsnd(msqID, &mesq, sizeof(mesq), IPC_NOWAIT) == -1) {
                 snprintf(errorArr, 200, "\n%s Failed to send message to child.\n", errorString);
                 perror(errorArr);
                 exit(1);
@@ -318,18 +341,18 @@ int main(int argc, char *argv[]) {
     shmdt(semaphore);
 
     /*Clear shared memory*/
-    shmctl(clocKID,IPC_RMID, NULL);
-    shmctl(semaphoreID,IPC_RMID, NULL);
-    msgctl(msqID,IPC_RMID, NULL);
+    shmctl(clocKID, IPC_RMID, NULL);
+    shmctl(semaphoreID, IPC_RMID, NULL);
+    msgctl(msqID, IPC_RMID, NULL);
     return 0;
 }
 
-void displayTable(Frame frameTable[MEM_SIZE]){
+void displayTable(Frame frameTable[MEM_SIZE]) {
     printf("\n\tCurrent memory layout at time %ld:%ld\n", memoryClock->seconds, memoryClock->nanoseconds);
 
     int i;
-    for(i = 0; i < MEM_SIZE; i++){
-        if(frameTable[i].occupiedBit == 1){
+    for (i = 0; i < MEM_SIZE; i++) {
+        if (frameTable[i].occupiedBit == 1) {
             printf("+ ");
         } else {
             printf(". ");
@@ -340,18 +363,18 @@ void displayTable(Frame frameTable[MEM_SIZE]){
 
 }
 
-void pageFaultOccured(Frame frameTable[MEM_SIZE], char *executable){
+void pageFaultOccured(Frame frameTable[MEM_SIZE], char *executable) {
     bool emptyFrame = false;
     int temp = 0;
     int victimFrame = 0;
 
     /*Find location to place page in memory*/
     int i;
-    for(i = 0; i < MEM_SIZE; i++){
+    for (i = 0; i < MEM_SIZE; i++) {
 
-        if(frameTable[i].occupiedBit == 0){
+        if (frameTable[i].occupiedBit == 0) {
             printf("%s: Placing process %ld page %d into frame %d\n",
-                    executable, mesq.mesq_pid, mesq.mesq_pageReference, i);
+                   executable, mesq.mesq_pid, mesq.mesq_pageReference, i);
 
             frameTable[i].pid = mesq.mesq_pid;
             frameTable[i].occupiedBit = 1;
@@ -365,23 +388,42 @@ void pageFaultOccured(Frame frameTable[MEM_SIZE], char *executable){
             /*Store frame index to processes page*/
             pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference] = i;
 
+            if (mesq.mesq_requestType == READ) {
+                frameTable[victimFrame].dirtyBit = 0;
+            } else {
+                frameTable[victimFrame].dirtyBit = 1;
+                printf("%s: Indicating to %ld that WRITE has happened to address %d\n",
+                       executable, mesq.mesq_pid, mesq.mesq_memoryAddress);
+            }
+
             emptyFrame = true;
             break;
         }
     }
 
+
     /*If an empty frame was not found*/
-    if(!emptyFrame && !isEmpty(frameQueue)){
-        printf("empty frame not found looking for victim\n");
-
-        victimFrame = dequeue(frameQueue);
-
-        printf("%s: %d clearing frame %d and swapping in process %ld page %d\n",
-                executable, getpid(), victimFrame, mesq.mesq_pid, mesq.mesq_pageReference);
+    if (!emptyFrame && !isEmpty(frameQueue)) {
 
 
-        for(i = 0;i < MAX_CONCURRENT_PROCS; i++){
-            if(bitVector[i] == frameTable[victimFrame].pid){
+        /*victimFrame = dequeue(frameQueue);*/
+        victimFrame = secondChanceAlgorithm(frameTable);
+
+
+        printf("%s: %ld clearing frame %d and swapping in process %ld page %d\n",
+               executable, mesq.mesq_pid, victimFrame, mesq.mesq_pid, mesq.mesq_pageReference);
+
+        if (frameTable[victimFrame].dirtyBit == 1) {
+            printf("%s: Dirty bit of frame %d set, adding additional time to the clock\n",
+                   executable, victimFrame);
+
+            sem_wait(&(semaphore->mutex));
+            addTime(100);
+            sem_post(&(semaphore->mutex));
+        }
+
+        for (i = 0; i < MAX_CONCURRENT_PROCS; i++) {
+            if (bitVector[i] == frameTable[victimFrame].pid) {
                 temp = i;
                 break;
             }
@@ -391,10 +433,12 @@ void pageFaultOccured(Frame frameTable[MEM_SIZE], char *executable){
 
 
         /*update dirtybit info*/
-        if(mesq.mesq_requestType == READ){
+        if (mesq.mesq_requestType == READ) {
             frameTable[victimFrame].dirtyBit = 0;
         } else {
             frameTable[victimFrame].dirtyBit = 1;
+            printf("%s: Indicating to %ld that WRITE has happened to address %d\n",
+                   executable, mesq.mesq_pid, mesq.mesq_memoryAddress);
         }
 
 
@@ -405,51 +449,74 @@ void pageFaultOccured(Frame frameTable[MEM_SIZE], char *executable){
     }
 }
 
-void memoryReferenced(Frame frameTable[MEM_SIZE], char *exectuable){
+int secondChanceAlgorithm(Frame frameTable[MEM_SIZE]) {
+    int victim = 0;
+
+    if(secondChanceFramePlace >= MEM_SIZE){
+        secondChanceFramePlace = 0;
+    }
+
+    while(secondChanceFramePlace < MEM_SIZE){
+        /*See if the second chance bit is zero
+ *          * if so that is the victim frame*/
+        if (second_chance[secondChanceFramePlace] == 0) {
+            victim = secondChanceFramePlace;
+            secondChanceFramePlace += 1;
+            break;
+        }
+        if(second_chance[secondChanceFramePlace] == 1){
+            second_chance[secondChanceFramePlace] = 0;
+        }
+
+        secondChanceFramePlace += 1;
+    }
+
+    printf("\n\nvictim %d\n\n", secondChanceFramePlace);
+    return victim;
+}
+
+void memoryReferenced(Frame frameTable[MEM_SIZE], char *executable) {
 
     /*indicate frame reference occured*/
     frameTable[pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference]].referenceByte = 1;
 
-    if(mesq.mesq_requestType == READ){
+    if (mesq.mesq_requestType == READ) {
         printf("%s: %ld is requesting READ of address %d at time %ld:%ld\n",
-                exectuable, mesq.mesq_pid, mesq.mesq_memoryAddress, mesq.mesq_sentSeconds, mesq.mesq_sentNS);
+               executable, mesq.mesq_pid, mesq.mesq_memoryAddress, mesq.mesq_sentSeconds, mesq.mesq_sentNS);
 
 
         /*If the dirty bit is not set take less time*/
-        if(frameTable[pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference]].dirtyBit == 0){
-            printf("%s: Address %d in frame %d, giving data to process %ld at %ld:%ld\n",
-                    exectuable, mesq.mesq_memoryAddress,
-                    pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference], mesq.mesq_pid,
-                    memoryClock->seconds, memoryClock->nanoseconds);
+        printf("%s: Address %d found in frame %d, giving data to process %ld at %ld:%ld\n",
+               executable, mesq.mesq_memoryAddress,
+               pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference], mesq.mesq_pid,
+               memoryClock->seconds, memoryClock->nanoseconds);
 
-            sem_wait(&(semaphore->mutex));
-            addTime(10);
-            sem_post(&(semaphore->mutex));
+        sem_wait(&(semaphore->mutex));
+        addTime(10);
+        sem_post(&(semaphore->mutex));
 
-        } else {
-            /*If dirty bit is set add more time to the clock*/
-            printf("%s: %ld address %d in frame %d. Providing data to process %ld at %ld:%ld\n",
-                   exectuable, mesq.mesq_pid , mesq.mesq_memoryAddress,
-                   pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference], mesq.mesq_pid,
-                   memoryClock->seconds, memoryClock->nanoseconds);
+        /*frame was referenced so set the second chance bit to 1*/
+        second_chance[pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference]] = 1;
 
-            sem_wait(&(semaphore->mutex));
-            addTime(10);
-            sem_post(&(semaphore->mutex));
-
-            printf("%s: Dirty bit of frame %d set, adding additional time to the clock\n",
-                    exectuable, pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference]);
-        }
     }
 
-    if(mesq.mesq_requestType == WRITE){
+    if (mesq.mesq_requestType == WRITE) {
 
-        printf("%s: %ld is requesting write of address %d at time %ld:%ld\n",
-                exectuable, mesq.mesq_pid, mesq.mesq_memoryAddress,
-                memoryClock->seconds, memoryClock->nanoseconds);
+        printf("%s: %ld is requesting WRITE of address %d at time %ld:%ld\n",
+               executable, mesq.mesq_pid, mesq.mesq_memoryAddress,
+               mesq.mesq_sentSeconds, mesq.mesq_sentNS);
 
-        printf("%s: Indicating to %ld that write has happened to address %d\n",
-                exectuable, mesq.mesq_pid, mesq.mesq_memoryAddress);
+        printf("%s: Address %d in frame %d, WRITING data to frame at time %ld:%ld\n",
+               executable, mesq.mesq_memoryAddress, pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference],
+               memoryClock->seconds, memoryClock->nanoseconds);
+
+        printf("%s: Indicating to %ld that WRITE has happened to address %d\n",
+               executable, mesq.mesq_pid, mesq.mesq_memoryAddress);
+
+        frameTable[pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference]].dirtyBit = 1;
+
+        /*frame was referenced so set the second chance bit to 1*/
+        second_chance[pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference]] = 1;
     }
 
     sem_wait(&(semaphore->mutex));
@@ -458,15 +525,14 @@ void memoryReferenced(Frame frameTable[MEM_SIZE], char *exectuable){
 
 }
 
-
-void resetFrame(Frame frameTable[MEM_SIZE]){
+void resetFrame(Frame frameTable[MEM_SIZE]) {
 
     /*clear bit vector location*/
     bitVector[mesq.mesq_pctLocation] = 0;
 
     int i;
-    for(i = 0; i < PT_SIZE; i++){
-        if(pcbTable[mesq.mesq_pctLocation].pageTable[i] != -1){
+    for (i = 0; i < PT_SIZE; i++) {
+        if (pcbTable[mesq.mesq_pctLocation].pageTable[i] != -1) {
 
             /*Reset the frame table for this process*/
             frameTable[pcbTable[mesq.mesq_pctLocation].pageTable[i]].pid = 0;
@@ -548,7 +614,9 @@ pid_t launchProcess(char *error, int openTableLocation) {
     pid_t pid;
 
     char tableLocationString[20];
+    char dirtybitString[2];
 
+    snprintf(dirtybitString, 2, "%d", dirtyBit);
     snprintf(tableLocationString, 20, "%d", openTableLocation);
 
 
@@ -564,17 +632,27 @@ pid_t launchProcess(char *error, int openTableLocation) {
     if (pid == 0) {
         /*executes files, Name of file to be execute, list of args following,
  *  *          * must be terminated with null*/
-        execl("./userProcess", "userProcess", tableLocationString, NULL);
+        execl("./userProcess", "userProcess", tableLocationString, dirtybitString, NULL);
 
         snprintf(errorArr, 200, "\n\n%s execution of user subprogram failure ", error);
         perror(errorArr);
         exit(EXIT_FAILURE);
 
     } else {
+        initializePCB(openTableLocation, pid);
         usleep(5000);
         return pid;
     }
 
+}
+
+void initializePCB(int location, int pid) {
+    pcbTable[location].pid = pid;
+
+    int i = 0;
+    for (i = 0; i < PT_SIZE; i++) {
+        pcbTable[location].pageTable[i] = -1;
+    }
 }
 
 /**Implementation from geeksforgeeks.com**/
@@ -601,8 +679,6 @@ void enqueue(Queue *queue, int item) {
     queue->rear = (queue->rear + 1) % queue->capacity;
     queue->array[queue->rear] = item;
     queue->size = queue->size + 1;
-
-    /* printf("%d enqueued to queue\n", pcbTable[item].pid);*/
 }
 
 /*Function to remove an item from queue.
