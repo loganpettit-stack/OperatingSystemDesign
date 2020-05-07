@@ -1,0 +1,32 @@
+HOW TO RUN: Create the executable files by typing make in the directory. This will create executables oss and userProccess. oss will be used to spawn instances of userProcess. The program will be ran by typing ./oss -m 1 or ./oss -m 0.
+
+DESCRIPTION: This project does memory managment by using page tables and frame tables. The main process spawns concurrent child process at random times. The user process will generate a page number and address two different ways.
+
+1.The first memory request scheme is simple. When a process needs to generate an address to request, it simply
+generates a random value from 0 to the limit of the process memory (32k).
+
+2. The second memory request scheme tries to favor certain pages over others. You should implement a scheme
+where each of the 32 pages of a process’ memory space has a different weight of being selected. In particular,
+the weight of a processes page n should be 1/n. So the first page of a process would have a weight of 1, the
+second page a weight of 0.5, the third page a weight of 0.3333 and so on. Your code then needs to select
+one of those pages based on these weights. This can be done by storing those values in an array and then,
+starting from the beginning, adding to each index of the array the value in the preceding index. For example,
+if our weights started off as [1, 0.5, 0.3333, 0.25, . . .] then after doing this process we would get an array of
+[1, 1.5, 1.8333, 2.0833, . . .]. Then you generate a random number from 0 to the last value in the array and then
+travel down the array until you find a value greater than that value and that index is the page you should
+request.
+
+When the user process generates its page number and address number it then signals to the main process that it is requesting either a READ or a WRITE from main memory. The main process will then determine if the address being requested resides within main memory. If so the main process signals to the child process that the memory access has happened and allows it to create a new request. If the address being requested does not reside in main memory then, a page fault occurs, the clock is incremented and the page is then loaded into main memory. If a page fault occurs and the frame table is full the main process selects a frame to kill based on the clock second chance algorithm. 
+
+The clock second chance replacement algorithm utilies a round robin selection of frames and an extra "second chance" bit to determine if a process gets replaced. If a process requests a frame that is in memory already then its second chance bit gets set. Upon looking for a frame to replace if a second chance bit is set then the bit is set back to 0 and the next frame that does not have the second chance bit set is selected. 
+
+If the frame to be removed has a dirty bit set then the main process increments the time to write frame back to memory before getting rid of it. A frames dirty bit gets set when a frame in memory gets written to. 
+
+The program runs until 100 process are launched and ends by outputing statistics on:
+
+• Number of memory accesses per second
+• Number of page faults per memory access
+• Average memory access speed
+
+After running both memory schemes several times and the memory scheme that has the least page faults was the complex scheme that used weights. This scheme also seems like a better way of requesting pages due to the fact that it does not rely on complete randomness and actually relies on weighing each page to decided how a page is going to be requested. 
+THINGS CHANGED: I changed the time the program will run from 2 to 4 seconds in order to get a full run. Due to the way it was tuned it would never complete in just two seconds creating a messy output always due to having to kill processes prematurely. 

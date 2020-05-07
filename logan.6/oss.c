@@ -173,6 +173,9 @@ int main(int argc, char *argv[]) {
         printf("%s: Program ending total page faults %d total launched %d\n", executable, pageFaultCount, totalLaunched);
 
         accesesPerSec = (double)requestCount / endtime;
+        if(accesesPerSec < 0){
+            accesesPerSec = accesesPerSec * -1;
+        }
         faultsPerSec = (double)pageFaultCount / requestCount;
 
         printf("%s: Run time: %ld:%ld\n%s: Memory acceses per second: %f\n%s: Page faults per memory access: %f\n",
@@ -808,8 +811,8 @@ void helpMessage(char *executable) {
     fprintf(stderr, "\nHelp: The following is the proper format for executing the program:\n\n%s",
             executable);
     fprintf(stderr, " [-m 1] [-m 0]\n\n");
-    fprintf(stderr, " -m 1 will use memory request scheme 1\n\n");
-    fprintf(stderr, " -m 0 will use memory request scheme 0\n");
+    fprintf(stderr, " -m 1 will use memory request scheme 1 which uses a complex weight system\n\n");
+    fprintf(stderr, " -m 0 will use memory request scheme 0 which randomly generates addresses\n");
 
     exit(EXIT_SUCCESS);
 
