@@ -43,19 +43,31 @@ int main(int argc, char *argv[]) {
     int requestPropability;
     int terminationPropability;
     int requestCount = 0;
+    double weightArr[PT_SIZE];
+    double weight = 1;
+    double randomValue = 0;
+    int index = 0;
+    double temp = 0;
+    double lastValue = 0;
 
     connectToClock(errorString);
     connectSemaphore(errorString);
     connectToMessageQueue(errorString);
 
     srand(time(0) * getpid());
-    
-    printf("\n\ndirty bit %d\n\n", dirtyBitNum);
 
     /*printf("user: process %d started  with location %d at time %ld:%ld\n",
  *            getpid(), tableLocation, memoryClock->seconds, memoryClock->nanoseconds);*/
 
 
+    /*Set up initial weights in array
+ *     int j;
+ *         for(j = 0; j < PT_SIZE; j++){
+ *                 printf("weight: %f\n", weight);
+ *                         weightArr[j] = weight;
+ *                                 weight /= (j + 1);
+ *                                     }
+ *                                         */
     while (true) {
 
         terminationPropability = (rand() % 100 + 1);
@@ -79,8 +91,38 @@ int main(int argc, char *argv[]) {
 
 
         /*Generate random number between 0 and 32 for and address to request*/
-        requestPage = (rand() % 32);
-        requestAddress = (rand() % 32000);
+        if(dirtyBitNum == 1) {
+            /*Set up initial weights in array*/
+            int j;
+            weightArr[0] = 1;
+            for(j = 1; j < PT_SIZE; j++){
+                weight = 1;
+                weight /= (j + 1);
+                weightArr[j] = weight;
+            }
+
+            for(j = 1; j < PT_SIZE;j++){
+                temp = weightArr[j - 1];
+                weightArr[j] = temp + weightArr[j];
+            }
+            
+            lastValue = weightArr[PT_SIZE - 1];
+            randomValue = (lastValue - 0) * (rand() / (double)RAND_MAX) + 0;
+
+            for(j = 0; j < PT_SIZE; j++){
+                if(weightArr[j] >= randomValue){
+                    index = j;
+                    break;
+                }
+            }
+
+            requestPage = index;
+            requestAddress = j * 1024 + (rand() % 1023);
+
+        } else {
+            requestPage = (rand() % 32);
+            requestAddress = (rand() % 32000);
+        }
 
         /*Generate if its a read or write*/
         requestPropability = (rand() % 100);

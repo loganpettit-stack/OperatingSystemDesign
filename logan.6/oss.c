@@ -34,6 +34,8 @@ int pageFaultCount = 0;
 int requestCount = 0;
 int secondChanceFramePlace = 0;
 int dirtyBit;
+FILE *outFile;
+
 
 void initializePCB(int, int);
 
@@ -85,8 +87,7 @@ int main(int argc, char *argv[]) {
     char *errorString = strcat(exe, ": Error: ");
     int statusCode = 0;
     int tableLocation = 0;
-    FILE *outFile;
-    int seconds = 5;
+    int seconds = 4;
     char *fileName = "output.dat";
     char c;
     long nextLaunchTimeNanos = 0;
@@ -96,7 +97,9 @@ int main(int argc, char *argv[]) {
     pid_t pid = 0;
     frameQueue = createQueue(MEM_SIZE);
     srand(time(0));
-
+    double accesesPerSec;
+    double faultsPerSec;
+    int endtime;
 
     outFile = fopen(fileName, "w");
 
@@ -122,9 +125,24 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        printf("oss program ending total page faults %d total launched %d running procs %d\n", pageFaultCount,
-               totalLaunched, runningProcesses);
+        usleep(1000);
 
+        fprintf(outFile, "\n\n\n");
+
+        endtime = getTimeInNanoseconds();
+
+        fprintf(outFile, "%s: Program ending total page faults %d total launched %d\n", executable, pageFaultCount, totalLaunched);
+        printf("%s: Program ending total page faults %d total launched %d\n", executable, pageFaultCount, totalLaunched);
+
+        accesesPerSec = (double)requestCount / endtime;
+        faultsPerSec = (double)pageFaultCount / requestCount;
+
+        printf("%s: Run time: %ld:%ld\n%s: Memory acceses per second: %f\n%s: Page faults per memory access: %f\n",
+               executable, memoryClock->seconds, memoryClock->nanoseconds, executable, accesesPerSec, executable,
+               faultsPerSec);
+        fprintf(outFile, "%s: Run time: %ld:%ld\n%s: Memory acceses per second: %f\n%s: Page faults per memory access: %f\n",
+                executable, memoryClock->seconds, memoryClock->nanoseconds, executable, accesesPerSec, executable,
+                faultsPerSec);
 
         fclose(outFile);
         shmdt(memoryClock);
@@ -145,9 +163,24 @@ int main(int argc, char *argv[]) {
             }
         }
 
+        usleep(1000);
 
-        printf("oss program ending total page faults %d total launched %d running proces%d\n", pageFaultCount,
-               totalLaunched, runningProcesses);
+        fprintf(outFile, "\n\n\n");
+
+        endtime = getTimeInNanoseconds();
+
+        fprintf(outFile, "%s: Program ending total page faults %d total launched %d\n", executable, pageFaultCount, totalLaunched);
+        printf("%s: Program ending total page faults %d total launched %d\n", executable, pageFaultCount, totalLaunched);
+
+        accesesPerSec = (double)requestCount / endtime;
+        faultsPerSec = (double)pageFaultCount / requestCount;
+
+        printf("%s: Run time: %ld:%ld\n%s: Memory acceses per second: %f\n%s: Page faults per memory access: %f\n",
+               executable, memoryClock->seconds, memoryClock->nanoseconds, executable, accesesPerSec, executable,
+               faultsPerSec);
+        fprintf(outFile, "%s: Run time: %ld:%ld\n%s: Memory acceses per second: %f\n%s: Page faults per memory access: %f\n",
+                executable, memoryClock->seconds, memoryClock->nanoseconds, executable, accesesPerSec, executable,
+                faultsPerSec);
 
         fclose(outFile);
         shmdt(memoryClock);
@@ -165,11 +198,16 @@ int main(int argc, char *argv[]) {
         switch (c) {
             case 'm':
                 dirtyBit = atoi(optarg);
-                printf("dirty bit %d\n", dirtyBit);
+                printf("%s: Memory request scheme %d chosen\n", executable, dirtyBit);
                 break;
             default:
                 helpMessage(executable);
         }
+
+
+    if(argc < 2){
+        helpMessage(executable);
+    }
 
 
     /*Connect structures and initialize*/
@@ -200,7 +238,6 @@ int main(int argc, char *argv[]) {
 
     startTimer(seconds);
 
-
     /*Calculate launch time for child process between
  *      * 1 and 500 milliseconds 1 mili is 1,000,000 nanos*/
     nextLaunchTimeNanos = 0;
@@ -228,7 +265,7 @@ int main(int argc, char *argv[]) {
 
         /*printf("current launch time %ld and time to next launch %ld\n", currentTimeNanos, nextLaunchTimeNanos);*/
         /*Check to see if we are ready to launch */
-        if (currentTimeNanos >= nextLaunchTimeNanos && runningProcesses < 18 && totalLaunched < 100) {
+        if (currentTimeNanos >= nextLaunchTimeNanos && runningProcesses < MAX_CONCURRENT_PROCS && totalLaunched < 100) {
 
             /*Find an open location in the bit vector and launch*/
             if ((tableLocation = findTableLocation(bitVector)) != -1) {
@@ -238,7 +275,7 @@ int main(int argc, char *argv[]) {
                 runningProcesses += 1;
                 totalLaunched += 1;
 
-                nextLaunchTimeNanos = (rand() % (500000 - 100000 + 1)) + 100000;
+                nextLaunchTimeNanos = (rand() % (50000 - 10000 + 1)) + 10000;
                 currentTimeNanos = getTimeInNanoseconds();
                 nextLaunchTimeNanos = currentTimeNanos + nextLaunchTimeNanos;
             }
@@ -246,7 +283,7 @@ int main(int argc, char *argv[]) {
 
 
         currentTimeNanos = getTimeInNanoseconds();
-        if (runningProcesses > 0 && currentTimeNanos > 100000) {
+        if (runningProcesses > 0 && currentTimeNanos > 1000) {
 
             if (msgrcv(msqID, &mesq, sizeof(mesq), getpid(), MSG_NOERROR) == -1) {
                 snprintf(errorArr, 200, "\n%s Failed to recieve message to OSS.\n", errorString);
@@ -265,7 +302,7 @@ int main(int argc, char *argv[]) {
                 pid = wait(&statusCode);
 
                 if (pid != -1) {
-                    printf("%s: process %d exited with status code %d\n", executable, pid, statusCode);
+                    fprintf(outFile, "%s: process %d exited with status code %d\n", executable, pid, statusCode);
                     runningProcesses -= 1;
                 }
 
@@ -280,7 +317,7 @@ int main(int argc, char *argv[]) {
 
             /*if we found page table reference*/
             if (pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference] != -1) {
-                printf("%s: Process %ld  has address %d in frame %d\n",
+                fprintf(outFile, "%s: Process %ld  has address %d in frame %d\n",
                        executable, mesq.mesq_pid, mesq.mesq_memoryAddress,
                        pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference]);
 
@@ -295,14 +332,14 @@ int main(int argc, char *argv[]) {
             if (pageFault) {
 
                 if (mesq.mesq_requestType == READ) {
-                    printf("%s: Process %ld is requesting read of address %d\n", executable, mesq.mesq_pid,
+                    fprintf(outFile, "%s: Process %ld is requesting read of address %d\n", executable, mesq.mesq_pid,
                            mesq.mesq_memoryAddress);
-                    printf("%s: Address %d is not in a frame, pagefault\n",
+                    fprintf(outFile, "%s: Address %d is not in a frame, pagefault\n",
                            executable, mesq.mesq_memoryAddress);
                 } else {
-                    printf("%s: Process %ld is requesting WRITE of address %d\n", executable, mesq.mesq_pid,
+                    fprintf(outFile, "%s: Process %ld is requesting WRITE of address %d\n", executable, mesq.mesq_pid,
                            mesq.mesq_memoryAddress);
-                    printf("%s: Address %d is not in a frame, pagefault\n",
+                    fprintf(outFile, "%s: Address %d is not in a frame, pagefault\n",
                            executable, mesq.mesq_memoryAddress);
                 }
 
@@ -322,8 +359,6 @@ int main(int argc, char *argv[]) {
             }
         }
 
-
-
         /*Signal semaphore to access clock and add time to it*/
         sem_wait(&(semaphore->mutex));
         addTime(100);
@@ -331,10 +366,24 @@ int main(int argc, char *argv[]) {
 
     }
 
+    usleep(1000);
 
-    printf("oss program ending total page faults %d total launched %d\n", pageFaultCount, totalLaunched);
+    endtime = getTimeInNanoseconds();
 
+    fprintf(outFile, "\n\n\n");
 
+    fprintf(outFile, "%s: Program ending total page faults %d total launched %d\n", executable, pageFaultCount, totalLaunched);
+    printf("%s: Program ending total page faults %d total launched %d\n", executable, pageFaultCount, totalLaunched);
+
+    accesesPerSec = (double)requestCount / endtime;
+    faultsPerSec = (double)pageFaultCount / requestCount;
+
+    printf("%s: Run time: %ld:%ld\n%s: Memory acceses per second: %f\n%s: Page faults per memory access: %f\n",
+           executable, memoryClock->seconds, memoryClock->nanoseconds, executable, accesesPerSec, executable,
+           faultsPerSec);
+    fprintf(outFile, "%s: Run time: %ld:%ld\n%s: Memory acceses per second: %f\n%s: Page faults per memory access: %f\n",
+            executable, memoryClock->seconds, memoryClock->nanoseconds, executable, accesesPerSec, executable,
+            faultsPerSec);
 
     /*detach from shared memory*/
     shmdt(memoryClock);
@@ -348,18 +397,18 @@ int main(int argc, char *argv[]) {
 }
 
 void displayTable(Frame frameTable[MEM_SIZE]) {
-    printf("\n\tCurrent memory layout at time %ld:%ld\n", memoryClock->seconds, memoryClock->nanoseconds);
+    fprintf(outFile, "\n\tCurrent memory layout at time %ld:%ld\n", memoryClock->seconds, memoryClock->nanoseconds);
 
     int i;
     for (i = 0; i < MEM_SIZE; i++) {
         if (frameTable[i].occupiedBit == 1) {
-            printf("+ ");
+            fprintf(outFile, "+ ");
         } else {
-            printf(". ");
+            fprintf(outFile, ". ");
         }
     }
 
-    printf("\n");
+    fprintf(outFile, "\n");
 
 }
 
@@ -373,7 +422,7 @@ void pageFaultOccured(Frame frameTable[MEM_SIZE], char *executable) {
     for (i = 0; i < MEM_SIZE; i++) {
 
         if (frameTable[i].occupiedBit == 0) {
-            printf("%s: Placing process %ld page %d into frame %d\n",
+            fprintf(outFile, "%s: Placing process %ld page %d into frame %d\n",
                    executable, mesq.mesq_pid, mesq.mesq_pageReference, i);
 
             frameTable[i].pid = mesq.mesq_pid;
@@ -392,7 +441,7 @@ void pageFaultOccured(Frame frameTable[MEM_SIZE], char *executable) {
                 frameTable[victimFrame].dirtyBit = 0;
             } else {
                 frameTable[victimFrame].dirtyBit = 1;
-                printf("%s: Indicating to %ld that WRITE has happened to address %d\n",
+                fprintf(outFile, "%s: Indicating to %ld that WRITE has happened to address %d\n",
                        executable, mesq.mesq_pid, mesq.mesq_memoryAddress);
             }
 
@@ -410,11 +459,11 @@ void pageFaultOccured(Frame frameTable[MEM_SIZE], char *executable) {
         victimFrame = secondChanceAlgorithm(frameTable);
 
 
-        printf("%s: %ld clearing frame %d and swapping in process %ld page %d\n",
+        fprintf(outFile, "%s: %ld clearing frame %d and swapping in process %ld page %d\n",
                executable, mesq.mesq_pid, victimFrame, mesq.mesq_pid, mesq.mesq_pageReference);
 
         if (frameTable[victimFrame].dirtyBit == 1) {
-            printf("%s: Dirty bit of frame %d set, adding additional time to the clock\n",
+            fprintf(outFile, "%s: Dirty bit of frame %d set, adding additional time to the clock\n",
                    executable, victimFrame);
 
             sem_wait(&(semaphore->mutex));
@@ -437,7 +486,7 @@ void pageFaultOccured(Frame frameTable[MEM_SIZE], char *executable) {
             frameTable[victimFrame].dirtyBit = 0;
         } else {
             frameTable[victimFrame].dirtyBit = 1;
-            printf("%s: Indicating to %ld that WRITE has happened to address %d\n",
+            fprintf(outFile, "%s: Indicating to %ld that WRITE has happened to address %d\n",
                    executable, mesq.mesq_pid, mesq.mesq_memoryAddress);
         }
 
@@ -471,7 +520,6 @@ int secondChanceAlgorithm(Frame frameTable[MEM_SIZE]) {
         secondChanceFramePlace += 1;
     }
 
-    printf("\n\nvictim %d\n\n", secondChanceFramePlace);
     return victim;
 }
 
@@ -481,12 +529,12 @@ void memoryReferenced(Frame frameTable[MEM_SIZE], char *executable) {
     frameTable[pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference]].referenceByte = 1;
 
     if (mesq.mesq_requestType == READ) {
-        printf("%s: %ld is requesting READ of address %d at time %ld:%ld\n",
+        fprintf(outFile, "%s: %ld is requesting READ of address %d at time %ld:%ld\n",
                executable, mesq.mesq_pid, mesq.mesq_memoryAddress, mesq.mesq_sentSeconds, mesq.mesq_sentNS);
 
 
         /*If the dirty bit is not set take less time*/
-        printf("%s: Address %d found in frame %d, giving data to process %ld at %ld:%ld\n",
+        fprintf(outFile, "%s: Address %d found in frame %d, giving data to process %ld at %ld:%ld\n",
                executable, mesq.mesq_memoryAddress,
                pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference], mesq.mesq_pid,
                memoryClock->seconds, memoryClock->nanoseconds);
@@ -502,15 +550,15 @@ void memoryReferenced(Frame frameTable[MEM_SIZE], char *executable) {
 
     if (mesq.mesq_requestType == WRITE) {
 
-        printf("%s: %ld is requesting WRITE of address %d at time %ld:%ld\n",
+        fprintf(outFile, "%s: %ld is requesting WRITE of address %d at time %ld:%ld\n",
                executable, mesq.mesq_pid, mesq.mesq_memoryAddress,
                mesq.mesq_sentSeconds, mesq.mesq_sentNS);
 
-        printf("%s: Address %d in frame %d, WRITING data to frame at time %ld:%ld\n",
+        fprintf(outFile, "%s: Address %d in frame %d, WRITING data to frame at time %ld:%ld\n",
                executable, mesq.mesq_memoryAddress, pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference],
                memoryClock->seconds, memoryClock->nanoseconds);
 
-        printf("%s: Indicating to %ld that WRITE has happened to address %d\n",
+        fprintf(outFile, "%s: Indicating to %ld that WRITE has happened to address %d\n",
                executable, mesq.mesq_pid, mesq.mesq_memoryAddress);
 
         frameTable[pcbTable[mesq.mesq_pctLocation].pageTable[mesq.mesq_pageReference]].dirtyBit = 1;
@@ -757,13 +805,11 @@ int findTableLocation() {
 }
 
 void helpMessage(char *executable) {
-    fprintf(stderr, "\nHelp Option Selected [-h]: The following is the proper format for executing the file:\n\n%s",
+    fprintf(stderr, "\nHelp: The following is the proper format for executing the program:\n\n%s",
             executable);
-    fprintf(stderr, " [-h] [-v]\n\n");
-    fprintf(stderr, "By default just typing %s will give you information on deadlock management\n\n", executable);
-    fprintf(stderr, "[-h] : Print a help message and exit.\n"
-                    "[-v] : This option will be used to enable a verbose mode. In verbose mode you will get information\n"
-                    "\ton the resource management as well as deadlock management\n");
+    fprintf(stderr, " [-m 1] [-m 0]\n\n");
+    fprintf(stderr, " -m 1 will use memory request scheme 1\n\n");
+    fprintf(stderr, " -m 0 will use memory request scheme 0\n");
 
     exit(EXIT_SUCCESS);
 
