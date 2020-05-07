@@ -135,6 +135,9 @@ int main(int argc, char *argv[]) {
         printf("%s: Program ending total page faults %d total launched %d\n", executable, pageFaultCount, totalLaunched);
 
         accesesPerSec = (double)requestCount / endtime;
+        if(accesesPerSec < 0){
+            accesesPerSec = accesesPerSec * -1;
+        }
         faultsPerSec = (double)pageFaultCount / requestCount;
 
         printf("%s: Run time: %ld:%ld\n%s: Memory acceses per second: %f\n%s: Page faults per memory access: %f\n",
@@ -379,6 +382,9 @@ int main(int argc, char *argv[]) {
     printf("%s: Program ending total page faults %d total launched %d\n", executable, pageFaultCount, totalLaunched);
 
     accesesPerSec = (double)requestCount / endtime;
+    if(accesesPerSec < 0){
+        accesesPerSec = accesesPerSec * -1;
+    }
     faultsPerSec = (double)pageFaultCount / requestCount;
 
     printf("%s: Run time: %ld:%ld\n%s: Memory acceses per second: %f\n%s: Page faults per memory access: %f\n",

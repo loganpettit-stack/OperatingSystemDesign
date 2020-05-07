@@ -1,0 +1,37 @@
+commit 7874d129966197d1b2568611bec54b0497f353e3
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Wed May 6 23:29:35 2020 -0500
+
+    added readme and finalized everything
+
+commit 2684edfd490aac48bdb507f86803e2da733b363f
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Wed May 6 22:58:26 2020 -0500
+
+    added file printing and statistics tracking
+
+commit c720f0ec0cf40dcfd9cf0b6edc5eb890b6d7d5f8
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Wed May 6 17:58:17 2020 -0500
+
+    fixed frame table and clock algorithm
+
+commit aeed6e26b966a499e6f82ee3a035bde0a45092d1
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Tue May 5 19:57:30 2020 -0500
+
+    processes now generating memory requests and fullfilling them
+
+commit 8d1b2166229a6f3d14361c5cc771565c0bda45df
+Merge: 01f6e7b c75e513
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Tue May 5 13:55:36 2020 -0500
+
+    Merge branch 'master' of https://github.com/loganpettit-stack/OperatingSystemDesign
+    resolving conflict
+
+commit 01f6e7bb860bb1dafcf8c3f9ece505ebc7f5ef42
+Author: Logan Pettit <logan@hoare7.cs.umsl.edu>
+Date:   Tue May 5 13:54:01 2020 -0500
+
+    initial commit, made late into project

@@ -29,4 +29,5 @@ The program runs until 100 process are launched and ends by outputing statistics
 • Average memory access speed
 
 After running both memory schemes several times and the memory scheme that has the least page faults was the complex scheme that used weights. This scheme also seems like a better way of requesting pages due to the fact that it does not rely on complete randomness and actually relies on weighing each page to decided how a page is going to be requested. 
-THINGS CHANGED: I changed the time the program will run from 2 to 4 seconds in order to get a full run. Due to the way it was tuned it would never complete in just two seconds creating a messy output always due to having to kill processes prematurely. 
+
+THINGS CHANGED: I changed the time the program will run from 2 to 4 seconds in order to get a full run. Due to the way it was tuned it would never complete in just two seconds creating a messy output always due to having to kill processes prematurely. I also changed the time that the frame table is displayed in order to produce a clean output. This ended up being longer than a second with tuning. 
